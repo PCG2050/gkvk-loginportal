@@ -1,0 +1,26 @@
+<div class="parent">
+    <img src="https://i.postimg.cc/MTRK7Thf/bg-form.jpg" alt="Background Image">
+    <div class="container">
+        <form (ngSubmit)="onLogin()">
+            <h1>Super Admin Portal</h1>
+            <div class="input-box">
+                <input type="email" name="email" [(ngModel)]="loginObj.email" placeholder="Email" required>
+                <i class='bx bx-envelope'></i>
+            </div>
+            <div class="input-box">
+                <input type="password" name="password" [(ngModel)]="loginObj.password" placeholder="Password" required>
+                <i class='bx bx-lock-alt'></i>
+            </div>
+            <div class="remember">
+                <label>
+                    <input type="checkbox"> Remember me
+                </label>
+                <a href="#">Forgot password?</a>
+            </div>
+            <button class="btn" type="submit">Login</button>
+            <div *ngIf="loginError" style="color: #ff6b6b; margin-top: 12px; text-align: center;">
+                {{ loginError }}
+            </div>
+        </form>
+    </div>
+</div>

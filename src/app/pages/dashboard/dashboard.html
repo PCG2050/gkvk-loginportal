@@ -1,0 +1,146 @@
+<div class="dashboard-container">
+  <!-- Feedback Message -->
+  <div *ngIf="feedbackMessage" [ngClass]="['feedback', feedbackMessageType]">
+    {{ feedbackMessage }}
+  </div>
+
+  <!-- Header -->
+  <div class="header">
+    <h2>Institute Management</h2>
+    <button class="add-btn" (click)="openAddModal()">+ Add Institute</button>
+  </div>
+
+  <!-- Institutes Grid -->
+  <div class="institutes-grid">
+    <div class="institute-card" *ngFor="let institute of institutes; let i = index">
+      <div class="card-left">
+        <img
+          *ngIf="institute.logoUrl; else noLogo"
+          [src]="institute.logoUrl"
+          class="institute-logo"
+          alt="Logo"
+        />
+        <ng-template #noLogo>
+          <div class="institute-logo no-logo">
+            <i class="fa fa-image"></i>
+          </div>
+        </ng-template>
+        <div class="serial-number">#{{ i + 1 }}</div>
+      </div>
+      <!-- <div class="card-center">
+        <h3 class="institute-name">{{ institute.name }}</h3>
+        <div class="info-row">
+          <span class="info-chip" *ngIf="institute.communicationChannels?.emailEnabled">
+            <i class="fa fa-envelope"></i> Email Enabled
+          </span>
+          <span class="info-chip" *ngIf="institute.communicationChannels?.phoneEnabled">
+            <i class="fa fa-phone"></i> SMS/Phone Enabled
+          </span>
+        </div> -->
+        <div class="card-center">
+        <h3 class="institute-name">{{ institute.name }}</h3>
+        <div class="info-row">
+          <span class="info-chip">
+            <i class="fa fa-map-marker"></i> {{ institute.address?.state }}, {{ institute.address?.district }}
+          </span>
+          <span class="info-chip">
+            <i class="fa fa-map-pin"></i> Pincode: {{ institute.address?.pincode }}
+          </span>
+          </div>
+
+        
+      </div>
+       <!-- <button class="admin-btn" (click)="openAdminModal(institute)">
+    <i class="fa fa-user-shield"></i>
+  </button> -->
+      <div class="card-right">
+        <button class="edit-btn" (click)="editInstitute(institute)">
+          <i class="fa fa-edit"></i>
+        </button>
+        <button class="delete-btn" (click)="confirmDelete(institute)">
+          <i class="fa fa-trash"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add/Edit Modal -->
+  <div class="modal" *ngIf="isModalOpen">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>{{ isEditMode ? 'Edit Institute' : 'Add New Institute' }}</h3>
+      </div>
+      <form>
+        <!-- Institute Name -->
+        <div class="form-group">
+          <label>Institute Name *</label>
+          <input type="text" [(ngModel)]="form.name" name="name" required placeholder="Enter institute name" />
+        </div>
+
+        <!-- Logo (Only in Edit) -->
+        <div class="form-group" *ngIf="isEditMode">
+          <label>Logo</label>
+          <input type="file" (change)="onLogoSelected($event)" />
+        </div>
+
+        <!-- Communication Channel -->
+        <div class="form-group">
+          <label class="comm-channel-heading">Communication Channel</label>
+          <div>
+            <label>
+              <input type="checkbox" [(ngModel)]="form.communicationChannels.emailEnabled" name="emailEnabled" />
+              Email Enabled
+            </label>
+            <label style="margin-left:16px;">
+              <input type="checkbox" [(ngModel)]="form.communicationChannels.phoneEnabled" name="phoneEnabled" />
+              SMS/Phone Enabled
+            </label>
+          </div>
+        </div>
+       
+
+        <!-- Storage Info -->
+        <div class="form-group">
+          <label>Private Container Name *</label>
+          <input type="text" [(ngModel)]="form.storageInfo.privateContainerName" name="privateContainer" required placeholder="Enter private container" />
+        </div>
+        <div class="form-group">
+          <label>Public Container Name *</label>
+          <input type="text" [(ngModel)]="form.storageInfo.publicContainerName" name="publicContainer" required placeholder="Enter public container" />
+        </div>
+
+        <!-- Address -->
+        <div class="form-group">
+          <label>State *</label>
+          <input type="text" [(ngModel)]="form.address.state" name="state" required placeholder="Enter state" />
+        </div>
+        <div class="form-group">
+          <label>District *</label>
+          <input type="text" [(ngModel)]="form.address.district" name="district" required placeholder="Enter district" />
+        </div>
+        <div class="form-group">
+          <label>Pincode *</label>
+          <input type="text" [(ngModel)]="form.address.pincode" name="pincode" required placeholder="Enter pincode" />
+        </div>
+
+        <!-- Actions -->
+        <div class="modal-actions">
+          <button type="button" (click)="saveInstitute()">Save</button>
+          <button type="button" class="cancel" (click)="closeModal()">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div class="modal confirmation-modal" *ngIf="isDeleteConfirmOpen">
+    <div class="modal-content">
+      <h3>Confirm Deletion</h3>
+      <p>Are you sure you want to delete <strong>{{ instituteToDelete?.name }}</strong>?</p>
+      <div class="modal-actions">
+        <button (click)="deleteInstitute()">Yes, Delete</button>
+        <button class="cancel" (click)="cancelDelete()">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
