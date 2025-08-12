@@ -80,7 +80,7 @@
 
 .card-left {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
   justify-content: center;
   min-width: 80px;
@@ -107,9 +107,10 @@
 }
 
 .card-center {
+  margin-top: 1vh;
   flex: 1;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   gap: 8px;
 }
 
@@ -121,8 +122,8 @@
 }
 
 .info-row {
-  display: flex;
-  flex-wrap: wrap;
+  /* display: flex;
+  flex-wrap: wrap; */
   gap: 18px;
   align-items: center;
   font-size: 1rem;
@@ -175,8 +176,15 @@
   cursor: pointer;
   box-shadow: 0 1px 4px rgba(1, 42, 91, 0.07);
 }
+.manage-admins-btn{
+  font-size: 1em;
+  border: none;
+  color: #012a5b;
+  background: #f4f7fb;
+  border-radius: 5%;
+}
 
-.edit-btn:hover,.admin-btn:hover {
+.edit-btn:hover,.admin-btn:hover,.manage-admins-btn:hover {
   background: #e9f2ff;
   color: #007bff;
 }
@@ -251,7 +259,7 @@
   color: #012a5b;
 }
 
-.form-group input {
+.form-group input, .form-group select {
   padding: 10px;
   border: 1px solid #cfd8dc;
   border-radius: 6px;
@@ -315,4 +323,154 @@
 
 .confirmation-modal .modal-actions {
   justify-content: center;
+}
+/* --- Global Dashboard Container --- */
+.dashboard-cards-container {
+  display: flex;       /* Enable Flexbox for layout */
+  flex-wrap: wrap;     /* Allow cards to wrap to the next line */
+  gap: 25px;           /* Space between cards */
+  padding: 30px;       /* Padding around the entire card group */
+  justify-content: center; /* Center cards horizontally in the container */
+  align-items: flex-start; /* Align cards to the top if they have different heights */
+  font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; /* Professional font stack */
+  background-color: #f8f9fa; /* Light background for the dashboard page */
+  min-height: calc(100vh - 60px); /* Adjust based on your header/footer height */
+}
+/* Admin Dashboard Container and Title */
+.dashboard-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 32px 16px;
+}
+
+.dashboard-title {
+  text-align: center;
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 32px;
+  color: #2c3e50;
+  letter-spacing: 1px;
+}
+
+
+/* --- Individual Card Styling --- */
+.dashboard-card {
+  background-color: #ffffff; /* White background for the card */
+  border-radius: 12px;       /* More rounded corners for a modern look */
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08); /* Stronger, yet subtle shadow for depth */
+  overflow: hidden;          /* Ensures content respects border-radius */
+  width: 280px;              /* Fixed width for consistency, adjust as needed */
+  min-height: 200px;         /* Minimum height to prevent content collapse */
+  display: flex;
+  flex-direction: column;    /* Stack content vertically */
+  transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out; /* Smooth hover effects */
+  position: relative; /* Needed for absolute positioning of potential elements */
+
+  &:hover {
+    transform: translateY(-8px); /* Lift card significantly on hover */
+    box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15); /* More prominent shadow on hover */
+  }
+}
+
+/* --- Card Icon Styling (Optional but recommended) --- */
+.card-icon {
+  background-color: #e6f7ff; /* Light blue background for icons */
+  color: #007bff;            /* Primary blue color for icon */
+  padding: 15px;
+  border-bottom: 1px solid #e0f2ff; /* Subtle separator below icon */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+
+  svg { /* Style for SVG icons */
+    width: 40px;
+    height: 40px;
+  }
+}
+
+.trainers-icon {
+  background-color: #e6f7ff;
+  color: #007bff;
+}
+
+.units-icon {
+  background-color: #fff3e0; /* Light orange for units icon */
+  color: #ff9800;
+}
+
+/* --- Card Content Area --- */
+.card-content {
+  flex-grow: 1; /* Allows content to take up available space */
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* Vertically center content if space allows */
+  align-items: center;     /* Horizontally center content */
+  padding: 20px;           /* Padding inside the content area */
+}
+
+.card-title {
+  font-size: 1.15rem; /* Slightly larger title */
+  font-weight: 500;   /* Medium weight */
+  color: #555;        /* Darker grey for readability */
+  margin-bottom: 8px; /* Space below title */
+  text-align: center;
+}
+
+.card-number {
+  font-size: 3.8rem;   /* Very large number for prominence */
+  font-weight: 700;    /* Boldest weight */
+  color: #007bff;      /* Primary brand color for the number */
+  line-height: 1;      /* Prevent extra space around the number */
+  margin: 0;           /* Remove default paragraph margins */
+  text-align: center;
+}
+
+/* --- Card Footer --- */
+.card-footer {
+  padding: 15px 20px;
+  background-color: #fbfbfb; /* Slightly different background for footer */
+  border-top: 1px solid #eee; /* Top border for separation */
+  display: flex;
+  justify-content: flex-end; /* Align link to the right */
+  border-bottom-left-radius: 12px;
+  border-bottom-right-radius: 12px;
+}
+
+.card-link {
+  color: #007bff;         /* Match primary color */
+  text-decoration: none;   /* Remove underline by default */
+  font-weight: 500;        /* Medium weight */
+  font-size: 0.95rem;      /* Slightly smaller link text */
+  transition: color 0.2s ease; /* Smooth color transition on hover */
+
+  &:hover {
+    color: #0056b3;        /* Darker blue on hover */
+    text-decoration: underline; /* Add underline on hover for clearer interaction */
+  }
+}
+
+/* --- Responsive Adjustments --- */
+@media (max-width: 992px) {
+  .dashboard-card {
+    width: 45%; /* Two cards per row on medium screens */
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-cards-container {
+    padding: 20px 15px; /* Reduce padding on smaller screens */
+    gap: 20px;
+  }
+  .dashboard-card {
+    width: 100%; /* Full width on small screens for better readability */
+    max-width: 350px; /* Limit max width for very narrow screens */
+  }
+  .card-number {
+    font-size: 3rem; /* Slightly smaller number on small screens */
+  }
+  .alert{
+    color: red;
+  }
 }

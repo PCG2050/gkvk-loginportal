@@ -1,0 +1,392 @@
+<div class="trainer-assignment-container">
+  <h2 class="section-title">Staff Management</h2>
+
+  <!-- Feedback Message Display -->
+  <div *ngIf="feedbackMessage" class="feedback-message">
+    {{ feedbackMessage }}
+  </div>
+
+  
+
+
+  <!-- Add Staff Button (left-aligned) -->
+  <div
+    style="
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 16px;
+      margin-right: 16px;
+    "
+  >
+    <button class="add-btn" (click)="showAddStaffModal = true">
+      + Add Staff
+    </button>
+  </div>
+
+  <!-- Search by Email -->
+  <div style="flex-direction: column; margin-bottom: 20px; margin-right: 16px;">
+    <input
+      type="text"
+      class="add-trainer-input"
+      style="max-width: 300px;"
+      placeholder="Search by staff email..."
+      [(ngModel)]="searchEmail"
+      (input)="onSearchByEmail()"
+      name="searchEmail"
+      autocomplete="off"
+    />
+  </div>
+  
+
+  <!-- Filter Bar
+  <form class="filter-bar" (ngSubmit)="onSearch()" #filterForm="ngForm">
+    <div class="filter-fields">
+      <label for="unit-select" class="visually-hidden">Unit</label>
+      <select
+        id="unit-select"
+        class="dropdown"
+        [(ngModel)]="selectedUnit"
+        name="unit"
+      >
+        <option value="">Unit</option>
+        <option *ngFor="let unit of units" [value]="unit">{{ unit }}</option>
+      </select>
+
+      <label for="district-select" class="visually-hidden">District</label>
+      <select
+        id="district-select"
+        class="dropdown"
+        [(ngModel)]="selectedDistrict"
+        name="district"
+        [disabled]="!selectedState"
+      >
+        <option value="">District</option>
+        <option
+          *ngFor="let district of districtsByState[selectedState] || []"
+          [value]="district"
+        >
+          {{ district }}
+        </option>
+      </select>
+
+      <label for="state-select" class="visually-hidden">State</label>
+      <select
+        id="state-select"
+        class="dropdown"
+        [(ngModel)]="selectedState"
+        name="state"
+        (change)="selectedDistrict=''"
+      >
+        <option value="">State</option>
+        <option *ngFor="let state of states" [value]="state">
+          {{ state }}
+        </option>
+      </select>
+
+      
+    </div>
+    <button type="submit" class="search-btn">Search</button>
+    <button type="button" class="reset-btn" (click)="onReset()">Reset</button>
+  </form> -->
+  
+
+ <!-- Add Staff Modal -->
+<div class="modal-backdrop" *ngIf="showAddStaffModal">
+  <div class="modal">
+    <h3>Add Staff Details</h3>
+    <form #addStaffForm="ngForm" (ngSubmit)="addStaff()">
+      <!-- Email -->
+      <label for="staffEmail" class="visually-hidden">Email</label>
+      <input
+        id="staffEmail"
+        type="email"
+        placeholder="Email"
+        [(ngModel)]="staffEmail"
+        name="staffEmail"
+        required
+        class="add-trainer-input"
+        autocomplete="off"
+      />
+      <!-- First Name -->
+      <label for="staffFirstName" class="visually-hidden">First Name</label>
+      <input
+        id="staffFirstName"
+        type="text"
+        placeholder="First Name"
+        [(ngModel)]="staffFirstName"
+        name="staffFirstName"
+        required
+        class="add-trainer-input"
+        autocomplete="off"
+      />
+      <!-- Last Name -->
+      <label for="staffLastName" class="visually-hidden">Last Name</label>
+      <input
+        id="staffLastName"
+        type="text"
+        placeholder="Last Name"
+        [(ngModel)]="staffLastName"
+        name="staffLastName"
+        required
+        class="add-trainer-input"
+        autocomplete="off"
+      />
+      <!-- Password -->
+      <label for="staffPassword" class="visually-hidden">Password</label>
+      <input
+        id="staffPassword"
+        type="password"
+        placeholder="Password"
+        [(ngModel)]="staffPassword"
+        name="staffPassword"
+        required
+        class="add-trainer-input"
+        autocomplete="new-password"
+      />
+      <!-- Gender -->
+      <label for="staffGender" class="visually-hidden">Gender</label>
+      <select
+        id="staffGender"
+        [(ngModel)]="staffGender"
+        name="staffGender"
+        required
+        class="dropdown"
+      >
+        <option value="">Select Gender</option>
+        <option value="Male">Male</option>
+        <option value="Female">Female</option>
+        <option value="Other">Other</option>
+      </select>
+      <!-- Designation -->
+      <label for="staffDesignation" class="visually-hidden">Designation</label>
+      <input
+        id="staffDesignation"
+        type="text"
+        placeholder="Designation"
+        [(ngModel)]="staffDesignation"
+        name="staffDesignation"
+        required
+        class="add-trainer-input"
+        autocomplete="off"
+      />
+      <!-- Employment Type -->
+      <label for="staffEmploymentType" class="visually-hidden">Employment Type</label>
+      <select
+        id="staffEmploymentType"
+        [(ngModel)]="staffEmploymentType"
+        name="staffEmploymentType"
+        required
+        class="dropdown"
+      >
+        <option value="">Select Employment Type</option>
+        <option value="Permanent">Permanent</option>
+        <option value="Temporary">Temporary</option>
+      </select>
+      <!-- DOB -->
+      <label for="staffDOB" class="visually-hidden">Date of Birth</label>
+      <input
+        id="staffDOB"
+        type="date"
+        [(ngModel)]="staffDOB"
+        name="staffDOB"
+        required
+        class="add-trainer-input"
+      />
+      <!-- Date of Joining -->
+      <label for="staffDOJ" class="visually-hidden">Date of Joining</label>
+      <input
+        id="staffDOJ"
+        type="date"
+        [(ngModel)]="staffDOJ"
+        name="staffDOJ"
+        required
+        class="add-trainer-input"
+      />
+      <!-- Qualification -->
+      <label for="staffQualification" class="visually-hidden">Qualification</label>
+      <input
+        id="staffQualification"
+        type="text"
+        placeholder="Qualification"
+        [(ngModel)]="staffQualification"
+        name="staffQualification"
+        required
+        class="add-trainer-input"
+        autocomplete="off"
+      />
+      <div class="modal-actions">
+        <button
+          type="submit"
+          [disabled]="!addStaffForm.form.valid"
+          class="add-btn"
+        >
+          Add
+        </button>
+        <button
+          type="button"
+          (click)="closeEditStaffModal()"
+          class="reset-btn"
+        >
+          Cancel
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>Sl No</th>
+          <th>Email</th>
+          <th>Designation</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let staff of filteredStaff; let i = index">
+          <td>{{ i + 1 }}</td>
+          <td>{{ staff.email }}</td>
+          <td>{{ staff.designation }}</td>
+          <td>
+            <label class="modern-switch">
+              <input type="checkbox" [checked]="staff.active" (change)="toggleStaffStatus(staff)" name="status{{i}}" />
+              <span class="modern-slider"></span>
+            </label>
+            <span class="status-label" [ngClass]="{'active': staff.active, 'deactive': !staff.active}">{{ staff.active ? 'Active' : 'Deactive' }}</span>
+          </td>
+          <td>
+            <button class="reassign-btn" (click)="editStaff(staff)"><i class="fa fa-edit"></i></button>
+          </td>
+        </tr>
+        <tr *ngIf="filteredStaff.length === 0">
+          <td colspan="5" class="no-data-message">
+            No staff found matching the criteria.
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Edit Staff Modal -->
+  <div class="modal-backdrop" *ngIf="showEditStaffModal">
+    <div class="modal">
+      <h3>Edit Staff Details</h3>
+      <form #editStaffForm="ngForm" (ngSubmit)="saveEditedStaff()">
+        <!-- Email (readonly) -->
+        <label for="editStaffEmail" class="visually-hidden">Email</label>
+        <input
+          id="editStaffEmail"
+          type="email"
+          [(ngModel)]="editStaffData.email"
+          name="editStaffEmail"
+          class="add-trainer-input"
+          readonly
+        />
+        <!-- First Name -->
+        <label for="editStaffFirstName" class="visually-hidden">First Name</label>
+        <input
+          id="editStaffFirstName"
+          type="text"
+          [(ngModel)]="editStaffData.firstName"
+          name="editStaffFirstName"
+          required
+          class="add-trainer-input"
+        />
+        <!-- Last Name -->
+        <label for="editStaffLastName" class="visually-hidden">Last Name</label>
+        <input
+          id="editStaffLastName"
+          type="text"
+          [(ngModel)]="editStaffData.lastName"
+          name="editStaffLastName"
+          required
+          class="add-trainer-input"
+        />
+        <!-- Password -->
+        <label for="editStaffPassword" class="visually-hidden">Password</label>
+        <input
+          id="editStaffPassword"
+          type="password"
+          [(ngModel)]="editStaffData.password"
+          name="editStaffPassword"
+          class="add-trainer-input"
+        />
+        <!-- Gender -->
+        <label for="editStaffGender" class="visually-hidden">Gender</label>
+        <select
+          id="editStaffGender"
+          [(ngModel)]="editStaffData.gender"
+          name="editStaffGender"
+          required
+          class="dropdown"
+        >
+          <option value="">Select Gender</option>
+          <option value="Male">Male</option>
+          <option value="Female">Female</option>
+          <option value="Other">Other</option>
+        </select>
+        <!-- Designation -->
+        <label for="editStaffDesignation" class="visually-hidden">Designation</label>
+        <input
+          id="editStaffDesignation"
+          type="text"
+          [(ngModel)]="editStaffData.designation"
+          name="editStaffDesignation"
+          required
+          class="add-trainer-input"
+        />
+        <!-- Employment Type -->
+        <label for="editStaffEmploymentType" class="visually-hidden">Employment Type</label>
+        <select
+          id="editStaffEmploymentType"
+          [(ngModel)]="editStaffData.employmentType"
+          name="editStaffEmploymentType"
+          required
+          class="dropdown"
+        >
+          <option value="">Select Employment Type</option>
+          <option value="Permanent">Permanent</option>
+          <option value="Temporary">Temporary</option>
+        </select>
+        <!-- DOB -->
+        <label for="editStaffDOB" class="visually-hidden">Date of Birth</label>
+        <input
+          id="editStaffDOB"
+          type="date"
+          [(ngModel)]="editStaffData.dob"
+          name="editStaffDOB"
+          required
+          class="add-trainer-input"
+        />
+        <!-- Date of Joining -->
+        <label for="editStaffDOJ" class="visually-hidden">Date of Joining</label>
+        <input
+          id="editStaffDOJ"
+          type="date"
+          [(ngModel)]="editStaffData.doj"
+          name="editStaffDOJ"
+          required
+          class="add-trainer-input"
+        />
+        <!-- Qualification -->
+        <label for="editStaffQualification" class="visually-hidden">Qualification</label>
+        <input
+          id="editStaffQualification"
+          type="text"
+          [(ngModel)]="editStaffData.qualification"
+          name="editStaffQualification"
+          required
+          class="add-trainer-input"
+        />
+        <div class="modal-actions">
+          <button type="submit" [disabled]="!editStaffForm.form.valid">Save</button>
+          <button type="button" (click)="closeEditStaffModal()">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+

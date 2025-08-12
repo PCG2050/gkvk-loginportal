@@ -1,0 +1,41 @@
+.back-btn{
+    border: none;
+}
+ul li{
+    list-style: none;
+    margin: 2vh;
+    font-weight: 500;
+}
+ul{
+    display: flex;
+}
+.tab.active{
+    border-bottom:4px solid #012a5b ;
+    color: #012a5b;
+    font-weight: 700;
+}
+.adminForm {
+  margin-bottom: 18px;
+  display: flex;
+  flex-direction: column;
+}
+
+.adminForm label {
+  margin-bottom: 6px;
+  font-weight: 600;
+  color: #012a5b;
+}
+
+.adminForm input, .adminForm select {
+  padding: 10px;
+  border: 1px solid #cfd8dc;
+  border-radius: 6px;
+  font-size: 1rem;
+  background: #f4f7fb;
+  transition: border 0.2s;
+}
+
+.adminForm input:focus {
+  border-color: #007bff;
+  outline: none;
+}

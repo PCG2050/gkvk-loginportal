@@ -1,33 +1,29 @@
 <div class="dashboard-container">
-  <!-- Feedback Message -->
-  <div *ngIf="feedbackMessage" [ngClass]="['feedback', feedbackMessageType]">
-    {{ feedbackMessage }}
-  </div>
+  <div class="superAdminDiv" *ngIf="IsSuperAdminLoggedIn">
+    <!-- Feedback Message -->
+    <div *ngIf="feedbackMessage" [ngClass]="['feedback', feedbackMessageType]">
+      {{ feedbackMessage }}
+    </div>
 
-  <!-- Header -->
-  <div class="header">
-    <h2>Institute Management</h2>
-    <button class="add-btn" (click)="openAddModal()">+ Add Institute</button>
-  </div>
+    <!-- Header -->
+    <div class="header">
+      <h2>Institute Management</h2>
+      <button class="add-btn" (click)="openAddModal()">+ Add Institute</button>
+    </div>
 
-  <!-- Institutes Grid -->
-  <div class="institutes-grid">
-    <div class="institute-card" *ngFor="let institute of institutes; let i = index">
-      <div class="card-left">
-        <img
-          *ngIf="institute.logoUrl; else noLogo"
-          [src]="institute.logoUrl"
-          class="institute-logo"
-          alt="Logo"
-        />
-        <ng-template #noLogo>
-          <div class="institute-logo no-logo">
-            <i class="fa fa-image"></i>
-          </div>
-        </ng-template>
-        <div class="serial-number">#{{ i + 1 }}</div>
-      </div>
-      <!-- <div class="card-center">
+    <!-- Institutes Grid -->
+    <div class="institutes-grid">
+      <div class="institute-card" *ngFor="let institute of institutes; let i = index">
+        <div class="card-left">
+          <div class="serial-number">#{{ i + 1 }}</div>
+          <img *ngIf="institute.logoUrl; else noLogo" [src]="institute.logoUrl" class="institute-logo" alt="Logo" />
+          <ng-template #noLogo>
+            <div class="institute-logo no-logo">
+              <i class="fa fa-image"></i>
+            </div>
+          </ng-template>
+        </div>
+        <!-- <div class="card-center">
         <h3 class="institute-name">{{ institute.name }}</h3>
         <div class="info-row">
           <span class="info-chip" *ngIf="institute.communicationChannels?.emailEnabled">
@@ -38,53 +34,68 @@
           </span>
         </div> -->
         <div class="card-center">
-        <h3 class="institute-name">{{ institute.name }}</h3>
-        <div class="info-row">
-          <span class="info-chip">
-            <i class="fa fa-map-marker"></i> {{ institute.address?.state }}, {{ institute.address?.district }}
-          </span>
-          <span class="info-chip">
-            <i class="fa fa-map-pin"></i> Pincode: {{ institute.address?.pincode }}
-          </span>
+          <h3 class="institute-name">{{ institute.name }}</h3>
+          <div class="info-row">
+            <span class="info-chip">
+              <i class="fa fa-map-marker"></i> {{ institute.stateName }}, {{ institute.districtName }}
+            </span>
+            <span class="info-chip">
+              <i class="fa fa-map-pin"></i> Pincode: {{ institute.pincode}}
+            </span>
           </div>
-
-        
-      </div>
-       <!-- <button class="admin-btn" (click)="openAdminModal(institute)">
+        </div>
+        <!-- <button class="admin-btn" (click)="openAdminModal(institute)">
     <i class="fa fa-user-shield"></i>
   </button> -->
-      <div class="card-right">
-        <button class="edit-btn" (click)="editInstitute(institute)">
-          <i class="fa fa-edit"></i>
-        </button>
-        <button class="delete-btn" (click)="confirmDelete(institute)">
-          <i class="fa fa-trash"></i>
-        </button>
+        <div class="card-right">
+          <div style="display: flex; flex-direction: row;">
+            <button class="edit-btn" (click)="editInstitute(institute, $event)" [value]="institute.id">
+              <i class="fa fa-edit"></i>
+            </button>
+            <button class="delete-btn" (click)="confirmDelete(institute)">
+              <i class="fa fa-trash"></i>
+            </button>
+          </div>
+          <button class="manage-admins-btn" (click)="navigateToManageAdmins($event)" [value]="institute.id"> Manage
+            Admins
+            <i class="bi bi-person-fill-add" style="font-size: 1.2em;"></i>
+          </button>
+        </div>
       </div>
     </div>
-  </div>
 
-  <!-- Add/Edit Modal -->
-  <div class="modal" *ngIf="isModalOpen">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3>{{ isEditMode ? 'Edit Institute' : 'Add New Institute' }}</h3>
-      </div>
-      <form>
-        <!-- Institute Name -->
-        <div class="form-group">
-          <label>Institute Name *</label>
-          <input type="text" [(ngModel)]="form.name" name="name" required placeholder="Enter institute name" />
+    <!-- Add/Edit Modal -->
+    <div class="modal" *ngIf="isModalOpen">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>{{ isEditMode ? 'Edit Institute' : 'Add New Institute' }}</h3>
         </div>
+        <form #instituteForm="ngForm" (ngSubmit)="saveInstitute()" novalidate>
+          <!-- Institute Name -->
+          <div class="form-group">
+            <label>Institute Name *</label>
+            <input type="text" [(ngModel)]="form.name" name="name" required placeholder="Enter institute name"
+              #name="ngModel" />
 
-        <!-- Logo (Only in Edit) -->
-        <div class="form-group" *ngIf="isEditMode">
-          <label>Logo</label>
-          <input type="file" (change)="onLogoSelected($event)" />
-        </div>
+            @if (name.invalid && (name.dirty || name.touched)) {
+            <div class="alert">
+              @if (name.hasError('required')) {
+              <div class="alert">
+               Institute Name is required.
+              </div>
+              }
+            </div>
+            }
+          </div>
 
-        <!-- Communication Channel -->
-        <div class="form-group">
+          <!-- Logo (Only in Edit) -->
+          <div class="form-group" *ngIf="isEditMode">
+            <label>Logo</label>
+            <input type="file" (change)="onLogoSelected($event)" />
+          </div>
+
+          <!-- Communication Channel -->
+          <!-- <div class="form-group">
           <label class="comm-channel-heading">Communication Channel</label>
           <div>
             <label>
@@ -96,51 +107,182 @@
               SMS/Phone Enabled
             </label>
           </div>
-        </div>
-       
+        </div> -->
 
-        <!-- Storage Info -->
-        <div class="form-group">
-          <label>Private Container Name *</label>
-          <input type="text" [(ngModel)]="form.storageInfo.privateContainerName" name="privateContainer" required placeholder="Enter private container" />
-        </div>
-        <div class="form-group">
-          <label>Public Container Name *</label>
-          <input type="text" [(ngModel)]="form.storageInfo.publicContainerName" name="publicContainer" required placeholder="Enter public container" />
-        </div>
 
-        <!-- Address -->
-        <div class="form-group">
-          <label>State *</label>
-          <input type="text" [(ngModel)]="form.address.state" name="state" required placeholder="Enter state" />
-        </div>
-        <div class="form-group">
-          <label>District *</label>
-          <input type="text" [(ngModel)]="form.address.district" name="district" required placeholder="Enter district" />
-        </div>
-        <div class="form-group">
-          <label>Pincode *</label>
-          <input type="text" [(ngModel)]="form.address.pincode" name="pincode" required placeholder="Enter pincode" />
-        </div>
+          <!-- Storage Info -->
+          <div class="form-group">
+            <label>Private Container Name *</label>
+            <input type="text" [(ngModel)]="form.storageInfo.storageContainerName" name="privateContainer" required
+              placeholder="Enter private container" #privateContainerName="ngModel" />
+              @if (privateContainerName.invalid && (privateContainerName.dirty || privateContainerName.touched)) {
+            <div>
+              @if (privateContainerName.hasError('required')) {
+              <div class="alert">
+               Private Container Name is required
+              </div>
+              }
+            </div>
+            }
+          </div>
+          <div class="form-group">
+            <label>Public Container Name *</label>
+            <input type="text" [(ngModel)]="form.storageInfo.storageContainerNamePublic" name="publicContainer" required
+              placeholder="Enter public container" #publiContainerName ="ngModel"/>
+               @if (publiContainerName.invalid && (publiContainerName.dirty || publiContainerName.touched)) {
+            <div>
+              @if (publiContainerName.hasError('required')) {
+              <div class="alert" style="color: red;">
+               public Container Name is required
+              </div>
+              }
+            </div>
+            }
+          </div>
 
-        <!-- Actions -->
-        <div class="modal-actions">
-          <button type="button" (click)="saveInstitute()">Save</button>
-          <button type="button" class="cancel" (click)="closeModal()">Cancel</button>
+          <!-- Address -->
+          <div class="form-group">
+  <label>State *</label>
+  <select
+    [(ngModel)]="form.address.state"
+    name="state"
+    required
+    (ngModelChange)="onStateSelect($event)"
+    *ngIf="states$ | async as states"
+    #state="ngModel"
+  >
+    <option [ngValue]="null" disabled>Select State</option>
+    <option *ngFor="let state of states" [ngValue]="state.id">{{ state.name }}</option>
+  </select>
+
+  <!-- @if (state.invalid && (state.dirty || state.touched)) {
+    <div>
+      @if (state.hasError('required')) {
+        <div class="alert" style="color: red;">
+          State is required
         </div>
-      </form>
+      }
     </div>
-  </div>
+  } -->
+</div>
 
-  <!-- Delete Confirmation Modal -->
-  <div class="modal confirmation-modal" *ngIf="isDeleteConfirmOpen">
-    <div class="modal-content">
-      <h3>Confirm Deletion</h3>
-      <p>Are you sure you want to delete <strong>{{ instituteToDelete?.name }}</strong>?</p>
-      <div class="modal-actions">
-        <button (click)="deleteInstitute()">Yes, Delete</button>
-        <button class="cancel" (click)="cancelDelete()">Cancel</button>
+<div class="form-group">
+  <label>District *</label>
+  <select
+    [(ngModel)]="form.address.district"
+    name="district"
+    required
+    (change)="onSelectDistrict($event)"
+    *ngIf="districts$ | async as districts"
+    #district="ngModel"
+  >
+    <option [ngValue]="null" disabled>Select District</option>
+    <option *ngFor="let district of districts" [ngValue]="district.id">{{ district.name }}</option>
+  </select>
+
+  <!-- @if (district.invalid && (district.dirty || district.touched)) {
+    <div>
+      @if (district.hasError('required')) {
+        <div class="alert" style="color: red;">
+          District is required
+        </div>
+      }
+    </div>
+  } -->
+</div>
+
+<div class="form-group">
+  <label>Pincode *</label>
+ <input
+  type="text"
+  name="pincode"
+  [(ngModel)]="form.address.pincode"
+  required
+  minlength="6"
+  maxlength="6"
+  pattern="^[0-9]{6}$"
+  placeholder="Enter pincode"
+  #pincode="ngModel"
+/>
+
+  @if (pincode.invalid && (pincode.dirty || pincode.touched)) {
+  <div>
+    @if (pincode.hasError('required')) {
+      <div class="alert" style="color: red;">Pincode is required</div>
+    }
+
+    @if (pincode.hasError('pattern')) {
+      <div class="alert" style="color: red;">only numeric characters</div>
+    }
+
+    @if (pincode.hasError('minlength') || pincode.hasError('maxlength')) {
+      <div class="alert" style="color: red;">Pincode must be 6 digits long</div>
+    }
+  </div>
+}
+
+</div>
+
+          <!-- Actions -->
+          <div class="modal-actions">
+            <button type="button" (click)="saveInstitute()">Save</button>
+            <button type="button" class="cancel" (click)="closeModal()">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal confirmation-modal" *ngIf="isDeleteConfirmOpen">
+      <div class="modal-content">
+        <h3>Confirm Deletion</h3>
+        <p>Are you sure you want to delete <strong>{{ instituteToDelete?.name }}</strong>?</p>
+        <div class="modal-actions">
+          <button (click)="deleteInstitute()">Yes, Delete</button>
+          <button class="cancel" (click)="cancelDelete()">Cancel</button>
+        </div>
       </div>
     </div>
   </div>
-</div>
+  <div class="AdminDiv" *ngIf="IsAdminLoggedIn">
+    <h1 class="dashboard-title">{{Role}} Dashboard</h1>
+    <div class="dashboard-cards-container">
+
+
+      <div class="dashboard-card">
+        <div class="card-icon units-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" />
+          </svg>
+        </div>
+        <div class="card-content">
+          <div class="card-title">Total Units</div>
+          <div class="card-number">{{unitCount}}</div>
+        </div>
+        <div class="card-footer">
+          <a [routerLink]="['/Edit-Units']" class="card-link">View All Units &rarr;</a>
+        </div>
+      </div>
+      <div class="dashboard-card">
+        <div class="card-icon trainers-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+            <path
+              d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+          </svg>
+        </div>
+        <div class="card-content">
+          <div class="card-title">Total Staff</div>
+          <!-- <div class="card-number">{{ numberOfTrainers }}</div> -->
+          <div class="card-number">4</div>
+        </div>
+        <div class="card-footer">
+          <a [routerLink]="['/Edit-Trainers']" class="card-link">View All Staff &rarr;</a>
+        </div>
+      </div>
+
+    </div>
+    <!-- <ul *ngIf="units$ | async as units">
+  <li *ngFor="let unit of units">{{ unit.Name }}</li>
+</ul> -->
+
+  </div>

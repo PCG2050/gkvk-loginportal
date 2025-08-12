@@ -1,0 +1,229 @@
+<div class="trainer-assignment-container">
+  <h2 class="section-title">Unit Head Assignment</h2>
+
+  <!-- Feedback Message Display -->
+  <div *ngIf="feedbackMessage" class="feedback-message">
+    {{ feedbackMessage }}
+  </div>
+
+
+
+  <!-- Add Trainer Button (left-aligned) -->
+  <div style="
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 16px;
+      margin-right: 16px;
+    ">
+    <button class="add-btn" (click)="showAddTrainerModal = true">
+      + Add Unit Head
+    </button>
+  </div>
+
+  <!-- Filter Bar -->
+  <form [formGroup]="filterForm" class="container mb-4">
+    <div class="row g-3 align-items-end">
+      <div class="col-md-4">
+        <label for="unit-select" class="form-label">Unit</label>
+        <select id="unit-select" class="form-select add-trainer-input" formControlName="unit"
+          *ngIf="unitsList$ | async as units">
+          <option value="">Select Unit</option>
+          <option *ngFor="let unit of units" [value]="unit.id">{{ unit.name }}</option>
+        </select>
+      </div>
+
+      <div class="col-md-4">
+        <label for="state-select" class="form-label">State</label>
+        <select id="state-select" class="form-select add-trainer-input" formControlName="state"
+          (change)="onStateChange($event)">
+          <option value="">Select State</option>
+          <option *ngFor="let state of states$ | async" [value]="state.id">{{ state.name }}</option>
+        </select>
+      </div>
+
+      <div class="col-md-4">
+        <label for="district-select" class="form-label">District</label>
+        <select id="district-select" class="form-select add-trainer-input" formControlName="district"
+          [disabled]="!filterForm.get('state')?.value">
+          <option value="">Select District</option>
+          <option *ngFor="let district of districts$ | async" [value]="district.id">{{ district.name }}</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="row mt-3">
+      <div class="col">
+        <button type="submit" class="btn btn-primary me-2">Search</button>
+        <button type="button" class="btn btn-secondary" (click)="onReset()">Reset</button>
+      </div>
+    </div>
+  </form>
+
+
+
+
+  <!-- Add Trainer Modal -->
+  <div class="modal-backdrop" *ngIf="showAddTrainerModal">
+    <div class="modal">
+      <h3>Add Unit Head Details</h3>
+      <form [formGroup]="unitHeadForm" (ngSubmit)="addTrainer()">
+        <!-- Email -->
+        <label for="newTrainerEmail" class="visually-hidden">Email</label>
+        <input id="newTrainerEmail" type="email" placeholder="Email" formControlName="unitHeadEmail" required
+          class="add-trainer-input" autocomplete="off" />
+
+        <!-- First and Last Name (side by side on desktop) -->
+        <div class="name-row">
+          <div class="name-col">
+            <label for="newTrainerFirstName" class="visually-hidden">First Name</label>
+            <input id="newTrainerFirstName" type="text" placeholder="First Name" formControlName="unitHeadFirstName"
+              required class="add-trainer-input" autocomplete="off" />
+
+
+            <label for="newTrainerLastName" class="visually-hidden">Last Name</label>
+            <input id="newTrainerLastName" type="text" placeholder="Last Name" formControlName="unitHeadLastName"
+              required class="add-trainer-input" autocomplete="off" />
+          </div>
+        </div>
+
+        <!-- Password -->
+        <label for="newTrainerPassword" class="visually-hidden">Password</label>
+        <input id="newTrainerPassword" type="password" placeholder="Password" formControlName="unitHeadPassword"
+          required class="add-trainer-input" autocomplete="new-password" />
+
+        <!-- Phone Number -->
+        <div class="name-row">
+          <div class="name-col">
+            <label for="newTrainerPhone" class="visually-hidden">Phone Number</label>
+            <input id="newTrainerPhone" type="tel" placeholder="Phone Number" formControlName='unitHeadPhone' required
+              class="add-trainer-input" autocomplete="off" />
+          </div>
+        </div>
+
+        <!-- Dropdowns -->
+        <label for="newAssignmentUnit" class="visually-hidden">Unit</label>
+        <select id="newAssignmentUnit" formControlName="unit" required class="dropdown"
+          *ngIf="unitsList$ | async as unitsList" class="form-select add-trainer-input">
+          <option value="">Select Unit</option>
+          <option *ngFor="let unit of unitsList" [value]="unit.id">{{ unit.name }}</option>
+        </select>
+
+        <label for="unitState" class="visually-hidden">select State</label>
+        <select id="unitState" formControlName="unitState" (change)="onStateChange($event)"
+          class="form-select add-trainer-input">
+          <option value="">Select State</option>
+          <option *ngFor="let state of states$ | async" [value]="state.id">{{ state.name }}</option>
+        </select>
+
+        <label for="unitDistrict" class="visually-hidden">Select District</label>
+        <select id="unitDistrict" formControlName="unitDistrict" class="form-select add-trainer-input"
+          [disabled]="!unitHeadForm.get('unitState')?.value">
+          <option value="">Select District</option>
+          <option *ngFor="let district of districts$ | async" [value]="district.id">{{ district.name }}</option>
+        </select>
+
+
+        <div class="modal-actions">
+          <button type="submit" [disabled]="!unitHeadForm" class="add-btn" (click)="addUnitHead()">
+            Add
+          </button>
+          <button type="button" (click)="closeAddTrainerModal()" class="reset-btn">
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>Sl No</th>
+          <th>Email</th>
+          <th>Assignments</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let trainer of filteredAssignments; let i = index">
+          <td>{{ i + 1 }}</td>
+          <td>{{ trainer.email }}</td>
+          <td>
+            <div *ngFor="let a of trainer.assignments; let j = index" class="assignment-row">
+              <span>{{ a.unit }} - {{ a.state }}, {{ a.district }}</span>
+              <button class="reassign-btn" (click)="startManageAssignment(trainer, j)">
+                <i class="fa fa-edit"></i>
+
+              </button>
+              <button class="delete-btn" (click)="confirmDelete(trainer, j)">
+                <i class="fa fa-trash"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+        <tr *ngIf="filteredAssignments.length === 0">
+          <td colspan="3" class="no-data-message">
+            No trainers found matching the criteria.
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Manage Assignment Modal -->
+  <div class="modal-backdrop" *ngIf="showManageAssignment">
+    <div class="modal">
+      <h3>
+        Manage Assignment for {{ manageTrainer?.email }}
+        <span *ngIf="manageUnit">at {{manageUnit}}</span>
+      </h3>
+     <form action="" [formGroup]="editAddAssignmentsForm">
+       <label for="manage-unit">Unit</label>
+      <select id="manage-unit" class="dropdown" [(ngModel)]="manageUnit" formControlname="manageUnit" *ngIf="unitsList$ | async as units">
+        <option value="">Select Unit</option>
+        <option *ngFor="let unit of units" [value]="unit.id">{{ unit.name }}</option>
+      </select>
+      <label for="manage-state">State</label>
+      <select id="manage-state" class="dropdown form-select" [(ngModel)]="manageState" formControlname="manageState"
+        (change)="onStateChange($event)" *ngIf="states$ | async as states">
+        <option value="">Select State</option>
+        <option *ngFor="let state of states" [value]="state.id">
+          {{ state.name }}
+        </option>
+      </select>
+      <label for="district-select">District</label>
+      <select class="dropdown" [(ngModel)]="selectedDistrict" formControlname="manageDistrict" [disabled]="!manageState">
+        <option value="">Select District</option>
+        <ng-container *ngIf="districts$ | async as districts">
+          <option *ngFor="let district of districts" [value]="district.id">
+            {{ district.name }}
+          </option>
+        </ng-container>
+      </select>
+
+
+      <div class="modal-actions">
+        <button (click)="saveManagedAssignment()">Save</button>
+        <button (click)="cancelManageAssignment()">Cancel</button>
+      </div>
+     </form>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div class="modal-backdrop" *ngIf="showDeleteConfirm">
+    <div class="modal">
+      <h3>Delete Assignment</h3>
+      <p>
+        Are you sure you want to delete this assignment for
+        <strong>{{ trainerToDelete?.email }}</strong>
+        <span *ngIf="trainerToDelete && assignmentToDeleteIndex !== null">
+          at {{ trainerToDelete.assignments[assignmentToDeleteIndex].unit }} </span>?
+      </p>
+      <div class="modal-actions">
+        <button (click)="deleteAssignment()">Yes, Delete</button>
+        <button (click)="cancelDelete()">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>

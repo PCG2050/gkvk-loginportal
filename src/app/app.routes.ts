@@ -2,7 +2,11 @@ import { Routes } from '@angular/router';
 import { Dashboard } from './pages/dashboard/dashboard';
 import { Login } from './pages/login/login';
 import { Layout } from './pages/layout/layout';
-import { authGuard } from './auth.guard';
+import { AuthGuard } from './core/guards/auth.guard';
+import { EditUnitsComponent } from './pages/edit-units/edit-units.component';
+import { EditTrainersComponent } from './pages/edit-trainers/edit-trainers.component';
+import { ManageadminsComponent } from './pages/manageadmins/manageadmins.component';
+import { StaffComponent } from './pages/staff/staff.component';
 
 
 export const routes: Routes = [
@@ -18,14 +22,34 @@ export const routes: Routes = [
     {
         path:'',
         component: Layout,
-        canActivate:[authGuard],
+        canActivate:[AuthGuard],
         children: [
             {
                 path: 'dashboard',
                 component: Dashboard,
                 title: 'Dashboard'
+            },
+            {
+                 path: 'manageAdmins',
+                 component:ManageadminsComponent,
+                 title:'Manage Admins'
+            },
+            {
+                path: 'Edit-Units',
+                component : EditUnitsComponent,
+                title : 'Units'
+            },
+            {
+                path: 'Edit-Trainers',
+                component : EditTrainersComponent,
+                title : 'Trainers'
+            },
+            {
+                path:'Staff',
+                component : StaffComponent,
+                title : 'Staff'
             }
             
-        ]
+        ]    
     }
 ];

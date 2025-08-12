@@ -1,0 +1,153 @@
+<div class="trainer-assignment-container">
+  <h2 class="section-title">Unit Management</h2>
+
+  <!-- Feedback Message Display -->
+  <div *ngIf="feedbackMessage" class="feedback-message">
+    {{ feedbackMessage }}
+  </div>
+
+
+  <!-- Add Unit Form -->
+  <form class="add-trainer-form" (ngSubmit)="addUnit()" [formGroup]="unitOrganizationForm">
+    <label for="newUnitName" class="visually-hidden">Unit Name</label>
+    <select
+      id="newUnitName"
+      class="dropdown"
+      formControlName = 'newUnitName'
+      required
+      *ngIf = "units$ | async as units"
+    >
+      <option value="">Select Unit Name</option>
+      <option *ngFor="let unit of units" [value]="unit.id">{{ unit.name }}</option>
+    </select>
+    <label for="newUnitState" class="visually-hidden">State</label>
+    <select id="newUnitState" class="dropdown"  formControlName="newUnitState" required (change)="onStateSelect($event)" *ngIf="states$ | async as states">
+      <option value="">Select State</option>
+      <option *ngFor="let state of states" [value]="state.id">{{state.name}}</option>
+    </select>
+    <label for="newUnitDistrict" class="visually-hidden">District</label>
+    <select id="newUnitDistrict" class="dropdown"  formControlName="newUnitDistrict" required [disabled]="!newUnitState">
+      <option value="">Select District</option>
+      <option *ngFor="let district of districts$ | async" [value]="district.id">{{ district.name }}</option>
+    </select>
+    <button type="submit" [disabled]="!unitOrganizationForm" class="add-btn" (click)="addUnitOrganization()">Add Unit</button>
+  </form>
+
+
+  <!-- Filter Bar -->
+<form class="filter-bar" (ngSubmit)="onSearch()" #filterForm="ngForm" >
+  <div class="filter-fields">
+    <label for="state-select" class="visually-hidden">State</label>
+    <select id="state-select"
+            class="dropdown"
+            [(ngModel)]="selectedState"
+            name="state"
+            (change)="onStateChange($event)"
+            *ngIf="states$ | async as states">
+      <option value="">State</option>
+      <option *ngFor="let state of states" [value]="state.id">
+        {{ state.name }}
+      </option>
+    </select>
+
+    <label for="district-select" class="visually-hidden">District</label>
+    <select id="district-select"
+            class="dropdown"
+            [(ngModel)]="selectedDistrict"
+            name="district"
+            [disabled]="!selectedState">
+      <option value="">District</option>
+      <option *ngFor="let district of districts$ | async" [value]="district.id">
+        {{ district.name }}
+      </option>
+    </select>
+  </div>
+  <button type="submit" class="search-btn">Search</button>
+  <button type="button" class="reset-btn" (click)="onReset()">Reset</button>
+</form>
+
+
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>Sl No</th>
+          <th>Unit Name</th>        
+          <th>District</th>
+          <th>State</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody *ngIf = "unitLocations$ | async as unitLocations">
+         <ng-container *ngFor="let unit of unitLocations">
+        <tr *ngFor="let loc of unit.location; let i = index">
+          <td>{{ i + 1 }}</td>
+          <td>{{ unit.unitName }}</td>
+          <td>{{ loc.districtName }}</td>
+          <td>{{ loc.stateName }}</td>          
+          <td>
+            <button
+                class="reassign-btn"
+                (click)="onOpenUnitEditModal(unit, loc)"
+              >
+                <i class="fa fa-edit"></i>
+              </button>
+            <button class="delete-btn" (click)="confirmDelete(unit)" (click)="onCloseEditModel()"><i class="fa fa-trash"></i></button>
+          </td>
+        </tr>
+        </ng-container>
+        <tr *ngIf="filteredUnits.length === 0">
+          <td colspan="5" class="no-data-message">No units found matching the criteria.</td>
+        </tr>
+      </tbody>
+    </table>    
+  </div> 
+  <!-- Delete Confirmation Modal -->
+  <div class="modal-backdrop" *ngIf="showDeleteConfirm">
+    <div class="modal">
+      <h3>Delete Unit</h3>
+      <p>Are you sure you want to delete unit <strong>{{ unitToDelete?.name }}</strong>?</p>
+      <div class="modal-actions">
+        <button (click)="deleteUnit()">Yes, Delete</button>
+        <button (click)="cancelDelete()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+ <!-- popup form to edit units -->
+<div class="modal-backdrop" *ngIf="editUnitModal">
+  <div class="modal">
+    <h3>Edit Unit Details</h3>
+    <form [formGroup]="editUnitForm" >
+
+      <!-- Unit dropdown -->
+      <label for="editUnitId" class="visually-hidden">Unit</label>
+      <select id="editUnitId" formControlName="unitId" class="dropdown" *ngIf="units$ | async as units" required>
+        <option value="">Select Unit</option>
+        <option *ngFor="let unit of units" [value]="unit.id">{{ unit.name }}</option>
+      </select>
+
+      <!-- State dropdown -->
+      <label for="editStateId" class="visually-hidden">State</label>
+      <select id="editStateId" formControlName="stateId" class="dropdown" required (change)="onStateChange($event)" *ngIf="states$ | async as states">
+        <option value="">Select State</option>
+        <option *ngFor="let state of states" [value]="state.id">{{ state.name }}</option>
+      </select>
+
+      <!-- District dropdown -->
+      <label for="editDistrictId" class="visually-hidden">District</label>
+      <select id="editDistrictId" formControlName="districtId" class="dropdown" required [disabled]="!editUnitForm.get('stateId')?.value" *ngIf="districts$ | async as districts">
+        <option value="">Select District</option>
+        <option *ngFor="let district of districts" [value]="district.id">{{ district.name }}</option>
+      </select>
+
+      <div class="modal-actions">
+        <button type="submit" class="add-btn" [disabled]="editUnitForm.invalid">Save</button>
+        <button type="button" class="reset-btn" (click)="onCloseEditModel()">Cancel</button>
+      </div>
+
+    </form>
+  </div>
+</div>
+
+</div>
