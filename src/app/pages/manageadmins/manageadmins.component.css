@@ -39,3 +39,16 @@ ul{
   border-color: #007bff;
   outline: none;
 }
+.addBtn{
+  background: #012a5b;
+  width: 15vh;
+  color: white;
+  padding: 10px;
+  border-radius: 5px;
+  margin-top: 10px;
+}
+ .alert{
+    color: red;
+    padding: 0px;
+    margin: 0px;
+  }

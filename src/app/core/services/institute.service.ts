@@ -24,11 +24,11 @@ export class InstituteService {
     })
     return this.httpClient.get<Institute[]>(this.endpoint,{headers});
   }
-  updateIntitutes(updatedIntititeData:any){
+  updateInstitutes(updatedIntititeData:any,organizationId:number){
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${this.token}`
     })
-    return this.httpClient.patch(this.endpoint, updatedIntititeData,{headers})
+    return this.httpClient.patch(`${this.endpoint}/${organizationId}`, updatedIntititeData,{headers})
   }
   getInstituteById(instituteId:number){
     const headers = new HttpHeaders({
@@ -36,10 +36,10 @@ export class InstituteService {
     })
     return this.httpClient.get(`${this.endpoint}/${instituteId}`)
   }
-  deleteInstituteById(){
+  deleteInstituteById(instituteId:number){
     const headers = new HttpHeaders({
       'Authorization':`Bearer ${this.token}`
     })
-    return this.httpClient.delete(`${this.endpoint}`)
+    return this.httpClient.delete(`${this.endpoint}/${instituteId}`,{headers})
   }
 }

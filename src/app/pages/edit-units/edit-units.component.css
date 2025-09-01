@@ -3,7 +3,7 @@
 .trainer-assignment-container {
   background: #fff;
   border-radius: 12px;
-  box-shadow: 0 6px 15px rgba(0,0,0,0.08);
+  box-shadow: 0 0 10px gray;
   padding: 32px;
   margin: 32px auto;
   max-width: 1000px;
@@ -25,26 +25,30 @@
   border-radius: 8px;
   font-weight: 600;
   text-align: center;
-  background-color: #e6f7ff; /* Info blue */
+  background-color: #e6f7ff;
+  /* Info blue */
   color: #012a5b;
   border: 1px solid #d0e6f7;
 }
 
 .feedback-message.success {
-  background-color: #e6ffe6; /* Light green */
+  background-color: #e6ffe6;
+  /* Light green */
   color: #28a745;
   border-color: #d4edda;
 }
 
 .feedback-message.error {
-  background-color: #ffe6e6; /* Light red */
+  background-color: #ffe6e6;
+  /* Light red */
   color: #dc3545;
   border-color: #f5c6cb;
 }
 
 
 .filter-bar,
-.add-trainer-form { /* Reusing add-trainer-form for add unit form */
+.add-trainer-form {
+  /* Reusing add-trainer-form for add unit form */
   display: flex;
   gap: 16px;
   flex-wrap: wrap;
@@ -54,7 +58,7 @@
   background: #f8f9fa;
   padding: 16px 24px;
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(44,62,80,0.04);
+  box-shadow: 0 2px 8px rgba(44, 62, 80, 0.04);
 }
 
 .filter-fields {
@@ -66,15 +70,17 @@
 }
 
 .dropdown,
-.add-trainer-input { /* Reusing add-trainer-input for unit name input */
+.add-trainer-input {
+  /* Reusing add-trainer-input for unit name input */
   padding: 10px 15px;
-  border: 1px solid #ced4da;
+  border: 1px solid #979797;
   border-radius: 6px;
   font-size: 1rem;
   color: #495057;
   background-color: #fff;
-  box-shadow: inset 0 1px 2px rgba(0,0,0,0.03);
-  flex: 1 1 180px; /* Allows flexibility in sizing */
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.03);
+  flex: 1 1 180px;
+  /* Allows flexibility in sizing */
   min-width: 150px;
 }
 
@@ -87,20 +93,21 @@
   font-size: 1rem;
   color: #495057;
   background-color: #fff;
-  box-shadow: inset 0 1px 2px rgba(0,0,0,0.03);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.03);
   flex: 1 1 180px;
   min-width: 150px;
-  min-height: 100px; /* For multiple select */
+  min-height: 100px;
+  /* For multiple select */
   resize: vertical;
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
   background-image: linear-gradient(45deg, transparent 50%, gray 50%),
-                    linear-gradient(135deg, gray 50%, transparent 50%),
-                    linear-gradient(to right, #ccc, #ccc);
+    linear-gradient(135deg, gray 50%, transparent 50%),
+    linear-gradient(to right, #ccc, #ccc);
   background-position: calc(100% - 20px) calc(1em + 2px),
-                       calc(100% - 15px) calc(1em + 2px),
-                       calc(100% - 2.5em) 0.5em;
+    calc(100% - 15px) calc(1em + 2px),
+    calc(100% - 2.5em) 0.5em;
   background-size: 5px 5px, 5px 5px, 1px 1.5em;
   background-repeat: no-repeat;
 }
@@ -122,23 +129,27 @@
   background: #f8f9fa;
   border-radius: 8px;
   padding: 16px;
-  box-shadow: 0 2px 8px rgba(44,62,80,0.04);
-  overflow-x: auto; /* For responsive tables */
+  box-shadow: 0 2px 8px rgba(44, 62, 80, 0.04);
+  overflow-x: auto;
+  /* For responsive tables */
 }
 
 table {
   width: 100%;
-  border-collapse: collapse; /* For cleaner table borders */
+  border-collapse: collapse;
+  /* For cleaner table borders */
   border-radius: 8px;
   overflow: hidden;
   background: #fff;
   margin-bottom: 16px;
 }
 
-th, td {
+th,
+td {
   padding: 12px 16px;
   text-align: left;
-  white-space: nowrap; /* Prevent text wrapping in table headers/cells */
+  white-space: nowrap;
+  /* Prevent text wrapping in table headers/cells */
 }
 
 th {
@@ -160,9 +171,11 @@ td {
   gap: 16px;
   margin-bottom: 16px;
 }
+
 .name-col {
   flex: 1 1 0;
 }
+
 @media (max-width: 600px) {
   .name-row {
     flex-direction: column;
@@ -171,17 +184,20 @@ td {
 }
 
 tr:last-child td {
-  border-bottom: none; /* No border for the last row */
+  border-bottom: none;
+  /* No border for the last row */
 }
 
 tr:hover {
-  background-color: #f5f5f5; /* Hover effect for table rows */
+  background-color: #f5f5f5;
+  /* Hover effect for table rows */
 }
 
 button,
 .search-btn,
 .reset-btn,
-.reassign-btn, /* Reassign button is not used here, but keeping the style */
+.reassign-btn,
+/* Reassign button is not used here, but keeping the style */
 .download-btn,
 .add-btn {
   border-radius: 6px;
@@ -190,10 +206,10 @@ button,
   padding: 10px 20px;
   border: none;
   cursor: pointer;
-  background: #012a5b;
+  background: green;
   color: #fff;
   font-weight: 600;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 button:hover,
@@ -202,13 +218,13 @@ button:hover,
 .reassign-btn:hover,
 .download-btn:hover,
 .add-btn:hover {
-  background: #004085; /* Darker blue on hover */
+  background: rgb(0, 74, 0);
   color: #fff;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 button:disabled {
-  background-color: #004085;
+  background-color: rgb(104, 171, 104);
   cursor: not-allowed;
   box-shadow: none;
 }
@@ -216,38 +232,86 @@ button:disabled {
 .delete-btn {
   background: #e74c3c;
   color: #fff;
-  margin-left: 8px; /* Maintain spacing from other buttons if any */
+  margin-left: 8px;
+  /* Maintain spacing from other buttons if any */
 }
+
 .delete-btn:hover {
   background: #c0392b;
 }
 
+.errorResponse {
+  width: 100%;
+  height: 60px;
+  background: rgb(238, 186, 186);
+  /* border: 2px 0 2px 0 solid red; */
+  border-top: 1px solid red;
+  border-bottom: 1px solid red;
+  position: relative;
+  font-size: 2.2vh;
+  color: red;
+}
+.successResponse{
+    width: 100%;
+  height: 60px;
+  background: rgb(173, 242, 173);
+  /* border: 2px 0 2px 0 solid red; */
+  border-top: 1px solid green;
+  border-bottom: 1px solid green;
+  position: relative;
+  font-size: 2.2vh;
+  color: green;
+}
+.responseText{
+  position: absolute;
+  left: 35%;
+  top: 30%;
+}
+
+.closeMsg {
+  position: absolute;
+  right: 1%;
+  cursor: pointer;
+}
+
 .modal-backdrop {
   position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0,0,0,0.5); /* Darker backdrop */
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  /* Darker backdrop */
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
 }
+
 .modal {
   background: #fff;
   padding: 24px 32px;
-  border-radius: 10px; /* Slightly more rounded */
-  box-shadow: 0 8px 30px rgba(0,0,0,0.2); /* More prominent shadow */
-  min-width: 350px; /* Slightly wider */
-  max-width: 350px; /* Responsive width */
+  border-radius: 10px;
+  /* Slightly more rounded */
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+  /* More prominent shadow */
+  min-width: 350px;
+  /* Slightly wider */
+  max-width: 350px;
+  /* Responsive width */
   opacity: 1;
   display: block;
   max-height: fit-content;
   text-align: center;
-  position: fixed; /* Changed to fixed for consistent centering */
+  position: fixed;
+  /* Changed to fixed for consistent centering */
   top: 50%;
   left: 50%;
   visibility: visible;
-  transform: translate(-50%, -50%); /* Centering trick */
-  z-index: 1051; /* Ensure it's above the backdrop */
+  transform: translate(-50%, -50%);
+  /* Centering trick */
+  z-index: 1051;
+  /* Ensure it's above the backdrop */
 }
 
 .modal h3 {
@@ -278,7 +342,8 @@ button:disabled {
   margin-top: 16px;
   display: flex;
   gap: 12px;
-  justify-content: center; /* Center buttons in modal */
+  justify-content: center;
+  /* Center buttons in modal */
 }
 
 .no-data-message {
@@ -288,28 +353,64 @@ button:disabled {
   font-style: italic;
 }
 
+.alert {
+  color: red;
+  padding: 0px;
+  margin: 0px;
+}
+.asterisk{
+    color: red;
+  }
+
+.close {
+  background: none;
+  color: rgb(100, 99, 99);
+  margin-top: -30px;
+  margin-right: -35px;
+  font-size: 3vh;
+  box-shadow: none;
+}
+
+.close:hover {
+  background: none;
+  color: rgb(100, 99, 99);
+  box-shadow: none;
+}
+
+.deleteBtn {
+  background: rgb(242, 37, 37);
+}
+
 @media (max-width: 992px) {
   .trainer-assignment-container {
     padding: 16px;
     margin: 16px auto;
     max-width: 98vw;
   }
+
   .filter-bar,
   .add-trainer-form {
     flex-direction: column;
     gap: 12px;
     padding: 12px;
   }
+
   .filter-fields,
-  .add-trainer-form > *:not(button) { /* Target all inputs/selects except buttons */
-    width: 100%; /* Make them full width */
-    flex-basis: auto; /* Reset flex basis */
+  .add-trainer-form>*:not(button) {
+    /* Target all inputs/selects except buttons */
+    width: 100%;
+    /* Make them full width */
+    flex-basis: auto;
+    /* Reset flex basis */
   }
+
   .dropdown,
   .add-trainer-input,
   .add-trainer-units {
-    width: 100%; /* Ensure inputs/selects take full width */
-    min-width: unset; /* Remove min-width constraint */
+    width: 100%;
+    /* Ensure inputs/selects take full width */
+    min-width: unset;
+    /* Remove min-width constraint */
   }
 }
 
@@ -317,17 +418,22 @@ button:disabled {
   .section-title {
     font-size: 1.3rem;
   }
+
   .table-container {
     padding: 8px;
   }
-  th, td {
+
+  th,
+  td {
     padding: 8px 12px;
     font-size: 0.9rem;
   }
+
   .modal {
     padding: 16px 24px;
     min-width: unset;
   }
+
   .modal-actions button {
     padding: 8px 15px;
     font-size: 0.9rem;

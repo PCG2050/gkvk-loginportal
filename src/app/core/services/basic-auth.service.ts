@@ -18,8 +18,6 @@ getPublicIpAddress(): Observable<string> {
     catchError(() => of('unknown'))
   );
 }
-
-
  login(data: { email: string, password: string }): Observable<any> {
   return this.getPublicIpAddress().pipe(
     switchMap(ip => {
@@ -47,6 +45,15 @@ getPublicIpAddress(): Observable<string> {
       );
     })
   );
+}
+
+logOut(refreshToken:any){
+  const authToken = localStorage.getItem('authtoken')
+  const endPoint = Endpoints.logout;
+  const headers = new HttpHeaders({
+    'Authorization':`Bearer ${authToken}`
+  })
+  return this.http.post(endPoint,refreshToken,{headers})
 }
 
 getDeviceType(): string {

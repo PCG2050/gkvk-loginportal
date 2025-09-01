@@ -1,7 +1,7 @@
 .trainer-assignment-container {
   background: #fff;
   border-radius: 12px;
-  box-shadow: 0 6px 15px rgba(0,0,0,0.08);
+  box-shadow: 0 0 10px gray;
   padding: 32px;
   margin: 32px auto;
   max-width: 1000px;
@@ -39,6 +39,38 @@
   color: #dc3545;
   border-color: #f5c6cb;
 }
+.errorResponse {
+  width: 100%;
+  height: 50px;
+  background: rgb(238, 186, 186);
+  /* border: 2px 0 2px 0 solid red; */
+  border-top: 1px solid red;
+  border-bottom: 1px solid red;
+  position: relative;
+  font-size: 2.2vh;
+  color: red;
+}
+.successResponse{
+  width: 100%;
+  height: 50px;
+  background: rgb(173, 242, 173);
+  /* border: 2px 0 2px 0 solid red; */
+  border-top: 1px solid green;
+  border-bottom: 1px solid green;
+  position: relative;
+  font-size: 2.2vh;
+  color: green;
+}
+.responseText{
+  position: absolute;
+  left: 35%;
+  top: 30%;
+}
+.closeMsg {
+  position: absolute;
+  right: 1%;
+  cursor: pointer;
+}
 
 
 .filter-bar,
@@ -67,7 +99,7 @@
 .add-trainer-input,
 .add-trainer-units { /* Removed .add-trainer-units from here */
   padding: 10px 15px;
-  border: 1px solid #ced4da;
+  border: 1px solid #979797;
   border-radius: 6px;
   font-size: 1rem;
   margin-bottom: 16px;;
@@ -161,6 +193,9 @@ tr:last-child td {
 tr:hover {
   background-color: #f5f5f5; /* Hover effect for table rows */
 }
+.btn{
+  width: 100px;
+}
 
 button,
 .search-btn,
@@ -174,10 +209,13 @@ button,
   padding: 10px 20px;
   border: none;
   cursor: pointer;
-  background: #012a5b;
+  background: green;
   color: #fff;
   font-weight: 600;
   box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+.add ,.closeFromBtn, .saveBtn, .cancelBtn{
+  width: 90px;
 }
 
 button:hover,
@@ -186,13 +224,13 @@ button:hover,
 .reassign-btn:hover,
 .download-btn:hover,
 .add-btn:hover {
-  background: #004085; /* Darker blue on hover */
+  background: rgb(0, 74, 0);
   color: #fff;
   box-shadow: 0 4px 8px rgba(0,0,0,0.15);
 }
 
 button:disabled {
-  background-color: #cccccc;
+  background-color:rgb(104, 171, 104);
   cursor: not-allowed;
   box-shadow: none;
 }
@@ -224,8 +262,8 @@ button:disabled {
   box-shadow: 0 8px 30px rgba(0,0,0,0.2);
   min-width: 350px;
   max-width: 600px;
-  max-height: 90vh;
-  max-height: fit-content;
+  max-height: 78vh;
+  /* max-height: fit-content; */
   overflow-y: auto; /* Allow scrolling if content exceeds height */
   width: 100%;
   z-index: 1051; /* Ensure it appears above backdrop */
@@ -234,6 +272,45 @@ button:disabled {
   opacity: 1;
   visibility: visible; /* Ensure it stacks above */
 }
+.close{
+   width: 30px;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer; 
+  border: none;
+  background: transparent;
+  font-size: 24px;    
+}
+ .modal-actions{
+    position: absolute;
+    left: 30%;
+    /* right: 10%; */
+  }
+  .modal-actions button{
+    margin: 2px;
+    margin-bottom: 15px;
+  }
+  .modal label{
+    display: flex;
+  }
+  .asterisk{
+    color: red;
+  }
+  .heading{
+    position: absolute;
+    left: 30%;
+    top: 2px;
+    padding-bottom: 10%;
+  }
+  .closeBtn{
+    position: absolute;
+    right: 8%;
+  }
+  /*
+}
+  
 
 .modal h3 {
   color: #012a5b;
@@ -263,14 +340,58 @@ button:disabled {
   margin-top: 16px;
   display: flex;
   gap: 12px;
-  justify-content: center; /* Center buttons in modal */
-}
+  justify-content: center;
+} 
+   /* Center buttons in modal  */
+
 
 .no-data-message {
   text-align: center;
   padding: 20px;
   color: #555;
   font-style: italic;
+}
+.alert{
+    color: red;
+    padding: 0px;
+    margin: 0px;
+    margin-top: -18px;
+    margin-bottom: 20px;
+  }
+  .close {
+  background: none;
+  color: rgb(100, 99, 99);
+  margin-top: -30px;
+  margin-right: -35px;
+  font-size: 3vh;
+  box-shadow: none;
+}
+
+.close:hover {
+  background: none;
+  color: rgb(100, 99, 99);
+  box-shadow: none;
+}
+.orgUnitList{
+  background: #fff;
+  padding: 24px 32px;
+  border-radius: 10px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+  min-width: 350px;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto; /* Allow scrolling if content exceeds height */
+  width: 100%;
+  z-index: 1051; /* Ensure it appears above backdrop */
+  position: relative;
+  display: block;
+  opacity: 1;
+  visibility: visible; /* Ensure it stacks above */
+}
+.map-btn{
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
 }
 
 @media (max-width: 992px) {
@@ -322,6 +443,7 @@ button:disabled {
     padding: 16px 24px;
     min-width: unset;
   }
+ 
   .modal-actions button {
     padding: 8px 15px;
     font-size: 0.9rem;

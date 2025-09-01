@@ -12,18 +12,5 @@ export class AdminService {
   constructor() { }
   private token = localStorage.getItem('authtoken');
 
-  getAdmins(instituteId:number): Observable<Admins[]> {
-    const headers = new HttpHeaders({
-      'Authorization': `Bearer ${this.token}`
-    })
-    let endPoint = Endpoints.addAdmin
-    return this.httpClient.get<Admins[]>(`${endPoint}/${instituteId}/admins`, { headers });
-  }
-   addAdmin(instituteId:number, adminData:any):Observable<Admins[]>{
-      const endPoint = Endpoints.addAdmin;
-      const headers = new HttpHeaders({
-      'Authorization': `Bearer ${this.token}`
-    })
-      return this.httpClient.post<Admins[]>(`${endPoint}/${instituteId}/users`,adminData,{headers},)
-    }
+  
 }

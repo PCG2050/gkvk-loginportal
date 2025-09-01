@@ -1,0 +1,420 @@
+/* Modern Switch Styles */
+.modern-switch {
+  position: relative;
+  display: inline-block;
+  width: 48px;
+  height: 28px;
+  vertical-align: middle;
+}
+.modern-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.modern-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #e0e0e0;
+  transition: background 0.3s;
+  border-radius: 34px;
+}
+.modern-slider:before {
+  position: absolute;
+  content: "";
+  height: 22px;
+  width: 22px;
+  left: 3px;
+  bottom: 3px;
+  background-color: #fff;
+  transition: transform 0.3s;
+  border-radius: 50%;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+}
+.modern-switch input:checked + .modern-slider {
+  background: linear-gradient(90deg, #28a745 60%, #218838 100%);
+}
+.modern-switch input:checked + .modern-slider:before {
+  transform: translateX(20px);
+}
+.modern-slider {
+  box-shadow: 0 1px 4px rgba(44,62,80,0.08);
+}
+.status-label {
+  margin-left: 10px;
+  font-weight: 600;
+  font-size: 1rem;
+  vertical-align: middle;
+  transition: color 0.2s;
+}
+.status-label.active {
+  color: #28a745;
+}
+.status-label.deactive {
+  color: #dc3545;
+}
+.trainer-assignment-container {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 0 10px gray;
+  padding: 32px;
+  margin: 32px auto;
+  max-width: 1000px;
+  font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+.editHeading{
+  position: absolute;
+  left: 40%;
+}
+
+.section-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin-bottom: 24px;
+  text-align: center;
+  letter-spacing: 1px;
+}
+
+.feedback-message {
+  padding: 12px;
+  margin-bottom: 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  text-align: center;
+  background-color: #e6f7ff; /* Info blue */
+  color: #012a5b;
+  border: 1px solid #d0e6f7;
+}
+
+.feedback-message.success {
+  background-color: #e6ffe6; /* Light green */
+  color: #28a745;
+  border-color: #d4edda;
+}
+
+.feedback-message.error {
+  background-color: #ffe6e6; /* Light red */
+  color: #dc3545;
+  border-color: #f5c6cb;
+}
+
+
+.filter-bar,
+.add-trainer-form {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+  align-items: center;
+  justify-content: center;
+  background: #f8f9fa;
+  padding: 16px 24px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(44,62,80,0.04);
+}
+
+.filter-fields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  flex-grow: 1;
+  justify-content: center;
+}
+
+.dropdown,
+.add-trainer-input,
+.add-trainer-units { /* Removed .add-trainer-units from here */
+  padding: 10px 15px;
+  border: 1px solid #979797;
+  border-radius: 6px;
+  font-size: 1rem;
+  margin-bottom: 16px;;
+  color: #495057;
+  background-color: #fff;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.03);
+  flex: 1 1 180px; /* Allows flexibility in sizing */
+  min-width: 150px;
+}
+
+
+.modal .dropdown[multiple] { /* Target multiple select specifically */
+  padding: 10px 15px;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  font-size: 1rem;
+  color: #495057;
+  background-color: #fff;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.03);
+  flex: 1 1 180px;
+  min-width: 150px;
+  min-height: 100px; 
+  resize: vertical;
+  /* Ensure consistent appearance for multiple select */
+  -webkit-appearance: none; /* Remove default browser styling for consistency */
+  -moz-appearance: none;
+  appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, gray 50%),
+                    linear-gradient(135deg, gray 50%, transparent 50%),
+                    linear-gradient(to right, #ccc, #ccc);
+  background-position: calc(100% - 20px) calc(1em + 2px),
+                       calc(100% - 15px) calc(1em + 2px),
+                       calc(100% - 2.5em) 0.5em;
+  background-size: 5px 5px, 5px 5px, 1px 1.5em;
+  background-repeat: no-repeat;
+}
+
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+
+.table-container {
+  margin-top: 16px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(44,62,80,0.04);
+  overflow-x: auto; /* For responsive tables */
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse; /* For cleaner table borders */
+  border-radius: 8px;
+  overflow: hidden;
+  background: #fff;
+  margin-bottom: 16px;
+}
+
+th, td {
+  padding: 12px 16px;
+  text-align: left;
+  white-space: nowrap; /* Prevent text wrapping in table headers/cells */
+}
+
+th {
+  font-weight: 700;
+  color: #012a5b;
+  background: #e6f7ff;
+  border-bottom: 2px solid #d0e6f7;
+}
+
+td {
+  color: #2c3e50;
+  font-size: 1rem;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+tr:last-child td {
+  border-bottom: none; /* No border for the last row */
+}
+
+tr:hover {
+  background-color: #f5f5f5; /* Hover effect for table rows */
+}
+
+button,
+.search-btn,
+.reset-btn,
+.reassign-btn,
+.download-btn,
+.add-btn {
+  border-radius: 6px;
+  font-size: 1rem;
+  transition: background 0.2s ease-in-out, color 0.2s ease-in-out;
+  padding: 10px 20px;
+  border: none;
+  cursor: pointer;
+  background:green;
+  color: #fff;
+  font-weight: 600;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+button:hover,
+.search-btn:hover,
+.reset-btn:hover,
+.reassign-btn:hover,
+.download-btn:hover,
+.add-btn:hover {
+  background: rgb(0, 74, 0);
+  color: #fff;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+button:disabled {
+  background-color:rgb(104, 171, 104);
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.delete-btn {
+  background: #e74c3c;
+  color: #fff;
+  margin-left: 8px;
+}
+.delete-btn:hover {
+  background: #c0392b;
+}
+
+.modal-backdrop {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1050; /* Bootstrap uses 1050 for modals */
+}
+.modal {
+  margin: 180px 0 100px 0;
+  background: #fff;
+  padding: 24px 32px;
+  border-radius: 10px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+  min-width: 350px;
+  max-width: 650px;
+  /* max-height: 100vh; */
+  max-height: 90vh;
+  overflow-y: auto; /* Allow scrolling if content exceeds height */
+  width: 100%;
+  z-index: 1051; /* Ensure it appears above backdrop */
+  position: relative;
+  display: block;
+  opacity: 1;
+  visibility: visible; /* Ensure it stacks above */
+}
+
+.modal h3 {
+  color: #012a5b;
+  margin-bottom: 20px;
+  font-size: 1.5rem;
+}
+
+.modal p {
+  color: #2c3e50;
+  margin-bottom: 24px;
+}
+
+.modal label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #2c3e50;
+  text-align: left;
+}
+
+.modal .dropdown {
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.modal-actions {
+  margin-top: 16px;
+  display: flex;
+  gap: 12px;
+  justify-content: center; /* Center buttons in modal */
+}
+
+.no-data-message {
+  text-align: center;
+  padding: 20px;
+  color: #555;
+  font-style: italic;
+}
+.alert{
+  color: red;
+  margin-top: -35px;
+}
+.asterisk{
+    color: red;
+  }
+  .close{
+   width: 30px;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer; 
+  border: none;
+  background:none;
+  font-size: 24px;
+  color:gray;   
+}
+.close:hover{
+  background: none;
+  color:gray;
+}
+.closeBtn{
+    position: absolute;
+    right: 8%;
+  }
+
+@media (max-width: 992px) {
+  .trainer-assignment-container {
+    padding: 16px;
+    margin: 16px auto;
+    max-width: 98vw;
+  }
+  .filter-bar,
+  .add-trainer-form {
+    flex-direction: column;
+    gap: 12px;
+    padding: 12px;
+  }
+  .filter-fields,
+  .add-trainer-form > *:not(button) { /* Target all inputs/selects except buttons */
+    width: 100%; /* Make them full width */
+    flex-basis: auto; /* Reset flex basis */
+  }
+  .dropdown,
+  .add-trainer-input,
+  .add-trainer-units {
+    width: 100%; /* Ensure inputs/selects take full width */
+    min-width: unset; /* Remove min-width constraint */
+  }
+}
+.assignment-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+.assignment-row span {
+  flex: 1 1 auto;
+}
+
+@media (max-width: 600px) {
+  .section-title {
+    font-size: 1.3rem;
+  }
+  .table-container {
+    padding: 8px;
+  }
+  th, td {
+    padding: 8px 12px;
+    font-size: 0.9rem;
+  }
+  .modal {
+    padding: 16px 24px;
+    min-width: unset;
+  }
+  .modal-actions button {
+    padding: 8px 15px;
+    font-size: 0.9rem;
+  }
+}

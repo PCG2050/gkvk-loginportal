@@ -5,19 +5,92 @@
         <li [class.active]="isAdminTabActive" class="tab" (click)="addAdminTab()">Add Admin</li>
     </ul>
     <div class="isAdminTabActive" *ngIf="adminTab">
-        <form action="" [formGroup]="AdminForm" class="adminForm">
-            <label for="firstName">First Name</label>
-            <input type="text" placeholder="Enter FirstName" formControlName="firstName">
-            <label for="lastName">Last Name</label>
-            <input type="text" placeholder="LastName" formControlName="lastName">
-            <label for="phone">Phone Number</label>
-            <input type="text" placeholder="Enter Phone Number" formControlName="phoneNumber">
-            <label for="email">Email</label>
-            <input type="text" placeholder="Enter Email" formControlName="email">
-            <label for="password">Password</label>
-            <input type="text" placeholder="Enter Password" formContolName="password">
-            <button type="submit" (click)="addAdmins()">Add</button>
-        </form>
+       <form [formGroup]="AdminForm" class="adminForm form-group" (ngSubmit)="addAdmins()">
+
+  <!-- First Name -->
+  <label for="firstName">First Name</label>
+  <input 
+    type="text" 
+    placeholder="Enter FirstName" 
+    formControlName="firstName" 
+    class="form-control" />
+
+  @if (AdminForm.get('firstName')?.invalid && (AdminForm.get('firstName')?.dirty || AdminForm.get('firstName')?.touched)) {
+    <div class="alert">
+      @if (AdminForm.get('firstName')?.hasError('required')) {
+        <div>Name is required.</div>
+      }
+      @if (AdminForm.get('firstName')?.hasError('pattern')) {
+        <div>Only alphabetic characters allowed.</div>
+      }
+    </div>
+  }
+  <!-- Last Name -->
+  <label for="lastName">Last Name</label>
+  <input type="text" placeholder="Last Name" formControlName="lastName" class="form-control" />
+
+  @if (AdminForm.get('lastName')?.invalid && (AdminForm.get('lastName')?.dirty || AdminForm.get('lastName')?.touched)) {
+    <div class="alert">
+      @if (AdminForm.get('lastName')?.hasError('required')) {
+        <div>Last Name is required.</div>
+      }
+    </div>
+  }
+
+  <!-- Phone Number -->
+<label for="phone">Phone Number</label>
+<input type="text" placeholder="Enter Phone Number" formControlName="phoneNumber" class="form-control" />
+
+@if (AdminForm.get('phoneNumber')?.invalid && (AdminForm.get('phoneNumber')?.dirty || AdminForm.get('phoneNumber')?.touched)) {
+  <div class="alert">
+    @if (AdminForm.get('phoneNumber')?.hasError('required')) {
+      <div>Phone number is required.</div>
+    }
+    @if (AdminForm.get('phoneNumber')?.hasError('pattern')) {
+      <div>Phone number must be exactly 10 digits.</div>
+    }
+    @if (AdminForm.get('phoneNumber')?.hasError('minlength') || AdminForm.get('phoneNumber')?.hasError('maxlength')) {
+      <div>Phone number must be exactly 10 digits.</div>
+    }
+  </div>
+}
+  <!-- Email -->
+  <label for="email">Email</label>
+  <input type="email" placeholder="Enter Email" formControlName="email" class="form-control" />
+
+  @if (AdminForm.get('email')?.invalid && (AdminForm.get('email')?.dirty || AdminForm.get('email')?.touched)) {
+    <div class="alert">
+      @if (AdminForm.get('email')?.hasError('required')) {
+        <div>Email is required.</div>
+      }
+      @if (AdminForm.get('email')?.hasError('email')) {
+        <div>Email is not valid.</div>
+      }
+    </div>
+  }
+
+  <!-- Password -->
+  <label for="password">Password</label>
+  <input type="password" placeholder="Enter Password" formControlName="password" class="form-control" />
+
+  @if (AdminForm.get('password')?.invalid && (AdminForm.get('password')?.dirty || AdminForm.get('password')?.touched)) {
+    <div class="alert">
+      @if (AdminForm.get('password')?.hasError('required')) {
+        <div>Password is required.</div>
+      }
+      @if (AdminForm.get('password')?.hasError('minlength')) {
+        <div>Password must be at least 6 characters.</div>
+      }
+    </div>
+  }
+
+  <!-- Submit -->
+  <div style="margin: 0 auto;">
+    <button type="submit" class="addBtn" [disabled]="!AdminForm.valid">Add</button>
+  </div>
+
+</form>
+
     </div>
     <div class="isManageAdminTabActive" *ngIf="manageAdminTab">
         <table class="table table-striped">

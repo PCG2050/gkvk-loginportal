@@ -7,6 +7,7 @@ import { EditUnitsComponent } from './pages/edit-units/edit-units.component';
 import { EditTrainersComponent } from './pages/edit-trainers/edit-trainers.component';
 import { ManageadminsComponent } from './pages/manageadmins/manageadmins.component';
 import { StaffComponent } from './pages/staff/staff.component';
+import { ProfileComponent } from './pages/profile/profile.component';
 
 
 export const routes: Routes = [
@@ -47,7 +48,12 @@ export const routes: Routes = [
             {
                 path:'Staff',
                 component : StaffComponent,
-                title : 'Staff'
+                title : 'Staff Management'
+            },
+            {
+                path:'Profile',
+                component : ProfileComponent,
+                title : 'Profile'
             }
             
         ]    

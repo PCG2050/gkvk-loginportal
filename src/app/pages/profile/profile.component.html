@@ -1,0 +1,104 @@
+<div class="profile-container">
+  <div class="personal-details">
+    <div class="profile-img">
+      <!-- <img *ngIf="(user$ | async)?.profileImageUrl as profileImg" [src]="profileImg" /> -->
+      <img src="img/profileIcon.png" alt="Profile" width="80" style="border-radius: 50%;" />
+      <label for="photo-upload" class="edit-pen">
+        <input type="file" id="photo-upload" hidden />
+        <i class="bi bi-pencil-square"></i>
+      </label>
+    </div>
+    <div class="details">
+      <p><span style="font-weight: bold;">Name:</span> {{user.firstName}} {{user.lastName}}</p>
+      <p><span style="font-weight: bold;">Email:</span> {{user.email}}</p>
+      <p><span style="font-weight: bold;">Phone:</span>{{user.phone}}</p>
+    </div>
+  </div>
+
+
+  <!-- Button to Open Modal -->
+  <button class="btn btn-primary" (click)="openUserDetailsEditModel()">Edit Profile</button>
+  <div class="modal-backdrop" *ngIf="editProfileModal">
+    <div>
+      <form [formGroup]="profileForm" (ngSubmit)="saveProfile()">
+        <label for="firstName">First Name</label>
+        <input id="firstName" type="text" formControlName="firstName" class="form-control" required />
+        @if(profileForm.get('firstName')?.invalid && (profileForm.get('firstName')?.dirty ||
+        profileForm.get('firstName')?.touched)){
+        <div class="alert">
+          @if(profileForm.get('firstName')?.hasError('required')){
+          <div>First Name is required</div>
+          }
+          @if(profileForm.get('firstName')?.hasError('minlength')){
+          <div>First name should be at least 3 characters long</div>
+          }
+          @if(profileForm.get('firstName')?.hasError('maxlength')){
+          <div>First name can’t be longer than 50 characters.</div>
+          }
+          @if(profileForm.get('firstName')?.hasError('pattern')){
+          <div>First name should contain only alphabetic characters</div>
+          }
+
+        </div>
+        }
+        <label for="lastName">Last Name</label>
+        <input id="lastName" type="text" formControlName="lastName" class="form-control" required />
+        @if(profileForm.get('lastName')?.invalid && (profileForm.get('lastName')?.dirty ||
+        profileForm.get('lastName')?.touched)){
+        <div class="alert">
+          @if(profileForm.get('lastName')?.hasError('required')){
+          <div>Last name is required</div>
+          }
+          @if(profileForm.get('lastName')?.hasError('maxlength')){
+          <div>Last name can’t be longer than 50 characters.</div>
+          }
+          @if(profileForm.get('lastName')?.hasError('pattern')){
+          <div>Last name should contain only alphabetic characters</div>
+          }
+        </div>
+        }
+
+        <label for="email">Email</label>
+        <input id="email" type="email" formControlName="email" class="form-control" required />
+        @if(profileForm.get('email')?.invalid && (profileForm.get('email')?.dirty ||
+        profileForm.get('email')?.touched)){
+        <div class="alert">
+          @if(profileForm.get('email')?.hasError('required')){
+          <div>Email is required</div>
+          }
+          @if(profileForm.get('email')?.hasError('email')){
+          <div>Please enter a valid email address</div>
+          }
+          @if(profileForm.get('email')?.hasError('maxlength')){
+          <div>Email can’t be longer than 100 characters</div>
+          }
+        </div>
+        }
+        <label for="phone">Phone</label>
+        <input type="text" formControlName="phone" class="form-control" required>
+        @if(profileForm.get('phone')?.invalid && (profileForm.get('phone')?.dirty ||
+        profileForm.get('phone')?.touched)){
+        <div class="alert">
+          @if(profileForm.get('phone')?.hasError('required')){
+          <div>Phone number is required</div>
+          }
+          @if(profileForm.get('phone')?.hasError('pattern')){
+          <div>Please enter a valid phone number</div>
+          }
+          @if(profileForm.get('phone')?.hasError('minlength')){
+          <div>Phone number should be at least 10 digits</div>
+          }
+          @if(profileForm.get('phone')?.hasError('maxlength')){
+          <div>Phone number can’t be longer than 10 digits</div>
+          }
+        </div>
+        }
+
+        <div class="modal-actions">
+          <button type="submit" [disabled]="profileForm.invalid">Save</button>
+          <button type="button" (click)="closeModal()">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

@@ -2,10 +2,11 @@ import { Component,HostListener,OnInit,signal } from '@angular/core';
 import { RouterOutlet,RouterLink } from '@angular/router';
 import { LeftSidebar } from './left-sidebar/left-sidebar';
 import { Main } from './main/main';
+import { HeaderComponent } from './header/header.component';
 
 @Component({
   selector: 'app-layout',
-  imports: [LeftSidebar,Main],
+  imports: [LeftSidebar,Main, HeaderComponent],
   templateUrl: './layout.html',
   styleUrl: './layout.css'
 })

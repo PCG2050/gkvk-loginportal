@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { filter, map, Observable, tap } from 'rxjs';
 import { AdminService } from '../../core/services/admin.service';
 import { Admins } from '../../core/models/admins.model';
+import { UserService } from '../../core/services/user.service';
 
 @Component({
   selector: 'app-manageadmins',
@@ -21,12 +22,12 @@ export class ManageadminsComponent implements OnInit{
   Role:string = '';
   admins$ !:Observable<Admins[]>
 
-  private service = inject(AdminService);
+  private service = inject(UserService);
   AdminForm = new FormGroup({
-    firstName : new FormControl('',[Validators.required]),
-    lastName: new FormControl('',[Validators.required]),
-    phoneNumber : new FormControl('', [Validators.required]),
-    email : new FormControl('',[Validators.required]),
+    firstName : new FormControl('',[Validators.required, Validators.pattern('^[a-zA-Z]*$')]),
+    lastName: new FormControl('',[Validators.required, Validators.pattern('^[a-zA-Z]*$')]),
+    phoneNumber : new FormControl('', [Validators.required, Validators.pattern('^[0-9]*$'), Validators.minLength(10), Validators.maxLength(10)]),
+    email : new FormControl('',[Validators.required, Validators.email]),
     password: new FormControl('',[Validators.required])
   })
 onBackToDashBoard(){
@@ -84,6 +85,9 @@ addAdmins(){
     console.log(res);
   })
   console.log(adminData);
+  this.AdminForm.reset();
+}
+setResponseMessage(){
   
 }
 }

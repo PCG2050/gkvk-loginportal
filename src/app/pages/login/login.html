@@ -1,26 +1,84 @@
 <div class="parent">
-    <img src="https://i.postimg.cc/MTRK7Thf/bg-form.jpg" alt="Background Image">
-    <div class="container">
-        <form (ngSubmit)="onLogin()">
-            <h1>Super Admin Portal</h1>
-            <div class="input-box">
-                <input type="email" name="email" [(ngModel)]="loginObj.email" placeholder="Email" required>
-                <i class='bx bx-envelope'></i>
-            </div>
-            <div class="input-box">
-                <input type="password" name="password" [(ngModel)]="loginObj.password" placeholder="Password" required>
-                <i class='bx bx-lock-alt'></i>
-            </div>
-            <div class="remember">
-                <label>
-                    <input type="checkbox"> Remember me
-                </label>
-                <a href="#">Forgot password?</a>
-            </div>
-            <button class="btn" type="submit">Login</button>
-            <div *ngIf="loginError" style="color: #ff6b6b; margin-top: 12px; text-align: center;">
-                {{ loginError }}
-            </div>
-        </form>
-    </div>
+  <img src="https://i.postimg.cc/MTRK7Thf/bg-form.jpg" alt="Background Image" />
+
+  <div class="container">
+    <form #loginForm="ngForm" (ngSubmit)="onLogin()">
+      <h1>Super Admin Portal</h1>
+
+      <!-- Email -->
+      <div class="input-box">
+        <input
+          type="email"
+          name="email"
+          [(ngModel)]="loginObj.email"
+          placeholder="Email"
+          #email="ngModel"
+          required
+        />
+        @if (email.invalid && (email.dirty || email.touched)) {
+          <div class="alert">
+            @if (email.hasError('required')) {
+              <div>Email is required</div>
+            }
+            @if (email.hasError('email')) {
+              <div>Please enter a valid email</div>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Password -->
+      <div class="input-box">
+        <input
+          [type]="getPasswordFieldType()"
+          name="password"
+          [(ngModel)]="loginObj.password"
+          #password="ngModel"
+          [ngModelOptions]="{ updateOn: 'blur' }"
+          required
+          [pattern]="passwordPattern"
+          placeholder="Password"
+        />
+        <i
+          class="bi"
+          [ngClass]="getPasswordIcon()"
+          (click)="togglePasswordVisibility()"
+          style="cursor: pointer; margin-right: 20px;"
+        ></i>
+
+        @if (password.invalid && (password.dirty || password.touched)) {
+          <div class="alert">
+            @if (password.hasError('required')) {
+              <div>Password is required</div>
+            }
+            @if (password.hasError('pattern')) {
+              <div>
+                * At least one lowercase<br />
+                * At least one uppercase<br />
+                * At least one digit<br />
+                * At least one special character<br />
+                * Password must be between 8 to 16 characters
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Remember & Link -->
+      <div class="remember">
+        <label>
+          <input type="checkbox" (change)="onSelectRememberMe($event)" [(ngModel)]="rememberMe" /> Remember me
+        </label>
+        <a href="#">Forgot password?</a>
+      </div>
+
+      <!-- Submit -->
+      <button class="btn" type="submit">Login</button>
+
+      <!-- Error -->
+      <div *ngIf="loginError" style="color: #ff6b6b; margin-top: 12px; text-align: center;">
+        {{ loginError }}
+      </div>
+    </form>
+  </div>
 </div>

@@ -154,3 +154,9 @@ h1 {
     color: #008cff; /* Consistent hover color */
     text-decoration: underline;
 }
+.alert{
+    color: red;
+    padding: 0px;
+    margin: 0px;
+    margin-bottom: 20px;
+  }

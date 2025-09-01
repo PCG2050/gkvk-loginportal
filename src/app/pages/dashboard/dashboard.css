@@ -8,6 +8,7 @@
   border-radius: 16px;
   box-shadow: 0 4px 32px rgba(1, 42, 91, 0.08);
   font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+  box-shadow: 0 0 10px gray;
 }
 
 .header {
@@ -334,7 +335,8 @@
   align-items: flex-start; /* Align cards to the top if they have different heights */
   font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; /* Professional font stack */
   background-color: #f8f9fa; /* Light background for the dashboard page */
-  min-height: calc(100vh - 60px); /* Adjust based on your header/footer height */
+  height: auto;
+  min-height: calc(80vh - 60px); /* Adjust based on your header/footer height */
 }
 /* Admin Dashboard Container and Title */
 .dashboard-container {
@@ -351,7 +353,14 @@
   color: #2c3e50;
   letter-spacing: 1px;
 }
-
+/* .loading-div{
+  background: gray;
+} */
+button:disabled {
+  pointer-events: none !important;
+  opacity: 0.5 !important;
+  cursor: not-allowed !important;
+}
 
 /* --- Individual Card Styling --- */
 .dashboard-card {
@@ -450,6 +459,11 @@
     text-decoration: underline; /* Add underline on hover for clearer interaction */
   }
 }
+ .alert{
+    color: red;
+    padding: 0px;
+    margin: 0px;
+  }
 
 /* --- Responsive Adjustments --- */
 @media (max-width: 992px) {
@@ -470,7 +484,5 @@
   .card-number {
     font-size: 3rem; /* Slightly smaller number on small screens */
   }
-  .alert{
-    color: red;
-  }
+ 
 }

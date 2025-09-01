@@ -6,6 +6,10 @@
     "outDir": "./out-tsc/app",
     "types": []
   },
+    "angularCompilerOptions": {
+    "enableControlFlow": true,
+    "enableTemplateStatements": true
+  },
   "files": [
     "src/main.ts"
   ],

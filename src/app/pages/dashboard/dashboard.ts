@@ -1,20 +1,22 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ViewChild } from '@angular/core';
 import { InstituteThemeService, Institute } from '../../shared/institute-theme.service';
-import { FormsModule } from '@angular/forms';
+import { FormControl, FormGroup, FormsModule, NgForm, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
-import { catchError, map, Observable, of, tap } from 'rxjs';
+import { catchError, from, map, Observable, of, tap, throwError } from 'rxjs';
 import { State } from '../../core/models/states.model';
 import { LocationsService } from '../../core/services/locations.service';
 import { Districts } from '../../core/models/districts.models';
-import { DashboardService } from '../../core/services/dashboard.service';
 import { Units } from '../../core/models/units.model';
 import { InstituteService } from '../../core/services/institute.service';
 import { InstituteData } from '../../core/models/institute.modal';
 import { UnitsService } from '../../core/services/units.service';
+import { BrowserModule } from '@angular/platform-browser';
+import { LoadingSpinnerComponent } from '../../shared/loading-spinner/loading-spinner.component';
+import { UserService } from '../../core/services/user.service';
 
 @Component({
-  imports: [FormsModule, CommonModule, RouterModule],
+  imports: [FormsModule, CommonModule, RouterModule, LoadingSpinnerComponent, ReactiveFormsModule],
   selector: 'app-dashboard',
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css'
@@ -25,6 +27,7 @@ export class Dashboard {
   private service = inject(LocationsService);
   private unitService = inject(UnitsService);
   private instituteServices = inject(InstituteService);
+  private userService = inject(UserService)
   units$!: Observable<Units[]>;
   unitCount: number = 0;
   Role: string = '';
@@ -32,7 +35,12 @@ export class Dashboard {
   selectedDistrictId: string | undefined = '';
   institutes: any[] = [];
   districtList:Districts[]= [];
-  instituteId: number | undefined;
+  organizationId:any;
+
+  //unitHead dashboard data
+  unitLoc:any[]=[];
+  selectedUnitLoc:any[]=[];
+  selectedState:any[]=[];
   // Modal states
   isModalOpen = false;
   isEditMode = false;
@@ -40,6 +48,9 @@ export class Dashboard {
   // Feedback message
   feedbackMessage: string = '';
   feedbackMessageType: 'success' | 'error' | 'info' = 'info';
+
+  //loader
+  isLoading:boolean = false;
 
   // Form model
   form: {
@@ -60,6 +71,15 @@ export class Dashboard {
     };
   } = this.getEmptyForm();
 
+
+  //unit Head unit and location form 
+  unitLocForm = new FormGroup({
+    unit : new FormControl(''),
+     state : new FormControl(''),
+    district : new FormControl(''),
+   
+  })
+
   // Used for editing
   instituteToEdit: Institute | null = null;
 
@@ -70,32 +90,36 @@ export class Dashboard {
   states$!: Observable<State[]>
   //specific state districts
   districts$!: Observable<Districts[]>
-  IsSuperAdminLoggedIn: boolean = false;
-  IsAdminLoggedIn: boolean = false;
+  isSuperAdminLoggedIn: boolean = false;
+  isUnitHeadLoggedIn : boolean = false;
+  isAdminLoggedIn: boolean = false;
   constructor(private instituteService: InstituteThemeService) { }
+   @ViewChild('instituteForm') instituteForm!: NgForm;
 
   ngOnInit(): void {
-    this.loadInstitutes();
+    // this.loadInstitutes();
     this.loadStates();
     this.onLoadUnits();
     this.loadInstitutes();
     this.onLoadInsititutes();
+    this.getUnitAndLoc();
     const userRole = localStorage.getItem('role');
     console.log(userRole);
     if (userRole === 'SUPERADMIN') {
       this.Role = 'Super Admin';
-      this.IsSuperAdminLoggedIn = true;
+      this.isSuperAdminLoggedIn = true;
     }
     else if (userRole === 'ADMIN') {
       this.Role = 'Admin';
-      this.IsAdminLoggedIn = true;
+      this.isAdminLoggedIn = true;
     }
     else if (userRole === 'UNITHEAD') {
-      this.Role = 'Unit-Head'
+      this.Role = 'Unit-Head';
+      this.isUnitHeadLoggedIn = true;
     }
   }
 
-  private getEmptyForm() {
+  public getEmptyForm() {
     return {
       name: '',
       logoUrl: '',
@@ -124,6 +148,7 @@ export class Dashboard {
     this.isModalOpen = true;
     this.isEditMode = false;
     this.instituteToEdit = null;
+
     this.form = this.getEmptyForm();
   }
 
@@ -133,7 +158,7 @@ export class Dashboard {
       console.log('Button value:', button.getAttribute('value'));
       const id = Number(button.getAttribute('value'));
       console.log('Parsed id:', id);
-      this.instituteId = id
+      this.organizationId = id
     }
     // console.log(institute);
     
@@ -189,40 +214,36 @@ export class Dashboard {
     
   }
 
-  saveInstitute(): void {
-
-    if (!this.form.name || !this.form.storageInfo.storageContainerName || !this.form.storageInfo.storageContainerNamePublic) {
-      alert('Please fill all required fields');
-      return;
-    }
-
-    if (this.isEditMode && this.instituteToEdit) {
+  saveInstitute(form:NgForm) {
+    this.isLoading = true;
+    if (this.isEditMode) {
       const updatedInstitute = {
-        id: this.instituteId,
+        id: this.organizationId,
         name: this.form.name,
-        districtName: this.form.address.district,
+        districtId: this.form.address.district,
         logoUrl: this.form.logoUrl,
         storageContainerName: this.form.storageInfo.storageContainerName,
-        storageContainerNamePublic: this.form.storageInfo.storageContainerNamePublic
+        storageContainerNamePublic: this.form.storageInfo.storageContainerNamePublic,
+        pinCode:this.form.address.pincode
       }
-      // communicationChannels: {
-      //   emailEnabled: this.form.communicationChannels.emailEnabled,
-      //   phoneEnabled: this.form.communicationChannels.phoneEnabled
-      // },
-      // storageInfo: {
-      //   storageContainerName: this.form.storageInfo.storageContainerName,
-      //   storageContainerNamePublic: this.form.storageInfo.storageContainerNamePublic
-      // },
-      // address: {
-      //   state: this.form.address.state,
-      //   district: this.form.address.district,
-      //   pincode: this.form.address.pincode
-      // }
-      this.instituteServices.updateIntitutes(updatedInstitute).subscribe(res=>{
+      this.instituteServices.updateInstitutes(updatedInstitute,this.organizationId).subscribe({
+       next:(res:any)=>{
+         alert("Institute Updated successfully");
         console.log(res);
-        
+        this.onLoadInsititutes();
+       },
+       error:(err:any)=> {
+       if (err.status === 404) {
+        alert("Institute not found)");
+      } else if (err.status === 500) {
+        alert("Server error. Please try again later");
+      } else if (err.error?.message) {
+        alert("Error: " + err.error.message);
+      } else {
+        alert("An unexpected error occurred, Failed to update Institute");
+      }
+       },
       })
-      // this.instituteService.updateInstitute(this.instituteToEdit.id, updatedInstitute);
 
     } else {
       const newInstitute = {
@@ -230,40 +251,29 @@ export class Dashboard {
         districtId: this.form.address.district,
         pincode: this.form.address.pincode,
         storageContainerName: this.form.storageInfo.storageContainerName
-        // id: 0, // will be set by service
-        // name: this.form.name,
-        // logoUrl: this.form.logoUrl,
-        // communicationChannels: {
-        //   emailEnabled: this.form.communicationChannels.emailEnabled,
-        //   phoneEnabled: this.form.communicationChannels.phoneEnabled
-        // },
-        // storageInfo: {
-        //   storageContainerName: this.form.storageInfo.storageContainerName,
-        //   storageContainerNamePublic: this.form.storageInfo.storageContainerNamePublic
-        // },
 
-        // address: {
-        //   state: this.selectedStateName,
-        //   district: this.form.address.district,
-        //   pincode: this.form.address.pincode
-        // }
       };
       console.log(newInstitute);
-
       this.instituteServices.addInstitute(newInstitute).subscribe({
         next: (response) => {
+          alert("Added institute Successfully")
           console.log('Institute added successfully:', response);
+          this.isLoading = false;
+          this.onLoadInsititutes();
         },
         error: (err) => {
+          alert("Failed to add institute, Please try again later")
           console.error('Error adding institute:', err);
+          this.isLoading = false;
         }
       });
-      // this.instituteService.addInstitute(newInstitute);
     }
-
-
-    this.closeModal();
+    this.isModalOpen = false;
+    form.reset();
     this.loadInstitutes();
+  }
+  resetForm(form:NgForm){
+    form.reset();
   }
   onLogoSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
@@ -277,23 +287,47 @@ export class Dashboard {
     }
   }
 
-  closeModal(): void {
+  closeModal(form:NgForm): void {
+    form.reset()
     this.isModalOpen = false;
     this.instituteToEdit = null;
     this.form = this.getEmptyForm();
   }
 
-  confirmDelete(institute: Institute): void {
+  confirmDelete(institute: Institute, event:Event): void {
     this.isDeleteConfirmOpen = true;
     this.instituteToDelete = institute;
+     const button = (event.target as HTMLElement).closest('button');
+    if (button) {
+      console.log('Button value:', button.getAttribute('value'));
+      const id = Number(button.getAttribute('value'));
+      console.log('Parsed id:', id);
+      this.organizationId = id
+    }
   }
 
   deleteInstitute(): void {
-    if (this.instituteToDelete) {
-      this.instituteService.deleteInstitute(this.instituteToDelete.id);
-      this.loadInstitutes();
-    }
-    this.cancelDelete();
+    this.isLoading = true;
+    this.isDeleteConfirmOpen = false;
+    this.instituteServices.deleteInstituteById(this.organizationId).pipe(
+      tap(res=>{
+      }),
+      catchError(error=>{
+        return throwError(()=>error)
+      })
+    ).subscribe({
+      next:(res:any)=>{
+        this.isLoading = false;
+       alert("Deleted institute Successfully")
+       this.onLoadInsititutes();
+       
+      },
+      error:(err:any)=>{
+        this.isLoading = false;
+        alert("Failed to delete institute, Please try again later")
+      }
+    })
+
   }
 
   cancelDelete(): void {
@@ -364,9 +398,81 @@ export class Dashboard {
     console.log(distId);
   }
   onLoadInsititutes() {
-    this.instituteServices.getInstitutes().subscribe((res: any) => {
-      this.institutes = res.items || [];
-      console.log(this.institutes);
+    this.isLoading = true;
+    this.instituteServices.getInstitutes().subscribe( {
+      next:(res:any)=>{
+        this.isLoading = false;
+       this.institutes = res.items || [];
+       console.log(this.institutes);
+      },
+      error:(err:any)=>{
+        this.isLoading = false
+        // alert("Failed to load Institutes"+ JSON.stringify(err.status),)
+      }
     });
   }
+
+
+  //get api to fetch specific unitHead unit and location
+  getUnitAndLoc(){
+    localStorage.getItem('userId')
+    const unitHeadId = Number(localStorage.getItem('userId'));
+    console.log(unitHeadId);
+    
+    this.unitService.getSpecificUnitHeadUnitLoc(unitHeadId).subscribe({
+      next:(res:any)=>{
+        this.unitLoc = res;
+        console.log(this.unitLoc);
+        
+      }
+    })
+  }
+
+  OnUnitChange(){
+    const unitId = this.unitLocForm.get('unit')?.value;
+    console.log(unitId);
+     const selectedUnit = this.unitLoc.find(u => u.unitId == unitId);
+     console.log(selectedUnit);
+     localStorage.setItem('unitId', unitId?.toString() ??'');
+     this.selectedUnitLoc = selectedUnit.locations;
+     console.log(this.selectedUnitLoc);
+     if (selectedUnit && selectedUnit.locations) {
+    const uniqueStates = selectedUnit.locations.filter(
+      (loc:any, index:any, self:any) =>
+        index === self.findIndex(
+          (l:any)=> l.stateName === loc.stateName && l.stateId === loc.stateId
+        )
+    );
+    console.log(uniqueStates);
+    
+    
+
+    this.selectedState = uniqueStates;
+    console.log('Unique states:', this.selectedUnitLoc);
+  } else {
+    this.selectedUnitLoc = [];
+  }
+  }
+  onStateChange(){
+    const stateId = this.unitLocForm.get('state')?.value;
+  }
+  onDistrictChange(){
+    const stateId = Number(this.unitLocForm.get('state')?.value);
+    // localStorage.setItem('stateId',stateId.toString());
+    const districtId = Number(this.unitLocForm.get('district')?.value);
+    localStorage.setItem('districtId',districtId.toString());
+     const selectedUnit =this.selectedUnitLoc.find(unit => 
+     unit.stateId === stateId && unit.districtId === districtId)
+  
+  console.log(selectedUnit);
+   if(selectedUnit){
+    const unitLocId = selectedUnit.unitLocationId
+    console.log(unitLocId);
+   }
+   else{
+    console.log('Cannot find specific unit');
+    
+   }
+  }
+  
 }

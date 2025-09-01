@@ -6,31 +6,69 @@
     {{ feedbackMessage }}
   </div>
 
-
+  <div>
+    <div class="errorResponse" *ngIf="errorMsg">
+      <p class="closeMsg" (click)="closeResponse()"><span>&times;</span></p>
+    <p class="responseText">{{errorText}}</p>
+  </div>
+  <div class="successResponse" *ngIf="successMsg">
+    <p class="closeMsg" (click)="closeResponse()"><span>&times;</span></p>
+    <p (click)="closeResponse()" class="responseText">{{successText}}</p>
+  </div>
+  </div>
   <!-- Add Unit Form -->
-  <form class="add-trainer-form" (ngSubmit)="addUnit()" [formGroup]="unitOrganizationForm">
+  <form class="add-trainer-form" (ngSubmit)="addUnitOrganization()" [formGroup]="unitOrganizationForm">
     <label for="newUnitName" class="visually-hidden">Unit Name</label>
     <select
       id="newUnitName"
       class="dropdown"
       formControlName = 'newUnitName'
       required
-      *ngIf = "units$ | async as units"
     >
-      <option value="">Select Unit Name</option>
-      <option *ngFor="let unit of units" [value]="unit.id">{{ unit.name }}</option>
+      <option value="" >Select Unit Name</option>
+      <option *ngFor="let unit of units$ | async " [value]="unit.id">{{ unit.name }}</option>
     </select>
+      @if (unitOrganizationForm.get('newUnitName')?.invalid && (unitOrganizationForm.get('newUnitName')?.dirty || unitOrganizationForm.get('newUnitName')?.touched)) {
+    <div class="alert">
+      @if (unitOrganizationForm.get('newUnitName')?.hasError('required')) {
+        <div>Unit Name is required.</div>
+      }
+      <!-- @if (unitOrganizationForm.get('newUnitName')?.hasError('pattern')) {
+        <div>Password must be at least 6 characters.</div>
+      } -->
+    </div>
+  }
     <label for="newUnitState" class="visually-hidden">State</label>
-    <select id="newUnitState" class="dropdown"  formControlName="newUnitState" required (change)="onStateSelect($event)" *ngIf="states$ | async as states">
+    <select id="newUnitState" class="dropdown"  formControlName="newUnitState" required (change)="onStateSelect($event)" >
       <option value="">Select State</option>
-      <option *ngFor="let state of states" [value]="state.id">{{state.name}}</option>
+      <option *ngFor="let state of states$ | async" [value]="state.id">{{state.name}}</option>
     </select>
+    @if (unitOrganizationForm.get('newUnitState')?.invalid && (unitOrganizationForm.get('newUnitState')?.dirty || unitOrganizationForm.get('newUnitState')?.touched)) {
+    <div class="alert">
+      @if (unitOrganizationForm.get('newUnitState')?.hasError('required')) {
+        <div>Unit state is required.</div>
+      }
+      <!-- @if (unitOrganizationForm.get('newUnitState')?.hasError('pattern')) {
+        <div>Password must be at least 6 characters.</div>
+      } -->
+    </div>
+  }
     <label for="newUnitDistrict" class="visually-hidden">District</label>
     <select id="newUnitDistrict" class="dropdown"  formControlName="newUnitDistrict" required [disabled]="!newUnitState">
       <option value="">Select District</option>
       <option *ngFor="let district of districts$ | async" [value]="district.id">{{ district.name }}</option>
-    </select>
-    <button type="submit" [disabled]="!unitOrganizationForm" class="add-btn" (click)="addUnitOrganization()">Add Unit</button>
+    </select>.
+    @if (unitOrganizationForm.get('newUnitDistrict')?.invalid && (unitOrganizationForm.get('newUnitDistrict')?.dirty || unitOrganizationForm.get('newUnitDistrict')?.touched)) {
+    <div class="alert">
+      @if (unitOrganizationForm.get('newUnitDistrict')?.hasError('required')) {
+        <div>Unit district is required.</div>
+      }
+      <!-- @if (unitOrganizationForm.get('newUnitState')?.hasError('pattern')) {
+        <div>Password must be at least 6 characters.</div>
+      } -->
+    </div>
+  }
+      <button type="submit" [disabled]="unitOrganizationForm.invalid" class="add-btn" >Add Unit</button>
   </form>
 
 
@@ -40,11 +78,11 @@
     <label for="state-select" class="visually-hidden">State</label>
     <select id="state-select"
             class="dropdown"
-            [(ngModel)]="selectedState"
             name="state"
             (change)="onStateChange($event)"
+            [(ngModel)]="itemFilter.stateId"
             *ngIf="states$ | async as states">
-      <option value="">State</option>
+      <option value="">Select State</option>
       <option *ngFor="let state of states" [value]="state.id">
         {{ state.name }}
       </option>
@@ -53,19 +91,22 @@
     <label for="district-select" class="visually-hidden">District</label>
     <select id="district-select"
             class="dropdown"
-            [(ngModel)]="selectedDistrict"
             name="district"
-            [disabled]="!selectedState">
-      <option value="">District</option>
+            [(ngModel)]="itemFilter.districtId"
+             [disabled]="!itemFilter.stateId"
+           >
+      <option value="">Select District</option>
       <option *ngFor="let district of districts$ | async" [value]="district.id">
         {{ district.name }}
       </option>
     </select>
   </div>
-  <button type="submit" class="search-btn">Search</button>
+  <button type="submit" class="search-btn">Filter</button>
   <button type="button" class="reset-btn" (click)="onReset()">Reset</button>
 </form>
-
+<div *ngIf="isLoading">
+     <app-loading-spinner  style="text-align:center ;"></app-loading-spinner>
+  </div>
 
   <div class="table-container">
     <table>
@@ -78,29 +119,30 @@
           <th>Actions</th>
         </tr>
       </thead>
-      <tbody *ngIf = "unitLocations$ | async as unitLocations">
-         <ng-container *ngFor="let unit of unitLocations">
-        <tr *ngFor="let loc of unit.location; let i = index">
-          <td>{{ i + 1 }}</td>
-          <td>{{ unit.unitName }}</td>
-          <td>{{ loc.districtName }}</td>
-          <td>{{ loc.stateName }}</td>          
-          <td>
-            <button
-                class="reassign-btn"
-                (click)="onOpenUnitEditModal(unit, loc)"
-              >
-                <i class="fa fa-edit"></i>
-              </button>
-            <button class="delete-btn" (click)="confirmDelete(unit)" (click)="onCloseEditModel()"><i class="fa fa-trash"></i></button>
-          </td>
-        </tr>
+      <tbody>
+         <ng-container>
+<tr *ngFor="let item of (unitLocations | filterBy: itemFilter | paginate: { itemsPerPage: 5, currentPage: p }); let i = index"> 
+   <td>{{ (p - 1) * 5 + i + 1  }}</td>
+  <td>{{ item.unitName }}</td>
+  <td>{{ item.districtName }}</td>
+  <td>{{ item.stateName }}</td>
+  <td>
+    <button class="reassign-btn" (click)="onOpenUnitEditModal(item)">
+      <i class="fa fa-edit"></i>
+    </button>
+    <button class="delete-btn" (click)="confirmDelete(item)">
+      <i class="fa fa-trash"></i>
+    </button>
+  </td>
+</tr>
+
         </ng-container>
-        <tr *ngIf="filteredUnits.length === 0">
+        <!-- <tr *ngIf="filteredUnits.length === 0">
           <td colspan="5" class="no-data-message">No units found matching the criteria.</td>
-        </tr>
+        </tr> -->
       </tbody>
-    </table>    
+    </table>
+     <pagination-controls (pageChange)="onPageChange($event)"></pagination-controls>
   </div> 
   <!-- Delete Confirmation Modal -->
   <div class="modal-backdrop" *ngIf="showDeleteConfirm">
@@ -108,7 +150,7 @@
       <h3>Delete Unit</h3>
       <p>Are you sure you want to delete unit <strong>{{ unitToDelete?.name }}</strong>?</p>
       <div class="modal-actions">
-        <button (click)="deleteUnit()">Yes, Delete</button>
+        <button (click)="deleteOrganizationUnit()" class="deleteBtn">Yes, Delete</button>
         <button (click)="cancelDelete()">Cancel</button>
       </div>
     </div>
@@ -117,29 +159,65 @@
  <!-- popup form to edit units -->
 <div class="modal-backdrop" *ngIf="editUnitModal">
   <div class="modal">
-    <h3>Edit Unit Details</h3>
-    <form [formGroup]="editUnitForm" >
+    <div style="text-align: end;">
+          <button type="button" class="close" (click)="onCloseEditModel()"> <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+         
+    <h3>Edit Unit</h3>
+    <form [formGroup]="editUnitForm" (ngSubmit)="saveUpdateOrgUnit()" >
 
       <!-- Unit dropdown -->
-      <label for="editUnitId" class="visually-hidden">Unit</label>
-      <select id="editUnitId" formControlName="unitId" class="dropdown" *ngIf="units$ | async as units" required>
+      <label for="editUnitId">Unit<span class="asterisk">*</span></label>
+      <select id="editUnitId" formControlName="unitId" class="dropdown" required>
         <option value="">Select Unit</option>
-        <option *ngFor="let unit of units" [value]="unit.id">{{ unit.name }}</option>
+        <option *ngFor="let unit of units$ |async" [ngValue]="unit.id">{{ unit.name }}</option>
       </select>
-
+       @if (editUnitForm.get('newUnitName')?.invalid && (editUnitForm.get('newUnitName')?.dirty || editUnitForm.get('newUnitName')?.touched)) {
+    <div class="alert">
+      @if (editUnitForm.get('newUnitName')?.hasError('required')) {
+        <div>Unit Name is required.</div>
+      }
+      <!-- @if (unitOrganizationForm.get('newUnitName')?.hasError('pattern')) {
+        <div>Password must be at least 6 characters.</div>
+      } -->
+    </div>
+  }
       <!-- State dropdown -->
-      <label for="editStateId" class="visually-hidden">State</label>
-      <select id="editStateId" formControlName="stateId" class="dropdown" required (change)="onStateChange($event)" *ngIf="states$ | async as states">
+      <label for="editStateId" >State<span class="asterisk">*</span></label>
+      <select id="editStateId" formControlName="stateId" class="dropdown" required (change)="onStateChange($event)" [disabled]="!editUnitForm.get('stateId')?.value" >
         <option value="">Select State</option>
-        <option *ngFor="let state of states" [value]="state.id">{{ state.name }}</option>
+        <option *ngFor="let state of states$ | async" [value]="state.id">{{ state.name }}</option>
       </select>
+      @if (editUnitForm.get('newUnitState')?.invalid && (editUnitForm.get('newUnitState')?.dirty || editUnitForm.get('newUnitState')?.touched)) {
+    <div class="alert">
+      @if (editUnitForm.get('newUnitState')?.hasError('required')) {
+        <div>Unit state is required.</div>
+      }
+      <!-- @if (unitOrganizationForm.get('newUnitState')?.hasError('pattern')) {
+        <div>Password must be at least 6 characters.</div>
+      } -->
+    </div>
+  }
 
       <!-- District dropdown -->
-      <label for="editDistrictId" class="visually-hidden">District</label>
-      <select id="editDistrictId" formControlName="districtId" class="dropdown" required [disabled]="!editUnitForm.get('stateId')?.value" *ngIf="districts$ | async as districts">
+      <label for="editDistrictId" >District<span class="asterisk">*</span></label>
+      <select id="editDistrictId" formControlName="districtId" class="dropdown" required>
         <option value="">Select District</option>
-        <option *ngFor="let district of districts" [value]="district.id">{{ district.name }}</option>
+        <ng-container>
+        <option *ngFor="let district of districts$ | async" [value]="district.id">{{ district.name }}</option>
+        </ng-container>
       </select>
+      @if (editUnitForm.get('newUnitDistrict')?.invalid && (editUnitForm.get('newUnitDistrict')?.dirty || editUnitForm.get('newUnitDistrict')?.touched)) {
+    <div class="alert">
+      @if (editUnitForm.get('newUnitDistrict')?.hasError('required')) {
+        <div>Unit district is required.</div>
+      }
+      <!-- @if (unitOrganizationForm.get('newUnitState')?.hasError('pattern')) {
+        <div>Password must be at least 6 characters.</div>
+      } -->
+    </div>
+  }
 
       <div class="modal-actions">
         <button type="submit" class="add-btn" [disabled]="editUnitForm.invalid">Save</button>

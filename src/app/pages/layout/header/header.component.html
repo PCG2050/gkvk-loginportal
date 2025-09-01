@@ -1,0 +1,48 @@
+<div class="profile-container">
+  <div class="heading">
+    <p>Table Management Data Table</p>
+  </div>
+  <div class="dropdown">
+  <!-- Profile image acts as the toggle (no arrow) -->
+  <a
+    href="#"
+    role="button"
+    data-bs-toggle="dropdown"
+    aria-expanded="false"
+    id="dropdownMenuLink"
+    class="profileImg"
+  >
+    <img src="img/profileIcon.png" alt="Profile" class="rounded-circle" width="40" height="40" />
+  </a>
+
+  <!-- Dropdown menu -->
+  <ul class="dropdown-div dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuLink">
+    @for (item of items; track $index) {
+      @if (item.roles.includes(currentUser)) {
+        <li>
+          <a
+            class="dropdown-item"
+            [routerLink]="item.routeLink"
+            routerLinkActive="active"
+            [routerLinkActiveOptions]="{ exact: true }"
+            (click)="item.routeLink === 'signout' && onSignOutClick($event)"
+          >
+            {{ item.label }}
+          </a>
+        </li>
+      }
+    }
+  </ul>
+</div>
+
+<div class="modal-backdrop" *ngIf="showSignOutConfirm">
+    <div class="modal">
+        <h3>Sign Out</h3>
+        <p>Are you sure you want to sign out?</p>
+        <div class="modal-actions">
+            <button (click)="confirmSignOut()" class="signOutBtn">Yes, Sign Out</button>
+            <button (click)="cancelSignOut()" class="cancelBtn">Cancel</button>
+        </div>
+    </div>
+</div>
+</div>

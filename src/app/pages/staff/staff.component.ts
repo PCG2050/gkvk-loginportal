@@ -1,6 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { Component, inject } from '@angular/core';
+import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { UserService } from '../../core/services/user.service';
+import { UnitsService } from '../../core/services/units.service';
 export interface Staff {
   email: string;
   firstName: string;
@@ -16,47 +18,42 @@ export interface Staff {
 }
 @Component({
   selector: 'app-staff',
-  imports: [FormsModule, CommonModule],
+  imports: [FormsModule, CommonModule, ReactiveFormsModule],
   templateUrl: './staff.component.html',
   styleUrl: './staff.component.css'
 })
 export class StaffComponent {
 // Dropdown data
-  genders = ['Male', 'Female', 'Other'];
-  employmentTypes = ['Permanent', 'Temporary'];
-  units = [
-    'Farmer Training Institute',
-    'Staff Training Institute',
-    'Farmer Information Unit',
-    'Institute of Baking Technology and Value Addition',
-    'Agricultural Technology Information Centre',
-    'Distance Education Unit',
-    'Agricultural Sciences Museum',
-    'National Agricultural Extension Project',
-    'Extension Education Units',
-    'Krishi Vigyan Kendras'
-  ];
 
+private userService = inject(UserService);
+private unitService = inject(UnitsService);
+
+  addStaffForm = new FormGroup({
+    staffEmail : new FormControl('',[Validators.required, Validators.email]),
+  staffFirstName : new FormControl('',[Validators.required, Validators.maxLength(50), Validators.minLength(3)]) ,
+  staffLastName : new FormControl('',[Validators.required, Validators.maxLength(50)]),
+  staffPassword : new FormControl('',[Validators.required, Validators.pattern('^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,16}$')]),
+  staffPhone: new FormControl('',[Validators.required, Validators.minLength(10), Validators.maxLength(10),Validators.pattern('^[0-9]*$')]),
+  staffGender : new FormControl('',[Validators.required]),
+  // staffDesignation : new FormControl('',[Validators.required]),
+  staffEmploymentType : new FormControl('',[Validators.required]),
+  staffDOB : new FormControl('',[Validators.required]),
+  staffDOJ : new FormControl('',[Validators.required]),
+  staffQualification : new FormControl('',[Validators.required])
+  })
   // Staff data
   staffList: Staff[] = [];
   filteredStaff: Staff[] = [];
+  staff:any[]=[];
 
-  // Add staff modal state and fields
+  // Add staff modal state
   showAddStaffModal = false;
-  staffEmail = '';
-  staffFirstName = '';
-  staffLastName = '';
-  staffPassword = '';
-  staffGender = '';
-  staffDesignation = '';
-  staffEmploymentType = '';
-  staffDOB = '';
-  staffDOJ = '';
-  staffQualification = '';
-
-  // Edit staff modal state and fields
+  // Edit staff modal state
   showEditStaffModal = false;
-  editStaffData: Staff = this.getEmptyStaff();
+
+  staffData:any[]=[];
+
+  showDeleteConfirm:boolean = false;
 
   // Filter fields
   filterDesignation = '';
@@ -66,123 +63,139 @@ export class StaffComponent {
   feedbackMessage: string | null = null;
 
   ngOnInit(): void {
-    // Example data
-    this.staffList = [
-      {
-        email: 'staff1@example.com',
-        firstName: 'John',
-        lastName: 'Doe',
-        password: '',
-        gender: 'Male',
-        designation: 'Manager',
-        employmentType: 'Permanent',
-        dob: '1990-01-01',
-        doj: '2020-01-01',
-        qualification: 'MSc',
-        active: true
-      },
-      {
-        email: 'staff2@example.com',
-        firstName: 'Jane',
-        lastName: 'Smith',
-        password: '',
-        gender: 'Female',
-        designation: 'Assistant',
-        employmentType: 'Temporary',
-        dob: '1992-05-10',
-        doj: '2021-06-15',
-        qualification: 'BSc',
-        active: false
-      }
-    ];
-    this.filteredStaff = [...this.staffList];
+    const user = localStorage.getItem('authtoken');
+    console.log(user);
+    
+    this.getStaff();
   }
+  
 
   // Add new staff
   addStaff() {
-    if (
-      this.staffEmail &&
-      this.staffFirstName &&
-      this.staffLastName &&
-      this.staffPassword &&
-      this.staffGender &&
-      this.staffDesignation &&
-      this.staffEmploymentType &&
-      this.staffDOB &&
-      this.staffDOJ &&
-      this.staffQualification
-    ) {
-      if (this.staffList.some(s => s.email.toLowerCase() === this.staffEmail.toLowerCase())) {
-        this.setFeedbackMessage('Staff with this email already exists.', 'error');
-        return;
-      }
-      this.staffList.push({
-        email: this.staffEmail,
-        firstName: this.staffFirstName,
-        lastName: this.staffLastName,
-        password: this.staffPassword,
-        gender: this.staffGender,
-        designation: this.staffDesignation,
-        employmentType: this.staffEmploymentType,
-        dob: this.staffDOB,
-        doj: this.staffDOJ,
-        qualification: this.staffQualification,
-        active: true
+    const Id = localStorage.getItem('organizationId');
+    const orgId = Number(Id)
+    const staffDetails ={
+      firstName:this.addStaffForm.controls.staffFirstName.value,
+      lastName:this.addStaffForm.controls.staffLastName.value,
+      email:this.addStaffForm.controls.staffEmail.value,
+      password:this.addStaffForm.controls.staffPassword.value,
+      phone:this.addStaffForm.controls.staffPhone.value,
+      role:1,
+      isDeactivated:true,
+      organization:orgId,
+      qualification:this.addStaffForm.controls.staffQualification.value,
+      dateOfJoining:this.addStaffForm.controls.staffDOJ.value,
+      dateOfBirth:this.addStaffForm.controls.staffDOB.value,
+      gender:Number(this.addStaffForm.controls.staffGender.value),
+      employmentType:Number(this.addStaffForm.controls.staffEmploymentType.value),
+    }
+    this.userService.addAdmin(orgId, staffDetails).subscribe({
+      next:(res:any)=>{
+        alert("Successfully added Staff Details")
+      },
+      error:(err:any)=>{
+        alert("Failed to add staff Details")
+      },
+    })
+    console.log(staffDetails);
+  }
+
+  getStaff(){
+    this.userService.getStaff().subscribe({
+      next:(res:any)=>{
+        console.log(res);
+        this.staff = res;
+     this.staff.forEach((staffMember: any) => {
+        const locations = staffMember.unitLocationDetails || [];
+        const unitId = Number(localStorage.getItem('unitId'));
+        const districtId = Number(localStorage.getItem('districtId'))
+
+        staffMember.isMapped = locations.some((loc: any) => 
+          loc.unitId === unitId && loc.districtId === districtId
+        );
       });
-      this.onSearch();
-      this.resetAddStaffForm();
-      this.showAddStaffModal = false;
-      this.setFeedbackMessage('Staff added successfully!', 'success');
-    } else {
-      this.setFeedbackMessage('Please fill all fields.', 'error');
-    }
+      console.log(this.staff);
+      }
+    })
   }
 
-    // Search by email
-  searchEmail: string = '';
-  // Search by email handler
-  onSearchByEmail() {
-    const email = this.searchEmail.trim().toLowerCase();
-    if (email) {
-      this.filteredStaff = this.staffList.filter(staff => staff.email.toLowerCase().includes(email));
-      this.setFeedbackMessage(`Found ${this.filteredStaff.length} staff.`, 'info');
-    } else {
-      this.filteredStaff = [...this.staffList];
-    }
-  };
-
-  // Edit staff
-  editStaff(staff: Staff) {
-    this.editStaffData = { ...staff };
-    this.showEditStaffModal = true;
+  editStaff(staff:any){
+        this.showAddStaffModal = true;
+        this.addStaffForm.patchValue({
+          staffEmail : staff.email,
+          staffFirstName: staff.firstName,
+          staffLastName : staff.lastName,
+          staffPhone :staff.phone,
+          staffEmploymentType : staff.employmentType,
+          staffQualification :staff.qualification,
+          staffGender : staff.gender,
+          staffDOB : staff.dob,
+          staffDOJ : staff.doj
+        })
   }
 
-  saveEditedStaff() {
-    const idx = this.staffList.findIndex(s => s.email === this.editStaffData.email);
-    if (idx !== -1) {
-      this.staffList[idx] = { ...this.editStaffData };
-      this.onSearch();
-      this.showEditStaffModal = false;
-      this.setFeedbackMessage('Staff details updated.', 'success');
-    }
+  confirmDelete(item:any){
+    this.showDeleteConfirm = true;
+    console.log(item);
+    this.staffData = item;
   }
+
+  deleteStaff(){    
+    // this.userService.deleteStaff()
+  }
+  cancelDelete(){
+    this.showDeleteConfirm = false;
+  }
+
+  mapUnit(staff:any){
+    const staffId = staff.userId;
+    console.log(staffId);
+    
+    const mappedData ={
+      trainerId : staffId,
+      unitId :Number(localStorage.getItem('unitId')),
+      districtId : Number(localStorage.getItem('districtId'))
+    }
+
+    if(staff.isMapped){
+      this.unitService.unMapStaffUnit(mappedData).subscribe({
+      next:(res)=>{        
+        console.log("Mapped");
+      },
+      error:(err:any)=>{
+        
+      }
+    })
+    }
+   else{
+     this.unitService.mapStaffUnit(mappedData).subscribe({
+      next:(res)=>{        
+        console.log("Mapped");
+      },
+      error:(err:any)=>{
+
+      }
+    })
+   }
+  }
+
+  
 
   closeEditStaffModal() {
+    console.log("close edit");
+    this.showAddStaffModal = false;
     this.showEditStaffModal = false;
-    this.editStaffData = this.getEmptyStaff();
-    this.setFeedbackMessage('Edit cancelled.', 'info');
-
+    // this.setFeedbackMessage('Edit cancelled.', 'info');
   }
+
   closeAddStaffModal(){
     this.showAddStaffModal = false;    
-    this.setFeedbackMessage('Add staff cancelled.', 'info');
+    // this.setFeedbackMessage('Add staff cancelled.', 'info');
   }
 
   // Toggle staff status (instant)
   toggleStaffStatus(staff: Staff) {
     staff.active = !staff.active;
-    this.setFeedbackMessage(`Staff status changed to ${staff.active ? 'Active' : 'Deactive'}.`, 'info');
-    // If using a service, update there as well
   }
 
   // Filtering
@@ -191,50 +204,19 @@ export class StaffComponent {
       (!this.filterDesignation || staff.designation === this.filterDesignation) &&
       (!this.filterStatus || (this.filterStatus === 'Active' ? staff.active : !staff.active))
     );
-    this.setFeedbackMessage(`Found ${this.filteredStaff.length} staff.`, 'info');
   }
-
-  onReset() {
-    this.filterDesignation = '';
-    this.filterStatus = '';
-    this.filteredStaff = [...this.staffList];
-    this.setFeedbackMessage('Filters reset. Showing all staff.', 'info');
-  }
-
-  // Helpers
-  resetAddStaffForm() {
-    this.staffEmail = '';
-    this.staffFirstName = '';
-    this.staffLastName = '';
-    this.staffPassword = '';
-    this.staffGender = '';
-    this.staffDesignation = '';
-    this.staffEmploymentType = '';
-    this.staffDOB = '';
-    this.staffDOJ = '';
-    this.staffQualification = '';
-  }
-
-  getEmptyStaff(): Staff {
-    return {
-      email: '',
-      firstName: '',
-      lastName: '',
-      password: '',
-      gender: '',
-      designation: '',
-      employmentType: '',
-      dob: '',
-      doj: '',
-      qualification: '',
-      active: true
-    };
-  }
-
-  setFeedbackMessage(message: string, type: 'success' | 'error' | 'info') {
-    this.feedbackMessage = message;
-    setTimeout(() => {
-      this.feedbackMessage = null;
-    }, 5000);
+setResponseMsg(message: string, isSuccess: boolean) {
+    // if (isSuccess) {
+    //   this.successMsg = true;
+    //   this.successText = message;
+    //   this.errorMsg = false;
+    // } else {
+    //   this.errorMsg = true;
+    //   this.errorText = message;
+    //   this.successMsg = false;
+    // }
+    // setTimeout(() => {
+    //   this.closeResponse();
+    // }, 5000);
   }
 }
