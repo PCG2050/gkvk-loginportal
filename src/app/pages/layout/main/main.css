@@ -7,7 +7,7 @@
   transition: all 0.5s ease;
   background: #f4f7fa;
   padding: 3rem;
-  background-image: url('/../../../img/Background.png');
+  background-image: url('../../../../assets/images/Background.png');
   background-size: cover;
   background-repeat: no-repeat;
   background-position: bottom;
