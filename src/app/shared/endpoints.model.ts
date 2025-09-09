@@ -9,10 +9,10 @@ export class Endpoints {
     static organizationUnit = Endpoints.getbaseURL()+'/api/organization-units';
     static addUnitHead = Endpoints.getbaseURL()+'/api/RegisterUser';
     static user = Endpoints.getbaseURL()+'/api/Users';
-    static unitHead = Endpoints.getbaseURL()+'/UnitHead';
+    static unitHead = Endpoints.getbaseURL()+'/api/UnitHeads';
     static updateUnitHead = Endpoints.getbaseURL+'/api/Users/{id}/UnitHead'
     static getUnitHead = Endpoints.getbaseURL()+'/api/UnitHeads';
-    static staff = Endpoints.getbaseURL()+'/api/Trainers/all';
+    static staff = Endpoints.getbaseURL()+'/api/Trainers';
     static logout = Endpoints.getbaseURL()+'/api/Auth/logout';
     static getbaseURL() {
     // return 'https://gkvk-qaenv.azurewebsites.net';

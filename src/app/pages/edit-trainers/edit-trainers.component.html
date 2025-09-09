@@ -63,6 +63,9 @@
       </div>
     </div>
   </form>
+  <div *ngIf="isLoading">
+     <app-loading-spinner  style="text-align:center ;"></app-loading-spinner>
+  </div>
   <!-- Add Trainer Modal -->
   <div class="modal-backdrop" *ngIf="showAddTrainerModal">
     <div class="modal">
@@ -192,7 +195,7 @@
           </div>
         </div>
         <ng-multiselect-dropdown [data]="orgUnits" [settings]="dropDownSettings"
-          [(ngModel)]="selectedOrgUnits[selectedUnitHeadId]" formControlName="orgUnit" (onSelect)="onItemSelect($event)"
+         formControlName="orgUnit" (onSelect)="onItemSelect($event)"
           (onDeSelect)="onItemDeSelect($event)" (onSelectAll)="onSelectAll($event)"
           (onDeSelectAll)="onDeSelectAll($event)">
         </ng-multiselect-dropdown>
@@ -208,7 +211,7 @@
     </div>
   </div>
 
-  <div class="table-container">
+  <div class="table-container ">
     <table>
       <thead>
         <tr>
@@ -221,32 +224,37 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let unitHead of unitHeads | paginate: { itemsPerPage: 5, currentPage: p }; let i = index">
-          <td>{{ (p-1)*5+i + 1}}</td>
-          <td>{{unitHead.firstName}} {{unitHead.lastName}}</td>
-          <td>{{ unitHead.email }}</td>
-          <td>
-            <div *ngFor="let unit of unitHead.unitLocationDetails; let i = index">
-              <strong>{{ i + 1 }}.</strong>
-              <span>{{ unit.unitName }} - {{ unit.districtName }}, {{ unit.stateName }}</span>
-            </div>
-            <ng-container *ngIf="!unitHead.unitLocationDetails || unitHead.unitLocationDetails.length === 0">
-              <em>No units assigned</em>
-            </ng-container>
-          </td>
-          <!-- <td>
-            <button (click)="mapOrgUnit(unitHead.userId)" [value]="unitHead.userId"><i
-                class="bi bi-link-45deg"></i></button>
-          </td> -->
-          <td>
-            <button class="reassign-btn" (click)="editUnitHead(unitHead)">
-              <i class="fa fa-edit"></i>
-            </button>
-            <button class="delete-btn" (click)="confirmDelete(unitHead)">
-              <i class="fa fa-trash"></i>
-            </button>
-          </td>
-        </tr>
+<tr *ngFor="let unitHead of (filteredUnitHeads | paginate: { itemsPerPage: 5, currentPage: p,totalItems: filteredUnitHeads.length }); let i = index">
+  <td>{{ (p-1)*5+i + 1}}</td>
+  <td>{{unitHead.firstName}} {{unitHead.lastName}}</td>
+  <td>{{ unitHead.email }}</td>
+  <td>
+    <div *ngFor="let unit of unitHead.unitLocationDetails; let i = index">
+      <strong>{{ i + 1 }}.</strong>
+      <span>{{ unit.unitName }} - {{ unit.districtName }}, {{ unit.stateName }}</span>
+    </div>
+  </td>
+  <td>
+    <button class="reassign-btn" (click)="editUnitHead(unitHead)">
+      <i class="fa fa-edit"></i>
+    </button>
+    <button class="delete-btn" (click)="confirmDelete(unitHead)">
+      <i class="fa fa-trash"></i>
+    </button>
+  </td>
+</tr>
+<ng-container *ngIf="(filteredUnitHeads | paginate: { itemsPerPage: 5, currentPage: p }).length === 0 && filteredUnitHeads.length > 0">
+  <tr>
+    <td colspan="5" class="text-center"><em>No results found for the current page.</em></td>
+  </tr>
+</ng-container>
+
+<ng-container *ngIf="filteredUnitHeads.length === 0">
+  <tr>
+    <td colspan="5" class="text-center"><em>No unit heads found.</em></td>
+  </tr>
+</ng-container>
+
       </tbody>
     </table>
     <pagination-controls (pageChange)="onPageChange($event)"></pagination-controls>
@@ -290,11 +298,11 @@
             </option>
           </ng-container>
         </select>
-        <ng-multiselect-dropdown [data]="orgUnits" [settings]="dropDownSettings" formControlName="orgUnit"
+        <!-- <ng-multiselect-dropdown [data]="orgUnits" [settings]="dropDownSettings" formControlName="orgUnit"
           [(ngModel)]="selectedOrgUnits[selectedUnitHeadId]" (onSelect)="onItemSelect($event)"
           (onDeSelect)="onItemDeSelect($event)" (onSelectAll)="onSelectAll($event)"
           (onDeSelectAll)="onDeSelectAll($event)">
-        </ng-multiselect-dropdown>
+        </ng-multiselect-dropdown> -->
 
         <div class="modal-actions">
           <button type="submit" class="saveBtn">Save</button>

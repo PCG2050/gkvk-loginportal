@@ -378,7 +378,10 @@ button:disabled {
 }
 
 .deleteBtn {
-  background: rgb(242, 37, 37);
+    background: rgb(246, 6, 6);
+}
+.deleteBtn:hover{
+    background: rgb(190, 2, 2);
 }
 
 @media (max-width: 992px) {

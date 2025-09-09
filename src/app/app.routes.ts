@@ -8,6 +8,8 @@ import { EditTrainersComponent } from './pages/edit-trainers/edit-trainers.compo
 import { ManageadminsComponent } from './pages/manageadmins/manageadmins.component';
 import { StaffComponent } from './pages/staff/staff.component';
 import { ProfileComponent } from './pages/profile/profile.component';
+import { ForgotPasswordComponent } from './pages/password/forgot-password/forgot-password.component';
+import { ResetPasswordComponent } from './pages/password/reset-password/reset-password.component';
 
 
 export const routes: Routes = [
@@ -21,9 +23,19 @@ export const routes: Routes = [
         component: Login
     },
     {
-        path:'',
+        path: 'Forgot-password',
+        component: ForgotPasswordComponent,
+        title: 'ForgotPassword'
+    },
+    {
+        path: 'Reset-password',
+        component: ResetPasswordComponent,
+        title: 'Reset password'
+    },
+    {
+        path: '',
         component: Layout,
-        canActivate:[AuthGuard],
+        canActivate: [AuthGuard],
         children: [
             {
                 path: 'dashboard',
@@ -31,31 +43,31 @@ export const routes: Routes = [
                 title: 'Dashboard'
             },
             {
-                 path: 'manageAdmins',
-                 component:ManageadminsComponent,
-                 title:'Manage Admins'
+                path: 'manageAdmins',
+                component: ManageadminsComponent,
+                title: 'Manage Admins'
             },
             {
                 path: 'Edit-Units',
-                component : EditUnitsComponent,
-                title : 'Units'
+                component: EditUnitsComponent,
+                title: 'Units'
             },
             {
                 path: 'Edit-Trainers',
-                component : EditTrainersComponent,
-                title : 'Trainers'
+                component: EditTrainersComponent,
+                title: 'Trainers'
             },
             {
-                path:'Staff',
-                component : StaffComponent,
-                title : 'Staff Management'
+                path: 'Staff',
+                component: StaffComponent,
+                title: 'Staff Management'
             },
             {
-                path:'Profile',
-                component : ProfileComponent,
-                title : 'Profile'
-            }
-            
-        ]    
-    }
+                path: 'Profile',
+                component: ProfileComponent,
+                title: 'Profile'
+            },
+        ]
+
+    },
 ];

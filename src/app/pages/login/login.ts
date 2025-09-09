@@ -1,15 +1,16 @@
 import { Component, inject } from '@angular/core';
 import { FormsModule, NgModel } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { BasicAuthService } from '../../core/services/basic-auth.service';
 import { LocalStorageService } from '../../core/services/local-storage.service';
 import * as jwt_decode from 'jwt-decode';
+import { LoadingSpinnerComponent } from '../../shared/loading-spinner/loading-spinner.component';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [FormsModule, CommonModule],
+  imports: [FormsModule, CommonModule, RouterModule, LoadingSpinnerComponent],
   templateUrl: './login.html',
   styleUrl: './login.css'
 })
@@ -20,6 +21,7 @@ export class Login {
   };
   rememberMe: boolean = false;
   passwordPattern: string = '^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,16}$';
+  isLoading:boolean = false;
 
   router = inject(Router);
   authService = inject(BasicAuthService);
@@ -29,7 +31,7 @@ export class Login {
   showPassword: boolean = false;
   onLogin() {
     this.loginError = null;
-
+this.isLoading = true;
     this.authService.login({ email: this.loginObj.email, password: this.loginObj.password }).subscribe({
       next: (res => {
         //had to be changed to session storage
@@ -39,7 +41,6 @@ export class Login {
         this.localStorage.set('instituteId', res.instituteId)
         this.router.navigateByUrl("/dashboard");
         console.log(res);
-        
         const token = res.accessToken;
         if (token) {
           const decodedToken: any = jwt_decode.jwtDecode(token);
@@ -51,10 +52,11 @@ export class Login {
           this.localStorage.set('role',role);
           this.localStorage.set('userId',userId)
           this.localStorage.set('organizationId', (decodedToken.organization));
-          console.log(res.role)          
+          console.log(res.role)        
         } else {
           console.log('No token found');
         }
+        this.isLoading = false
       }),
       error: (err) => {
         if (err.error && typeof err.error === 'object' && err.error.error) {
@@ -71,6 +73,7 @@ export class Login {
         }
       }
     });
+    this.isLoading = false;
   }
   togglePasswordVisibility() {
   this.showPassword = !this.showPassword;

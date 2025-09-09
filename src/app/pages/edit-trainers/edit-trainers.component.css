@@ -307,42 +307,9 @@ button:disabled {
   .closeBtn{
     position: absolute;
     right: 8%;
+    width: 20px;
+    height: 20px;
   }
-  /*
-}
-  
-
-.modal h3 {
-  color: #012a5b;
-  margin-bottom: 20px;
-  font-size: 1.5rem;
-}
-
-.modal p {
-  color: #2c3e50;
-  margin-bottom: 24px;
-}
-
-.modal label {
-  display: block;
-  margin-bottom: 8px;
-  font-weight: 600;
-  color: #2c3e50;
-  text-align: left;
-}
-
-.modal .dropdown {
-  width: 100%;
-  margin-bottom: 20px;
-}
-
-.modal-actions {
-  margin-top: 16px;
-  display: flex;
-  gap: 12px;
-  justify-content: center;
-} 
-   /* Center buttons in modal  */
 
 
 .no-data-message {
@@ -380,13 +347,13 @@ button:disabled {
   min-width: 350px;
   max-width: 600px;
   max-height: 90vh;
-  overflow-y: auto; /* Allow scrolling if content exceeds height */
+  overflow-y: auto;
   width: 100%;
-  z-index: 1051; /* Ensure it appears above backdrop */
+  z-index: 1051;
   position: relative;
   display: block;
   opacity: 1;
-  visibility: visible; /* Ensure it stacks above */
+  visibility: visible;
 }
 .map-btn{
   position: absolute;

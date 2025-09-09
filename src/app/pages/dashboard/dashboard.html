@@ -298,12 +298,12 @@
         </svg>
       </div>
       <div class="card-content">
-        <div class="card-title">Staff</div>
+        <div class="card-title">Unit Head</div>
         <!-- <div class="card-number">{{ numberOfTrainers }}</div> -->
-        <div class="card-number">4</div>
+        <div class="card-number">{{unitHeadCount}}</div>
       </div>
       <div class="card-footer">
-        <a [routerLink]="['/Edit-Trainers']" class="card-link">View All Staff &rarr;</a>
+        <a [routerLink]="['/Edit-Trainers']" class="card-link">View All Unit Head &rarr;</a>
       </div>
     </div>
 
@@ -315,17 +315,12 @@
 </div>
 <div class="unitHeadDiv" *ngIf = "isUnitHeadLoggedIn">
   <div>
-    <form action="" [formGroup]="unitLocForm">
-    <select name="" id=""  (change)="OnUnitChange()" formControlName ="unit">
+    <!-- <form action="" [formGroup]="unitLocForm"> -->
+    <!-- <select name="" id=""  (change)="OnUnitChange()" formControlName ="unit">
       <option value="">Select unit</option>
       <option [value]="unit.unitId" *ngFor="let unit of unitLoc">{{unit.unitName}}</option>
     </select>
     <div>
-     
-    <!-- <select name="" id="" formControlName="state">
-      <option value="">Select State</option>
-      <option [value]="loc.stateId" *ngFor="let loc of selectedUnitLoc">{{loc.stateName}}</option>
-    </select> -->
      <select name="" id="" formControlName="state" (change)="onStateChange()">
       <option value="">Select state</option>
       <option [value]="loc.stateId" *ngFor="let loc of selectedState">{{loc.stateName}}</option>
@@ -334,9 +329,9 @@
       <option value="">Select district</option>
       <option [value]="loc.districtId" *ngFor="let loc of selectedUnitLoc">{{loc.districtName}}</option>
     </select>
-    </div>
+    </div> -->
     
-  </form>
+  <!-- </form> -->
   </div>
 </div>
 </div>

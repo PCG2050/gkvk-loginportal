@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, OnInit } from '@angular/core';
-import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Component, inject, Input, input, OnInit } from '@angular/core';
+import { FormControl, FormGroup, FormsModule, NgForm, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { State } from '../../core/models/states.model';
 import { catchError, finalize, firstValueFrom, Observable, of, tap } from 'rxjs';
@@ -28,7 +28,7 @@ export class EditUnitsComponent implements OnInit {
   selectedStateId: number | undefined;
   units$!: Observable<Units[]>;
   unitLocations$!: Observable<any[]>;
-
+  @Input() filterForm!: FormGroup;
 
   // Form fields for adding a new unit
   newUnitName = '';
@@ -105,11 +105,8 @@ export class EditUnitsComponent implements OnInit {
   }
 
   // Resets all filter selections and displays all units
-  onReset() {
-    this.selectedState = '';
-    this.selectedDistrict = '';
-    this.filteredUnits = [...this.unit];
-    this.setFeedbackMessage('Filters reset. Showing all units.', 'info');
+  onReset(form:NgForm) {
+   form.resetForm({ state: '', district: '' });
   }
 
   // When state changes, reset district selection
@@ -251,6 +248,9 @@ export class EditUnitsComponent implements OnInit {
             this.setResponseMsg("Added Organization Unit successfully.", true);
             console.log("Unit added successfully");
             this.getUnitOrganization();
+            // Reset the form and close the modal on successful addition
+            // Reset the form with explicit default values to show the placeholders
+            this.unitOrganizationForm.reset({ newUnitName: '', newUnitState: '', newUnitDistrict: '' });
           },
           error: (err: any) => {
             this.isLoading = false;
@@ -260,9 +260,7 @@ export class EditUnitsComponent implements OnInit {
           },
 
         });
-
       console.log(orgnId);
-      // console.log(uni);
       this.editUnitModal = false;
     }
     catch (error) {
@@ -272,7 +270,7 @@ export class EditUnitsComponent implements OnInit {
     this.unitOrganizationForm.reset();
   }
   getUnitOrganization() {
-    this.isLoading = false
+    this.isLoading = true;
     this.unitLocations$ = this.unitService.getOrganizationUnit().pipe(
       finalize(() => {
         this.isLoading = false;
@@ -334,6 +332,7 @@ export class EditUnitsComponent implements OnInit {
   }
 
   saveUpdateOrgUnit() {
+    this.isLoading = true;
     const updateOrgUnit = {
       unitId: this.editUnitForm.controls.unitId.value,
       districtId: this.editUnitForm.controls.districtId.value
@@ -341,11 +340,14 @@ export class EditUnitsComponent implements OnInit {
     this.unitService.updateOrgUnit(this.orgUnitLocId, updateOrgUnit).subscribe({
       next: () => {
         this.editUnitModal = false;
+        this.isLoading = false;
         this.setResponseMsg("Orgnaization Unit updated successfully.", true);
         this.unitOrganizationForm.reset();
         this.getUnitOrganization()
+        this.unitOrganizationForm.reset({ newUnitName: '', newUnitState: '', newUnitDistrict: '' });
       },
       error: () => {
+      this.isLoading = false;
         this.setResponseMsg("Failed to update Organization Unit. Please try again.", false);
       }
     })
@@ -357,12 +359,14 @@ export class EditUnitsComponent implements OnInit {
     this.showDeleteConfirm = false;
     this.unitService.deleteOrganizationUnit(this.unitData).subscribe({
       next: (res: any) => {
+        this.isLoading = false
         this.setResponseMsg("Orgnaization Unit deleted successfully.", true);
         // alert("Unit deleted Successfully")
         console.log(res);
         this.getUnitOrganization();
       },
       error: (err: any) => {
+        this.isLoading = false;
         this.setResponseMsg("Failed to delete Organization Unit. Please try again.", false);
       }
     })

@@ -2,8 +2,12 @@
   <img src="https://i.postimg.cc/MTRK7Thf/bg-form.jpg" alt="Background Image" />
 
   <div class="container">
+
+    <div *ngIf="isLoading">
+     <app-loading-spinner  style="text-align:center ;"></app-loading-spinner>
+  </div>
     <form #loginForm="ngForm" (ngSubmit)="onLogin()">
-      <h1>Super Admin Portal</h1>
+      <h1>Login Portal</h1>
 
       <!-- Email -->
       <div class="input-box">
@@ -69,7 +73,7 @@
         <label>
           <input type="checkbox" (change)="onSelectRememberMe($event)" [(ngModel)]="rememberMe" /> Remember me
         </label>
-        <a href="#">Forgot password?</a>
+        <a [routerLink]="['/Forgot-password']">Forgot password?</a>
       </div>
 
       <!-- Submit -->

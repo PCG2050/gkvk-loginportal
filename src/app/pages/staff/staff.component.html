@@ -1,10 +1,17 @@
 <div class="trainer-assignment-container">
   <h2 class="section-title">Staff Management</h2>
 
-  <!-- Feedback Message Display -->
-  <div *ngIf="feedbackMessage" class="feedback-message">
-    {{ feedbackMessage }}
+  <div>
+    <div class="errorResponse" *ngIf="errorMsg">
+      <p class="closeMsg" (click)="closeResponse()"><span>&times;</span></p>
+      <p class="responseText">{{errorText}}</p>
+    </div>
+    <div class="successResponse" *ngIf="successMsg">
+      <p class="closeMsg" (click)="closeResponse()"><span>&times;</span></p>
+      <p (click)="closeResponse()" class="responseText">{{successText}}</p>
+    </div>
   </div>
+
   <!-- Add Staff Button (left-aligned) -->
   <div style="
       display: flex;
@@ -12,7 +19,7 @@
       margin-bottom: 16px;
       margin-right: 16px;
     ">
-    <button class="add-btn" (click)="showAddStaffModal = true">
+    <button class="add-btn" (click)="openAddStaffModal()">
       + Add Staff
     </button>
   </div>
@@ -20,8 +27,12 @@
   <!-- Search by Email -->
   <div style="flex-direction: column; margin-bottom: 20px; margin-right: 16px;">
     <input type="text" class="add-trainer-input" style="max-width: 300px;" placeholder="Search by staff email..."
-      name="searchEmail" autocomplete="off" />
+      name="searchEmail" [(ngModel)]="itemFilter.email" autocomplete="off" />
   </div>
+  <div *ngIf="isLoading">
+    <app-loading-spinner style="text-align:center ;"></app-loading-spinner>
+  </div>
+
 
 
   <!-- Filter Bar
@@ -81,11 +92,10 @@
     *ngIf="showAddStaffModal">
     <div class="modal">
       <h3>Add Staff Details</h3>
-      <div class="closeBtn">
-        <button type="button" class="case close" (click)="closeEditStaffModal()"> <span
-            aria-hidden="true">&times;</span>
-        </button>
-      </div>
+
+      <p type="button" class="btn-close case close closeBtn" (click)="closeAddStaffModal()"> <span>&times;</span>
+      </p>
+
       <form (ngSubmit)="addStaff()" [formGroup]="addStaffForm">
         <!-- Email -->
         <label for="staffEmail">Email<span class="asterisk">*</span></label>
@@ -97,7 +107,7 @@
           @if (addStaffForm.get('staffEmail')?.hasError('required')) {
           <div>Email is required.</div>
           }
-          @if(addStaffForm.get('staffEmail')?.hasError('pattern')){
+          @if(addStaffForm.get('staffEmail')?.hasError('email')){
           <div>Please enter valid email</div>
           }
         </div>
@@ -164,32 +174,34 @@
         </div>
         }
         <!-- Password -->
-        <label for="staffPassword">Password<span class="asterisk">*</span></label>
-        <input id="staffPassword" type="password" placeholder="Enter Password" formControlName="staffPassword" required
-          class="add-trainer-input" autocomplete="new-password" />
-        @if(addStaffForm.get('staffPassword')?.invalid && (addStaffForm.get('staffPassword')?.dirty ||
-        addStaffForm.get('staffPassword')?.touched)){
-        <div class="alert">
-          @if (addStaffForm.get('staffPassword')?.hasError('required')) {
-          <div>Password is required</div>
-          }
-          @if(addStaffForm.get('staffPassword')?.hasError('pattern')){
-          <div>* At least one lowercase<br>
-            * At least one uppercase
-            <br>
-            * At least one digit
-            <br>
-            * At least one special character
-            <br>
-            * Password must be between 8 to 16 characters
+        <div *ngIf="showPasswordField">
+          <label for="staffPassword">Password<span class="asterisk">*</span></label>
+          <input id="staffPassword" type="password" placeholder="Enter Password" formControlName="staffPassword"
+            required class="add-trainer-input" autocomplete="new-password" />
+          @if(addStaffForm.get('staffPassword')?.invalid && (addStaffForm.get('staffPassword')?.dirty ||
+          addStaffForm.get('staffPassword')?.touched)){
+          <div class="alert">
+            @if (addStaffForm.get('staffPassword')?.hasError('required')) {
+            <div>Password is required</div>
+            }
+            @if(addStaffForm.get('staffPassword')?.hasError('pattern')){
+            <div>* At least one lowercase<br>
+              * At least one uppercase
+              <br>
+              * At least one digit
+              <br>
+              * At least one special character
+              <br>
+              * Password must be between 8 to 16 characters
+            </div>
+            }
           </div>
           }
         </div>
-        }
         <!-- Gender -->
         <label for="staffGender">Gender<span class="asterisk">*</span></label>
         <select id="staffGender" formControlName='staffGender' required class="dropdown">
-          <option value="">Select Gender</option>
+          <option value="" selected>Select Gender</option>
           <option value="0">Undefined</option>
           <option value="1">Male</option>
           <option value="2">Female</option>
@@ -227,7 +239,7 @@
         <!-- Employment Type -->
         <label for="staffEmploymentType">Employment Type<span class="asterisk">*</span></label>
         <select id="staffEmploymentType" formControlName="staffEmploymentType" required class="dropdown">
-          <option value="">Select Employment Type</option>
+          <option value="" selected>Select Employment Type</option>
           <option value="0">Permanent</option>
           <option value="1">Temporary</option>
         </select>
@@ -241,11 +253,30 @@
         <label for="staffQualification">Qualification<span class="asterisk">*</span></label>
         <input id="staffQualification" type="text" placeholder="Qualification" formControlName="staffQualification"
           required class="add-trainer-input" autocomplete="off" />
+
+        <ng-multiselect-dropdown formControlName="unitLoc" [placeholder]="'Map Unit'" [settings]="dropdownSettings"
+          [data]="unitLocArray" (onSelect)="onItemSelect($event)" (onSelectAll)="onSelectAll($event)">
+        </ng-multiselect-dropdown>
+
+        <!-- <select name="" id="" (change)="OnUnitChange()" formControlName="unit">
+          <option value="">Select unit</option>
+          <option [value]="unit.unitId" *ngFor="let unit of unitLoc">{{unit.unitName}}</option>
+        </select>
+        <div>
+          <select name="" id="" formControlName="state" (change)="onStateChange()">
+            <option value="">Select state</option>
+            <option [value]="loc.stateId" *ngFor="let loc of selectedState">{{loc.stateName}}</option>
+          </select>
+          <select name="" id="" formControlName="district" (change)="onDistrictChange()">
+            <option value="">Select district</option>
+            <option [value]="loc.districtId" *ngFor="let loc of selectedUnitLoc">{{loc.districtName}}</option>
+          </select>
+        </div> -->
         <div class="modal-actions">
-          <button type="submit" class="add-btn">
+          <button type="submit" class="add-btn" [disabled]=addStaffForm.invalid>
             Add
           </button>
-          <button type="button" (click)="closeEditStaffModal()" class="reset-btn">
+          <button type="button" (click)="closeAddStaffModal()" class="reset-btn">
             Cancel
           </button>
         </div>
@@ -258,32 +289,38 @@
       <thead>
         <tr>
           <th>Sl No</th>
+          <th>Name</th>
           <th>Email</th>
-          <th>Designation</th>
+          <th>Assignments</th>
           <th>Status</th>
-          <th>Map Unit</th>
           <th>Actions</th>
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let item of staff ; let i = index">
+        <tr *ngFor="let item of staff | filterBy: itemFilter ; let i = index">
           <td>{{ i + 1 }}</td>
           <td>{{ item.firstName }} {{item.lastName}}</td>
           <td>{{ item.email }}</td>
+
           <td>
-            <label class="modern-switch">
-              <input type="checkbox" [checked]="item.status" (change)="toggleStaffStatus(item)" name="status{{i}}" />
-              <span class="modern-slider"></span>
-            </label>
-            <span class="status-label" [ngClass]="{'deactive': item.status, 'active': !item.status}">{{ item.status ?
-              'Deactive' : 'Active' }}</span>
+            <div *ngFor="let assignment of item.unitLocationDetails ; let i = index">
+              <span style="font-weight: 700;">{{i+1}}. </span>
+              <span>{{assignment.unitName}} - {{assignment.districtName}},{{assignment.stateName}}</span>
+            </div>
+            <ng-container *ngIf="!item.unitLocationDetails || item.unitLocationDetails.length==0">
+              No assigned units
+            </ng-container>
           </td>
           <td>
-  <button (click)="mapUnit(item)">
-    {{ item.isMapped ? 'Unmap' : 'Map' }}
-  </button>
-</td>
+            <label class="modern-switch">
+              <input type="checkbox" [(ngModel)]="item.status" name="status{{i}}" />
+              <span class="modern-slider"></span>
+            </label>
+            <span class="status-label" [ngClass]="{ 'deactive': item.status, 'active': !item.status }">
+              {{ item.status ? 'Deactive' : 'Active' }}
+            </span>
 
+          </td>
           <td>
             <button class="reassign-btn" (click)="editStaff(item)"><i class="fa fa-edit"></i></button>
             <button class="delete-btn" (click)="confirmDelete(item)">
@@ -291,7 +328,7 @@
             </button>
           </td>
         </tr>
-        <tr *ngIf="filteredStaff.length === 0">
+        <tr *ngIf="staff.length === 0">
           <td colspan="5" class="no-data-message">
             No staff found matching the criteria.
           </td>
@@ -300,18 +337,18 @@
     </table>
 
     <div class="modal-backdrop" *ngIf="showDeleteConfirm">
-    <div class="modal">
-      <h3>Delete Assignment</h3>
-      <p>
-        Are you sure you want to delete this assignment for
-        <!-- <strong>{{ trainerToDelete?.email }}</strong>
+      <div class="modal">
+        <h3>Delete Assignment</h3>
+        <p>
+          Are you sure you want to delete this assignment for
+          <!-- <strong>{{ trainerToDelete?.email }}</strong>
         <span *ngIf="trainerToDelete && assignmentToDeleteIndex !== null">
           at {{ trainerToDelete.assignments[assignmentToDeleteIndex].unit }} </span>? -->
-      </p>
-      <div class="modal-actions">
-        <button (click)="deleteStaff()">Yes, Delete</button>
-        <button (click)="cancelDelete()">Cancel</button>
+        </p>
+        <div class="modal-actions">
+          <button (click)="deleteStaff()">Yes, Delete</button>
+          <button (click)="cancelDelete()">Cancel</button>
+        </div>
       </div>
     </div>
-  </div>
   </div>

@@ -19,82 +19,85 @@ export class UserService {
     })
     return this.httpClient.get(`${this.endpoint}/profile/${userId}`, { headers })
   }
-  updateUser(userId:number, updateDto:any) {
+  updateUser(userId: number, updateDto: any) {
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${this.token}`
     })
-    return this.httpClient.patch(`${this.endpoint}/${userId}`,updateDto,{headers})
+    return this.httpClient.patch(`${this.endpoint}/${userId}`, updateDto, { headers })
   }
-  getAdmins(instituteId:number): Observable<Admins[]> {
+  getAdmins(instituteId: number): Observable<Admins[]> {
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${this.token}`
     })
     let endPoint = Endpoints.institutes
     return this.httpClient.get<Admins[]>(`${endPoint}/${instituteId}/admins`, { headers });
   }
-   addAdmin(instituteId:number, adminData:any):Observable<Admins[]>{
-      const endPoint = Endpoints.institutes;
-      const headers = new HttpHeaders({
-      'Authorization': `Bearer ${this.token}`
-    })
-      return this.httpClient.post<Admins[]>(`${endPoint}/${instituteId}/users`,adminData,{headers},)
-    }
-    addStaff(instituteId:number, staffData:any){
-       const endPoint = Endpoints.institutes;
-      const headers = new HttpHeaders({
-      'Authorization': `Bearer ${this.token}`
-    })
-          return this.httpClient.post(`${endPoint}/${instituteId}/users`,staffData,{headers},)
-
-    }
-
-    addUnitHead(instituteId:number,unitHeadData:any){
-      const endpoint = Endpoints.unitHead;
+  addAdmin(instituteId: number, adminData: any): Observable<Admins[]> {
+    const endPoint = Endpoints.institutes;
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${this.token}`
     })
-    return this.httpClient.post(`${endpoint}`,unitHeadData, {headers})
-    }
-  getUnitHead(){
-    const endpoint = Endpoints.getUnitHead;
+    return this.httpClient.post<Admins[]>(`${endPoint}/${instituteId}/users`, adminData, { headers },)
+  }
+
+  addUnitHead(instituteId: number, unitHeadData: any) {
+    const endpoint = Endpoints.unitHead;
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${this.token}`
     })
-    return this.httpClient.get(`${endpoint}/Details/all`, {headers})
+    return this.httpClient.post(`${endpoint}`, unitHeadData, { headers })
   }
-  updateUnitHead(unitHeadId:number, unitHeadData:any){
-    const endPoint = Endpoints.user;
-     const headers = new HttpHeaders({
+  getUnitHead() {
+    const endpoint = Endpoints.unitHead;
+    const headers = new HttpHeaders({
       'Authorization': `Bearer ${this.token}`
     })
-    return this.httpClient.patch(`${endPoint}/UnitHead/${unitHeadId}`,unitHeadData,{headers})
+    return this.httpClient.get(`${endpoint}/Details/all`, { headers })
+  }
+  updateUnitHead(unitHeadId: number, unitHeadData: any) {
+    const endPoint = Endpoints.unitHead;
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${this.token}`
+    })
+    return this.httpClient.patch(`${endPoint}/UnitHead/${unitHeadId}`, unitHeadData, { headers })
   }
 
-  deleteUnitHead(unitHeadId:number){
-    const endPoint = Endpoints.user;
+  deleteUnitHead(unitHeadId: number) {
+    const endPoint = Endpoints.unitHead;
     const headers = new HttpHeaders({
-      'Authorization':`Bearer ${this.token}`
+      'Authorization': `Bearer ${this.token}`
     })
 
-    return this.httpClient.delete(`${endPoint}/${unitHeadId}/UnitHead`,{headers})
+    return this.httpClient.delete(`${endPoint}/${unitHeadId}/UnitHead`, { headers })
   }
-  getStaff(){
+  addStaff(staffData: any) {
     const endPoint = Endpoints.staff;
-     const headers = new HttpHeaders({
+    const headers = new HttpHeaders({
       'Authorization': `Bearer ${this.token}`
     })
-    return this.httpClient.get(`${endPoint}`,{headers})
+    return this.httpClient.post(`${endPoint}`, staffData, { headers },)
+
   }
-  deleteStaff(staffData:any){
-    const endPoint = Endpoints.organizationUnit;
-     const headers = new HttpHeaders({
+  getStaff() {
+    const endPoint = Endpoints.staff;
+    const headers = new HttpHeaders({
       'Authorization': `Bearer ${this.token}`
     })
-         const options = {
-    headers,
-    body: staffData
-  };
-  return this.httpClient.delete(`${endPoint}`,options)
+    return this.httpClient.get(`${endPoint}/with-assignments`, { headers })
+  }
+  updateStaff(staffId: number, staffData: any) {
+    const endPoint = Endpoints.staff;
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${this.token}`
+    })
+    return this.httpClient.patch(`${endPoint}/${staffId}`, staffData, { headers })
+  }
+  deleteStaff(staffId: number) {
+    const endPoint = Endpoints.staff;
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${this.token}`
+    })
+    return this.httpClient.delete(`${endPoint}/${staffId}`, { headers })
   }
 
   constructor() { }

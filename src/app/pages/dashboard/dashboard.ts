@@ -72,13 +72,7 @@ export class Dashboard {
   } = this.getEmptyForm();
 
 
-  //unit Head unit and location form 
-  unitLocForm = new FormGroup({
-    unit : new FormControl(''),
-     state : new FormControl(''),
-    district : new FormControl(''),
-   
-  })
+  
 
   // Used for editing
   instituteToEdit: Institute | null = null;
@@ -100,9 +94,9 @@ export class Dashboard {
     // this.loadInstitutes();
     this.loadStates();
     this.onLoadUnits();
+    this.getUnitHead()
     this.loadInstitutes();
     this.onLoadInsititutes();
-    this.getUnitAndLoc();
     const userRole = localStorage.getItem('role');
     console.log(userRole);
     if (userRole === 'SUPERADMIN') {
@@ -411,68 +405,29 @@ export class Dashboard {
       }
     });
   }
+  unitHeads:any[]=[];
+  unitHeadCount:any;
+  getUnitHead() {
+    this.userService.getUnitHead().subscribe({
+      next: (res: any) => {
+        if (res && Array.isArray(res)) {
+          this.unitHeads = res;
+          console.log(this.unitHeads.length);
+          this.unitHeadCount = this.unitHeads.length
+          // After fetching, initialize the filtered array with all data
+        } else {
+          this.unitHeads = [];
+        }
+      },
+      error: (err) => {
+        console.error('Error fetching unit heads:', err);
+        this.unitHeads = [];
+      }
+    });
+  }
 
 
   //get api to fetch specific unitHead unit and location
-  getUnitAndLoc(){
-    localStorage.getItem('userId')
-    const unitHeadId = Number(localStorage.getItem('userId'));
-    console.log(unitHeadId);
-    
-    this.unitService.getSpecificUnitHeadUnitLoc(unitHeadId).subscribe({
-      next:(res:any)=>{
-        this.unitLoc = res;
-        console.log(this.unitLoc);
-        
-      }
-    })
-  }
 
-  OnUnitChange(){
-    const unitId = this.unitLocForm.get('unit')?.value;
-    console.log(unitId);
-     const selectedUnit = this.unitLoc.find(u => u.unitId == unitId);
-     console.log(selectedUnit);
-     localStorage.setItem('unitId', unitId?.toString() ??'');
-     this.selectedUnitLoc = selectedUnit.locations;
-     console.log(this.selectedUnitLoc);
-     if (selectedUnit && selectedUnit.locations) {
-    const uniqueStates = selectedUnit.locations.filter(
-      (loc:any, index:any, self:any) =>
-        index === self.findIndex(
-          (l:any)=> l.stateName === loc.stateName && l.stateId === loc.stateId
-        )
-    );
-    console.log(uniqueStates);
-    
-    
-
-    this.selectedState = uniqueStates;
-    console.log('Unique states:', this.selectedUnitLoc);
-  } else {
-    this.selectedUnitLoc = [];
-  }
-  }
-  onStateChange(){
-    const stateId = this.unitLocForm.get('state')?.value;
-  }
-  onDistrictChange(){
-    const stateId = Number(this.unitLocForm.get('state')?.value);
-    // localStorage.setItem('stateId',stateId.toString());
-    const districtId = Number(this.unitLocForm.get('district')?.value);
-    localStorage.setItem('districtId',districtId.toString());
-     const selectedUnit =this.selectedUnitLoc.find(unit => 
-     unit.stateId === stateId && unit.districtId === districtId)
-  
-  console.log(selectedUnit);
-   if(selectedUnit){
-    const unitLocId = selectedUnit.unitLocationId
-    console.log(unitLocId);
-   }
-   else{
-    console.log('Cannot find specific unit');
-    
-   }
-  }
   
 }

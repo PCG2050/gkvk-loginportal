@@ -25,7 +25,7 @@
       formControlName = 'newUnitName'
       required
     >
-      <option value="" >Select Unit Name</option>
+      <option value="" selected disabled>Select Unit Name</option>
       <option *ngFor="let unit of units$ | async " [value]="unit.id">{{ unit.name }}</option>
     </select>
       @if (unitOrganizationForm.get('newUnitName')?.invalid && (unitOrganizationForm.get('newUnitName')?.dirty || unitOrganizationForm.get('newUnitName')?.touched)) {
@@ -40,7 +40,7 @@
   }
     <label for="newUnitState" class="visually-hidden">State</label>
     <select id="newUnitState" class="dropdown"  formControlName="newUnitState" required (change)="onStateSelect($event)" >
-      <option value="">Select State</option>
+      <option value="" selected disabled>Select State</option>
       <option *ngFor="let state of states$ | async" [value]="state.id">{{state.name}}</option>
     </select>
     @if (unitOrganizationForm.get('newUnitState')?.invalid && (unitOrganizationForm.get('newUnitState')?.dirty || unitOrganizationForm.get('newUnitState')?.touched)) {
@@ -55,7 +55,7 @@
   }
     <label for="newUnitDistrict" class="visually-hidden">District</label>
     <select id="newUnitDistrict" class="dropdown"  formControlName="newUnitDistrict" required [disabled]="!newUnitState">
-      <option value="">Select District</option>
+      <option value="" selected disabled>Select District</option>
       <option *ngFor="let district of districts$ | async" [value]="district.id">{{ district.name }}</option>
     </select>.
     @if (unitOrganizationForm.get('newUnitDistrict')?.invalid && (unitOrganizationForm.get('newUnitDistrict')?.dirty || unitOrganizationForm.get('newUnitDistrict')?.touched)) {
@@ -80,10 +80,9 @@
             class="dropdown"
             name="state"
             (change)="onStateChange($event)"
-            [(ngModel)]="itemFilter.stateId"
-            *ngIf="states$ | async as states">
+            [(ngModel)]="itemFilter.stateId">
       <option value="">Select State</option>
-      <option *ngFor="let state of states" [value]="state.id">
+      <option *ngFor="let state of states$ | async" [value]="state.id">
         {{ state.name }}
       </option>
     </select>
@@ -102,7 +101,7 @@
     </select>
   </div>
   <button type="submit" class="search-btn">Filter</button>
-  <button type="button" class="reset-btn" (click)="onReset()">Reset</button>
+  <button type="button" class="reset-btn" (click)="onReset(filterForm)">Reset</button>
 </form>
 <div *ngIf="isLoading">
      <app-loading-spinner  style="text-align:center ;"></app-loading-spinner>
@@ -121,7 +120,7 @@
       </thead>
       <tbody>
          <ng-container>
-<tr *ngFor="let item of (unitLocations | filterBy: itemFilter | paginate: { itemsPerPage: 5, currentPage: p }); let i = index"> 
+<tr *ngFor="let item of (unitLocations |filterBy: itemFilter | paginate: { itemsPerPage: 5, currentPage: p }); let i = index"> 
    <td>{{ (p - 1) * 5 + i + 1  }}</td>
   <td>{{ item.unitName }}</td>
   <td>{{ item.districtName }}</td>
