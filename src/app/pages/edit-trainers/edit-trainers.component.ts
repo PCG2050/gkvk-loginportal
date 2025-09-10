@@ -340,12 +340,10 @@ export class EditTrainersComponent {
         next: (res: any) => {
           this.isLoading = false;
           this.showAddTrainerModal = false;
-          setTimeout(() => {
-            window.scrollTo({
+          window.scrollTo({
               top: 0,
               behavior: 'smooth'
             });
-          }, 300);
           this.showAddTrainerModal = false;
           this.setResponseMsg("Added Unit Head successfully.", true);
           this.unitHeadForm.reset();
@@ -355,6 +353,11 @@ export class EditTrainersComponent {
         error: (err: any) => {
           console.error(err);
           this.isLoading = false;
+          this.showAddTrainerModal = false;
+           window.scrollTo({
+              top: 0,
+              behavior: 'smooth'
+            });
           this.setResponseMsg("Failed to add Unit Head. Please try again.", false);
         },
       })
@@ -378,6 +381,10 @@ export class EditTrainersComponent {
       this.userService.updateUnitHead(this.unitHeadId, userData).subscribe({
         next: (res: any) => {
           this.showAddTrainerModal = false;
+          window.scrollTo({
+              top: 0,
+              behavior: 'smooth'
+            });
           this.setResponseMsg("Unit Head updated successfully.", true);
           this.unitHeadForm.reset();
           this.isLoading = false
@@ -385,6 +392,10 @@ export class EditTrainersComponent {
         },
         error: (err: any) => {
           this.isLoading = false;
+          window.scrollTo({
+              top: 0,
+              behavior: 'smooth'
+            });
           console.error(err);
           this.setResponseMsg("Failed to update Unit Head. Please try again.", false);
         }
@@ -394,31 +405,31 @@ export class EditTrainersComponent {
 
   }
 
-onLoadOrgUnits(): Observable<any[]> {
-  this.isLoading = true;
-  return this.unitService.getOrganizationUnit().pipe(
-    tap((units: any[]) => {
-      this.orgUnits = units.map(unit => ({
-        ...unit,
-        orgUnitLocationId: unit.orgUnitLocationId,
-        unitLoc: `${unit.unitName} - ${unit.districtName}, ${unit.stateName}`
-      }));
+  onLoadOrgUnits(): Observable<any[]> {
+    this.isLoading = true;
+    return this.unitService.getOrganizationUnit().pipe(
+      tap((units: any[]) => {
+        this.orgUnits = units.map(unit => ({
+          ...unit,
+          orgUnitLocationId: unit.orgUnitLocationId,
+          unitLoc: `${unit.unitName} - ${unit.districtName}, ${unit.stateName}`
+        }));
 
-      this.orgUnitsArray = Object.values(this.orgUnits);
-      console.log("Mapped Org Units:", this.orgUnits);
-    }),
-    catchError(err => {
-      this.setResponseMsg("Failed to fetch Organization units", false);
-      console.error("Error fetching Org Units:", err);
-      this.orgUnits = [];
-      return of([]);
-    }),
-    finalize(() => {
-      this.isLoading = false; 
-      this.cdr.detectChanges()
-    })
-  );
-}
+        this.orgUnitsArray = Object.values(this.orgUnits);
+        console.log("Mapped Org Units:", this.orgUnits);
+      }),
+      catchError(err => {
+        this.setResponseMsg("Failed to fetch Organization units", false);
+        console.error("Error fetching Org Units:", err);
+        this.orgUnits = [];
+        return of([]);
+      }),
+      finalize(() => {
+        this.isLoading = false;
+        this.cdr.detectChanges()
+      })
+    );
+  }
 
   getUnitHead() {
     this.userService.getUnitHead().subscribe({
@@ -442,10 +453,16 @@ onLoadOrgUnits(): Observable<any[]> {
 
   deleteUnitHead() {
     this.isLoading = true;
+    setTimeout(() => {
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    }, 300);
     this.userService.deleteUnitHead(this.unitHeadId).subscribe({
       next: () => {
-        this.isLoading = false
         this.isLoading = false;
+        this.showDeleteConfirm = false;
         // this.successMsg = true;
         //  this.successText = "Deleted Unit Head Successfully"
         this.setResponseMsg("Deleted Unit Head successfully.", true);
@@ -453,18 +470,17 @@ onLoadOrgUnits(): Observable<any[]> {
         this.getUnitHead()
       },
       error: () => {
-        this.isLoading = false
+        this.isLoading = false;
+        this.showDeleteConfirm = false;
         this.setResponseMsg("Failed to Delete Unit Head. Please try again.", false);
       }
     })
-    this.showDeleteConfirm = false;
   }
 
   mapOrgUnit(userId: number) {
     const unitHeadId = userId;
     console.log(unitHeadId);
     this.selectedUnitHeadId = unitHeadId
-
     this.onLoadOrgUnits().subscribe();
     this.openOrgUnitDropDown = true;
   }

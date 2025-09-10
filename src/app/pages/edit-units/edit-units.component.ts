@@ -245,6 +245,10 @@ export class EditUnitsComponent implements OnInit {
         {
           next: (res: any) => {
             this.isLoading = false;
+             window.scrollTo({
+              top: 0,
+              behavior: 'smooth'
+            });
             this.setResponseMsg("Added Organization Unit successfully.", true);
             console.log("Unit added successfully");
             this.getUnitOrganization();
@@ -340,6 +344,10 @@ export class EditUnitsComponent implements OnInit {
     this.unitService.updateOrgUnit(this.orgUnitLocId, updateOrgUnit).subscribe({
       next: () => {
         this.editUnitModal = false;
+         window.scrollTo({
+              top: 0,
+              behavior: 'smooth'
+            });
         this.isLoading = false;
         this.setResponseMsg("Orgnaization Unit updated successfully.", true);
         this.unitOrganizationForm.reset();
@@ -348,6 +356,10 @@ export class EditUnitsComponent implements OnInit {
       },
       error: () => {
       this.isLoading = false;
+       window.scrollTo({
+              top: 0,
+              behavior: 'smooth'
+            });
         this.setResponseMsg("Failed to update Organization Unit. Please try again.", false);
       }
     })
@@ -359,7 +371,11 @@ export class EditUnitsComponent implements OnInit {
     this.showDeleteConfirm = false;
     this.unitService.deleteOrganizationUnit(this.unitData).subscribe({
       next: (res: any) => {
-        this.isLoading = false
+        this.isLoading = false;
+         window.scrollTo({
+              top: 0,
+              behavior: 'smooth'
+            });
         this.setResponseMsg("Orgnaization Unit deleted successfully.", true);
         // alert("Unit deleted Successfully")
         console.log(res);
@@ -367,6 +383,10 @@ export class EditUnitsComponent implements OnInit {
       },
       error: (err: any) => {
         this.isLoading = false;
+         window.scrollTo({
+              top: 0,
+              behavior: 'smooth'
+            });
         this.setResponseMsg("Failed to delete Organization Unit. Please try again.", false);
       }
     })

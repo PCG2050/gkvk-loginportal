@@ -11,7 +11,8 @@
 
       <!-- Email -->
       <div class="input-box">
-        <input
+      <div class="input-wrapper">
+          <input
           type="email"
           name="email"
           [(ngModel)]="loginObj.email"
@@ -19,7 +20,9 @@
           #email="ngModel"
           required
         />
-        @if (email.invalid && (email.dirty || email.touched)) {
+       
+      </div>
+       @if (email.invalid && (email.dirty || email.touched)) {
           <div class="alert">
             @if (email.hasError('required')) {
               <div>Email is required</div>
@@ -32,41 +35,45 @@
       </div>
 
       <!-- Password -->
-      <div class="input-box">
-        <input
-          [type]="getPasswordFieldType()"
-          name="password"
-          [(ngModel)]="loginObj.password"
-          #password="ngModel"
-          [ngModelOptions]="{ updateOn: 'blur' }"
-          required
-          [pattern]="passwordPattern"
-          placeholder="Password"
-        />
-        <i
-          class="bi"
-          [ngClass]="getPasswordIcon()"
-          (click)="togglePasswordVisibility()"
-          style="cursor: pointer; margin-right: 20px;"
-        ></i>
+    <div class="input-box">
+  <div class="input-wrapper">
+    <input
+      [type]="getPasswordFieldType()"
+      name="password"
+      [(ngModel)]="loginObj.password"
+      #password="ngModel"
+      [ngModelOptions]="{ updateOn: 'blur' }"
+      required
+      [pattern]="passwordPattern"
+      placeholder="Password"
+    />
+    <i
+      class="bi"
+      [ngClass]="getPasswordIcon()"
+      (click)="togglePasswordVisibility()"
+    ></i>
+  </div>
 
-        @if (password.invalid && (password.dirty || password.touched)) {
-          <div class="alert">
-            @if (password.hasError('required')) {
-              <div>Password is required</div>
-            }
-            @if (password.hasError('pattern')) {
-              <div>
-                * At least one lowercase<br />
-                * At least one uppercase<br />
-                * At least one digit<br />
-                * At least one special character<br />
-                * Password must be between 8 to 16 characters
-              </div>
-            }
-          </div>
-        }
-      </div>
+  @if (password.invalid && (password.dirty || password.touched)) {
+    <div class="alert">
+      @if (password.hasError('required')) {
+        <div>Password is required</div>
+      }
+      @if (password.hasError('pattern')) {
+         <div>* At least one lowercase<br>
+              * At least one uppercase
+              <br>
+              * At least one digit
+              <br>
+              * At least one special character
+              <br>
+              * Password must be between 8 to 16 characters
+            </div>
+      }
+    </div>
+  }
+</div>
+
 
       <!-- Remember & Link -->
       <div class="remember">

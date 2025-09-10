@@ -284,6 +284,7 @@ button:disabled {
   font-size: 24px;    
 }
  .modal-actions{
+  margin-top: 25px;
     position: absolute;
     left: 30%;
     /* right: 10%; */

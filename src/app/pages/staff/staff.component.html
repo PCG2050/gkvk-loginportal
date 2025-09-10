@@ -297,8 +297,8 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let item of staff | filterBy: itemFilter ; let i = index">
-          <td>{{ i + 1 }}</td>
+        <tr *ngFor="let item of staff | filterBy: itemFilter | paginate: { itemsPerPage: 5, currentPage: p }; let i = index">
+          <td>{{ (p - 1) * 5 + i + 1  }}</td>
           <td>{{ item.firstName }} {{item.lastName}}</td>
           <td>{{ item.email }}</td>
 
@@ -335,6 +335,7 @@
         </tr>
       </tbody>
     </table>
+    <pagination-controls (pageChange)="onPageChange($event)"></pagination-controls>
 
     <div class="modal-backdrop" *ngIf="showDeleteConfirm">
       <div class="modal">

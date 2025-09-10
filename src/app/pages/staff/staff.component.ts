@@ -6,6 +6,7 @@ import { UnitsService } from '../../core/services/units.service';
 import { NgMultiSelectDropDownModule } from 'ng-multiselect-dropdown';
 import { LoadingSpinnerComponent } from '../../shared/loading-spinner/loading-spinner.component';
 import { FilterPipeModule } from 'ngx-filter-pipe';
+import { NgxPaginationModule } from 'ngx-pagination';
 export interface Staff {
   email: string;
   firstName: string;
@@ -21,7 +22,7 @@ export interface Staff {
 }
 @Component({
   selector: 'app-staff',
-  imports: [FormsModule, CommonModule, ReactiveFormsModule, NgMultiSelectDropDownModule, LoadingSpinnerComponent, FilterPipeModule],
+  imports: [FormsModule, CommonModule, ReactiveFormsModule, NgMultiSelectDropDownModule, LoadingSpinnerComponent, FilterPipeModule, NgxPaginationModule],
   templateUrl: './staff.component.html',
   styleUrl: './staff.component.css'
 })
@@ -48,6 +49,8 @@ export class StaffComponent {
   // Staff data
   filteredStaff: Staff[] = [];
   staff: any[] = [];
+    p: number = 1;
+  total: number = 0;
 
   // Add staff modal state
   showAddStaffModal = false;
@@ -384,5 +387,9 @@ export class StaffComponent {
 itemFilter : any ={
   email : ''
 }
+onPageChange(page: number): void {
+  this.p = page;
+}
+
 
 }

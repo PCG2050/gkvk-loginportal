@@ -15,7 +15,7 @@ export class Endpoints {
     static staff = Endpoints.getbaseURL()+'/api/Trainers';
     static logout = Endpoints.getbaseURL()+'/api/Auth/logout';
     static getbaseURL() {
-    // return 'https://gkvk-qaenv.azurewebsites.net';
-    return 'https://localhost:7024'
+    return 'https://gkvk-qaenv.azurewebsites.net';
+    // return 'https://localhost:7024'
 }
 }

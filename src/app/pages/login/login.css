@@ -57,6 +57,24 @@ h1 {
     width: 100%;
     margin: 25px 0; /* Adjusted margin */
 }
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-box input {
+  flex: 1;
+  padding-right: 40px; /* leave room for the icon */
+}
+
+.input-wrapper i {
+  position: absolute;
+  right: 15px;
+  cursor: pointer;
+  font-size: 18px;
+  color: rgba(255, 255, 255, 0.7);
+}
 
 .input-box input {
     width: calc(100% - 20px); /* Adjust width for padding */
