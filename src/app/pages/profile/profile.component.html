@@ -22,7 +22,7 @@
   <div class="modal-backdrop" *ngIf="editProfileModal">
     <div>
       <form [formGroup]="profileForm" (ngSubmit)="saveProfile()">
-        <label for="firstName">First Name</label>
+        <label for="firstName">First Name<span class="asterisk">*</span></label>
         <input id="firstName" type="text" formControlName="firstName" class="form-control" required />
         @if(profileForm.get('firstName')?.invalid && (profileForm.get('firstName')?.dirty ||
         profileForm.get('firstName')?.touched)){
@@ -42,7 +42,7 @@
 
         </div>
         }
-        <label for="lastName">Last Name</label>
+        <label for="lastName">Last Name<span class="asterisk">*</span></label>
         <input id="lastName" type="text" formControlName="lastName" class="form-control" required />
         @if(profileForm.get('lastName')?.invalid && (profileForm.get('lastName')?.dirty ||
         profileForm.get('lastName')?.touched)){
@@ -59,7 +59,7 @@
         </div>
         }
 
-        <label for="email">Email</label>
+        <label for="email">Email<span class="asterisk">*</span></label>
         <input id="email" type="email" formControlName="email" class="form-control" required />
         @if(profileForm.get('email')?.invalid && (profileForm.get('email')?.dirty ||
         profileForm.get('email')?.touched)){
@@ -75,7 +75,7 @@
           }
         </div>
         }
-        <label for="phone">Phone</label>
+        <label for="phone">Phone<span class="asterisk">*</span></label>
         <input type="text" formControlName="phone" class="form-control" required>
         @if(profileForm.get('phone')?.invalid && (profileForm.get('phone')?.dirty ||
         profileForm.get('phone')?.touched)){
@@ -83,6 +83,7 @@
           @if(profileForm.get('phone')?.hasError('required')){
           <div>Phone number is required</div>
           }
+          
           @if(profileForm.get('phone')?.hasError('pattern')){
           <div>Please enter a valid phone number</div>
           }
