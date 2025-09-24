@@ -152,7 +152,7 @@
           <div class="form-group">
             <label>Public Container Name *</label>
             <input type="text" [(ngModel)]="form.storageInfo.storageContainerNamePublic" name="publicContainer" required
-              placeholder="Enter public container" #publicContainerName="ngModel" minlength="3" maxlength="100" pattern="^[a-zA-Z]*$"/>
+              placeholder="Enter public container" #publicContainerName="ngModel" minlength="3" maxlength="100" pattern="^[a-zA-Z-]*$"/>
             @if (publicContainerName.invalid && (publicContainerName.dirty || publicContainerName.touched)) {
             <div class="alert">
               @if (publicContainerName.hasError('required')) {

@@ -95,9 +95,10 @@
 
       <p type="button" class="btn-close case close closeBtn" (click)="closeAddStaffModal()"> <span>&times;</span>
       </p>
+      
 
       <form (ngSubmit)="addStaff()" [formGroup]="addStaffForm">
-        <!-- Email -->
+              <!-- Email -->
         <label for="staffEmail">Email<span class="asterisk">*</span></label>
         <input id="staffEmail" type="email" placeholder="Enter Email" formControlName="staffEmail" required
           class="add-trainer-input" autocomplete="off" />
@@ -254,8 +255,9 @@
         <input id="staffQualification" type="text" placeholder="Qualification" formControlName="staffQualification"
           required class="add-trainer-input" autocomplete="off" />
 
+        <label for="mapUnit">Map unit location</label>
         <ng-multiselect-dropdown formControlName="unitLoc" [placeholder]="'Map Unit'" [settings]="dropdownSettings"
-          [data]="unitLocArray" (onSelect)="onItemSelect($event)" (onSelectAll)="onSelectAll($event)">
+          [data]="unitLocArray" (onSelect)="onItemSelect($event)" (onSelectAll)="onSelectAll($event)" style="margin-bottom: 50px;">
         </ng-multiselect-dropdown>
 
         <!-- <select name="" id="" (change)="OnUnitChange()" formControlName="unit">

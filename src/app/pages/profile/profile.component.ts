@@ -71,13 +71,10 @@ export class ProfileComponent implements OnInit {
     this.service.updateUser(id, userData).subscribe({
       next:(res:any)=>{
         console.log(res);
-        
       },
       error:(err:any)=>{
         console.log(err);
-        
       }
     })
   }
-
 }

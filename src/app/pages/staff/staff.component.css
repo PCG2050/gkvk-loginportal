@@ -308,6 +308,7 @@ button:disabled {
   display: block;
   opacity: 1;
   visibility: visible; /* Ensure it stacks above */
+  padding-bottom: 100px;
 }
 
 .modal h3 {
