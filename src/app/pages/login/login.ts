@@ -32,16 +32,15 @@ export class Login implements OnInit{
   route = inject(ActivatedRoute);
 
   ngOnInit(): void {
-    const hasRefreshed = this.route.snapshot.queryParamMap.get('refreshed')
-    if(!hasRefreshed){
-      this.router.navigate([],{
-        relativeTo:this.route,
-        queryParams:{refreshed:'true'},
-      })
-      .then(()=>{
-        window.location.reload();
-      })
-    }
+    const refreshFlag = 'loginPageRefreshed';
+
+        
+        if (sessionStorage.getItem(refreshFlag) === null) {
+            
+            sessionStorage.setItem(refreshFlag, 'true');
+
+            window.location.reload(); 
+        } 
   }
   onLogin() {
     this.loginError = null;
