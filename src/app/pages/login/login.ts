@@ -1,6 +1,6 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { FormsModule, NgModel } from '@angular/forms';
-import { Router, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { BasicAuthService } from '../../core/services/basic-auth.service';
 import { LocalStorageService } from '../../core/services/local-storage.service';
@@ -14,7 +14,7 @@ import { LoadingSpinnerComponent } from '../../shared/loading-spinner/loading-sp
   templateUrl: './login.html',
   styleUrl: './login.css'
 })
-export class Login {
+export class Login implements OnInit{
   loginObj: any = {
     email: '',
     password: ''
@@ -29,6 +29,20 @@ export class Login {
 
   loginError: string | null = null;
   showPassword: boolean = false;
+  route = inject(ActivatedRoute);
+
+  ngOnInit(): void {
+    const hasRefreshed = this.route.snapshot.queryParamMap.get('refreshed')
+    if(!hasRefreshed){
+      this.router.navigate([],{
+        relativeTo:this.route,
+        queryParams:{refreshed:'true'},
+      })
+      .then(()=>{
+        window.location.reload();
+      })
+    }
+  }
   onLogin() {
     this.loginError = null;
 this.isLoading = true;
