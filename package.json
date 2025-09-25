@@ -7,7 +7,7 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "build-deploy" : "ng build --prod --base-href /Dashboard/ --output-path"
+    "build-deploy" : "ng build --configuration production --base-href /dashboard/"
   },
   "private": true,
   "dependencies": {

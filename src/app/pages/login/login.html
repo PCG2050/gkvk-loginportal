@@ -1,95 +1,91 @@
-<div class="parent">
-  <img src="https://i.postimg.cc/MTRK7Thf/bg-form.jpg" alt="Background Image" />
 
-  <div class="container">
+    <div class="parent">
+      <div class="container">
+        <!-- The user-defined loading spinner component is not available, so this is commented out -->
+        <div *ngIf="isLoading">
+          <app-loading-spinner style="text-align:center;"></app-loading-spinner>
+        </div>
 
-    <div *ngIf="isLoading">
-     <app-loading-spinner  style="text-align:center ;"></app-loading-spinner>
-  </div>
-    <form #loginForm="ngForm" (ngSubmit)="onLogin()">
-      <h1>Login Portal</h1>
+        <form #loginForm="ngForm" (ngSubmit)="onLogin()">
+          <h1>Login Portal</h1>
 
-      <!-- Email -->
-      <div class="input-box">
-      <div class="input-wrapper">
-          <input
-          type="email"
-          name="email"
-          [(ngModel)]="loginObj.email"
-          placeholder="Email"
-          #email="ngModel"
-          required
-        />
-       
-      </div>
-       @if (email.invalid && (email.dirty || email.touched)) {
-          <div class="alert">
-            @if (email.hasError('required')) {
-              <div>Email is required</div>
-            }
-            @if (email.hasError('email')) {
-              <div>Please enter a valid email</div>
+          <!-- Email -->
+          <div class="input-box">
+            <div class="input-wrapper">
+              <input
+                type="email"
+                name="email"
+                [(ngModel)]="loginObj.email"
+                placeholder="Email"
+                #email="ngModel"
+                required
+              />
+            </div>
+            @if (email.invalid && (email.dirty || email.touched)) {
+              <div class="alert">
+                @if (email.hasError('required')) { <div>Email is required</div> }
+                @if (email.hasError('email')) { <div>Please enter a valid email</div> }
+              </div>
             }
           </div>
-        }
-      </div>
 
-      <!-- Password -->
-    <div class="input-box">
-  <div class="input-wrapper">
-    <input
-      [type]="getPasswordFieldType()"
-      name="password"
-      [(ngModel)]="loginObj.password"
-      #password="ngModel"
-      [ngModelOptions]="{ updateOn: 'blur' }"
-      required
-      [pattern]="passwordPattern"
-      placeholder="Password"
-    />
-    <i
-      class="bi"
-      [ngClass]="getPasswordIcon()"
-      (click)="togglePasswordVisibility()"
-    ></i>
-  </div>
-
-  @if (password.invalid && (password.dirty || password.touched)) {
-    <div class="alert">
-      @if (password.hasError('required')) {
-        <div>Password is required</div>
-      }
-      @if (password.hasError('pattern')) {
-         <div>* At least one lowercase<br>
-              * At least one uppercase
-              <br>
-              * At least one digit
-              <br>
-              * At least one special character
-              <br>
-              * Password must be between 8 to 16 characters
+          <!-- Password -->
+          <div class="input-box">
+            <div class="input-wrapper">
+              <input
+                [type]="getPasswordFieldType()"
+                name="password"
+                [(ngModel)]="loginObj.password"
+                #password="ngModel"
+                [ngModelOptions]="{ updateOn: 'blur' }"
+                required
+                [pattern]="passwordPattern"
+                placeholder="Password"
+              />
+              <!-- The bi-eye and bi-eye-slash classes would require a library like Bootstrap Icons -->
+              <i
+                class="bi"
+                [ngClass]="getPasswordIcon()"
+                (click)="togglePasswordVisibility()"
+              ></i>
             </div>
-      }
+            @if (password.invalid && (password.dirty || password.touched)) {
+              <div class="alert">
+                @if (password.hasError('required')) { <div>Password is required</div> }
+                @if (password.hasError('pattern')) {
+                  <div>
+                    * At least one lowercase<br>
+                    * At least one uppercase<br>
+                    * At least one digit<br>
+                    * At least one special character<br>
+                    * Password must be between 8 to 16 characters
+                  </div>
+                }
+              </div>
+            }
+          </div>
+
+          <!-- Remember & Link -->
+          <div class="remember">
+            <label>
+              <input
+                type="checkbox"
+                name="rememberMeCheckbox"
+                (change)="onSelectRememberMe($event)"
+                [(ngModel)]="rememberMe"
+              /> Remember me
+            </label>
+            <a href="#">Forgot password?</a>
+          </div>
+
+          <!-- Submit -->
+          <button class="btn" type="submit">Login</button>
+
+          <!-- Error -->
+          <div *ngIf="loginError" class="error-msg">
+            {{ loginError }}
+          </div>
+        </form>
+      </div>
     </div>
-  }
-</div>
-
-
-      <!-- Remember & Link -->
-      <div class="remember">
-        <label>
-          <input type="checkbox" (change)="onSelectRememberMe($event)" [(ngModel)]="rememberMe" /> Remember me
-        </label>
-        <a [routerLink]="['/Forgot-password']">Forgot password?</a>
-      </div>
-
-      <!-- Submit -->
-      <button class="btn" type="submit">Login</button>
-
-      <!-- Error -->
-      <div *ngIf="loginError" style="color: #ff6b6b; margin-top: 12px; text-align: center;">
-        {{ loginError }}
-      </div>
-    </form>
-  </div>
-</div>
+    
