@@ -13,24 +13,64 @@ import { ResetPasswordComponent } from './pages/password/reset-password/reset-pa
 
 
 export const routes: Routes = [
-  { path: '', redirectTo: 'login', pathMatch: 'full' },
-  { path: 'login', component: Login },
-  { path: 'forgot-password', component: ForgotPasswordComponent, title: 'Forgot Password' },
-  { path: 'reset-password', component: ResetPasswordComponent, title: 'Reset Password' },
-  {
-    path: '',
-    component: Layout,
-    canActivate: [AuthGuard],
-    children: [
-      { path: 'dashboard', component: Dashboard },
-      { path: 'manage-admins', component: ManageadminsComponent },
-      { path: 'edit-units', component: EditUnitsComponent },
-      { path: 'edit-trainers', component: EditTrainersComponent },
-      { path: 'staff', component: StaffComponent },
-      { path: 'profile', component: ProfileComponent },
-    ]
-  },
-  { path: '**', redirectTo: 'login' }
-];
+     {
+        path: '',
+        redirectTo: 'login',
+        pathMatch: 'full',
+    },
+    {
+        path: 'login',
+        component: Login
+    },
+    {
+        path: 'Forgot-password',
+        component: ForgotPasswordComponent,
+        title: 'ForgotPassword'
+    },
+    {
+        path: 'Reset-password',
+        component: ResetPasswordComponent,
+        title: 'Reset password'
+    },
+    {
+        path: '',
+        component: Layout,
+        canActivate: [AuthGuard],
+        children: [
+            {
+                path: 'dashboard',
+                component: Dashboard,
+                title: 'Dashboard'
+            },
+            {
+                path: 'manageAdmins',
+                component: ManageadminsComponent,
+                title: 'Manage Admins'
+            },
+            {
+                path: 'Edit-Units',
+                component: EditUnitsComponent,
+                title: 'Units'
+            },
+            {
+                path: 'Edit-Trainers',
+                component: EditTrainersComponent,
+                title: 'Trainers'
+            },
+            {
+                path: 'Staff',
+                component: StaffComponent,
+                title: 'Staff Management'
+            },
+            {
+                path: 'Profile',
+                component: ProfileComponent,
+                title: 'Profile'
+            },
+        ]
+
+    },
+  ];
+  
 
 
