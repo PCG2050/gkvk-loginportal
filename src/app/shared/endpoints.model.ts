@@ -14,8 +14,11 @@ export class Endpoints {
     static getUnitHead = Endpoints.getbaseURL()+'/api/UnitHeads';
     static staff = Endpoints.getbaseURL()+'/api/Trainers';
     static logout = Endpoints.getbaseURL()+'/api/Auth/logout';
+    static stuReports = Endpoints.getbaseURL() + '/api/STUReport/AllReports';
+    static stuThemeReportsByLocation = Endpoints.getbaseURL() + '/api/STUReport/Last3MonthsThemeReportByLocation';
+
     static getbaseURL() {
-    return 'https://gkvk-qaenv.azurewebsites.net';
-    // return 'https://localhost:7024'
+    //return 'https://gkvk-qaenv.azurewebsites.net';
+     return 'https://localhost:7024'
 }
 }

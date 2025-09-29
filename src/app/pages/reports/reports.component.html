@@ -1,0 +1,85 @@
+<div class="trainer-assignment-container">
+  <h2 class="section-title">Report Management</h2>
+
+  <!-- Unit dropdown -->
+  <label for="unitSelect" class="dropdown-label">Select Units</label>
+  <select id="unitSelect"
+          class="dropdown"
+          [(ngModel)]="selectedUnitId"
+          (change)="onUnitChange()">
+    <option value="" disabled selected>Select Unit Name</option>
+    <option *ngFor="let unit of units$ | async" [value]="unit.id">{{ unit.name }}</option>
+  </select>
+
+  <!-- Main report: Progress of Units -->
+  <div *ngIf="reports.length > 0" class="report-section">
+    <h3>PROGRESS OF UNITS</h3>
+    <p>Staff Training Unit (STU), GKVK</p>
+    <p>
+      Progress of {{ reports[0]?.theme }} Batch - {{ reports[0]?.batch }}, TP No. {{ reports[0]?.tpNo }} weekly classes
+    </p>
+
+    <table id="progressUnitsTable" class="report-table" border="1" cellspacing="0" cellpadding="5">
+      <thead>
+        <tr>
+          <th>Sl. No.</th>
+          <th>Week</th>
+          <th>Date</th>
+          <th>No. of Participants</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let report of reports">
+          <td>{{ report.slNo }}</td>
+          <td>{{ report.week }}</td>
+          <td>{{ report.date }}</td>
+          <td>{{ report.noOfParticipants }}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="mt-2">
+      <button (click)="downloadPDF('progress')" class="btn btn-primary">Download Progress PDF</button>
+    </div>
+  </div>
+
+  <!-- Theme report: SAMETI -->
+  <div *ngIf="themeReports.length > 0" class="report-section mt-4">
+    <h3>SAMETI</h3>
+    <table id="themeReportTable" class="report-table" border="1" cellspacing="0" cellpadding="5">
+      <thead>
+        <tr>
+          <th rowspan="2">Sl. No.</th>
+          <th rowspan="2">District</th>
+          <th colspan="2">Completed During the Month</th>
+          <th colspan="2">Ongoing Batches</th>
+          <th colspan="2">Started During the Month</th>
+        </tr>
+        <tr>
+          <th>No of Batches</th>
+          <th>No of Input Dealers</th>
+          <th>No of Batches</th>
+          <th>No of Input Dealers</th>
+          <th>No of Batches</th>
+          <th>No of Input Dealers</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of themeReports; let i = index">
+          <td>{{ i + 1 }}</td>
+          <td>{{ item.location }}</td>
+          <td>{{ item.completedBatches }}</td>
+          <td>{{ item.totalParticipants }}</td>
+          <td>{{ item.ongoingBatches }}</td>
+          <td>{{ item.totalParticipants }}</td>
+          <td>{{ item.startedBatches }}</td>
+          <td>{{ item.totalParticipants }}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="mt-2">
+      <button (click)="downloadPDF('theme')" class="btn btn-primary">Download SAMETI PDF</button>
+    </div>
+  </div>
+</div>

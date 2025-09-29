@@ -10,6 +10,7 @@ import { StaffComponent } from './pages/staff/staff.component';
 import { ProfileComponent } from './pages/profile/profile.component';
 import { ForgotPasswordComponent } from './pages/password/forgot-password/forgot-password.component';
 import { ResetPasswordComponent } from './pages/password/reset-password/reset-password.component';
+import { ReportsComponent } from './pages/reports/reports.component';
 
 
 export const routes: Routes = [
@@ -61,6 +62,11 @@ export const routes: Routes = [
                 path: 'Staff',
                 component: StaffComponent,
                 title: 'Staff Management'
+            },
+            {
+                path: 'records',
+                component: ReportsComponent,
+                title: 'Reports'
             },
             {
                 path: 'Profile',
