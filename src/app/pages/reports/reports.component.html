@@ -7,15 +7,17 @@
           class="dropdown"
           [(ngModel)]="selectedUnitId"
           (change)="onUnitChange()">
-    <option value="" disabled selected>Select Unit Name</option>
-    <option *ngFor="let unit of units$ | async" [value]="unit.id">{{ unit.name }}</option>
+    <option [ngValue]="null" disabled >Select Unit Name</option>
+    <option *ngFor="let unit of units$ | async" [ngValue]="unit.id">{{ unit.name }}</option>
   </select>
 
-  <!-- Main report: Progress of Units -->
+  <!-- Main report -->
   <div *ngIf="reports.length > 0" class="report-section">
     <h3>PROGRESS OF UNITS</h3>
-    <p>Staff Training Unit (STU), GKVK</p>
-    <p>
+    <p>{{ selectedUnitName }}, GKVK</p>
+
+    <!-- STU-specific header -->
+    <p *ngIf="selectedUnitId == 2">
       Progress of {{ reports[0]?.theme }} Batch - {{ reports[0]?.batch }}, TP No. {{ reports[0]?.tpNo }} weekly classes
     </p>
 
@@ -23,18 +25,47 @@
       <thead>
         <tr>
           <th>Sl. No.</th>
-          <th>Week</th>
+          <th *ngIf="selectedUnitId == 2">Week</th>
           <th>Date</th>
+          <th *ngIf="selectedUnitId == 1">Title</th>
+          <th *ngIf="selectedUnitId == 1">Duration</th>
+          <th *ngIf="selectedUnitId != 1 && selectedUnitId != 2">Title</th>
           <th>No. of Participants</th>
         </tr>
       </thead>
-      <tbody>
-        <tr *ngFor="let report of reports">
-          <td>{{ report.slNo }}</td>
-          <td>{{ report.week }}</td>
-          <td>{{ report.date }}</td>
-          <td>{{ report.noOfParticipants }}</td>
-        </tr>
+      <tbody [ngSwitch]="selectedUnitId">
+
+        <!-- STU -->
+        <ng-container *ngSwitchCase="2">
+          <tr *ngFor="let report of reports">
+            <td>{{ report.slNo }}</td>
+            <td>{{ report.week }}</td>
+            <td>{{ report.date }}</td>
+            <td>{{ report.noOfParticipants }}</td>
+          </tr>
+        </ng-container>
+
+        <!-- FTI -->
+        <ng-container *ngSwitchCase="1">
+          <tr *ngFor="let report of reports">
+            <td>{{ report.slNo }}</td>
+            <td>{{ report.date }}</td>
+            <td>{{ report.title }}</td>
+            <td>{{ report.duration }}</td>
+            <td>{{ report.noOfTrainees }}</td>
+          </tr>
+        </ng-container>
+
+        <!-- Generic fallback (units 3–10) -->
+        <ng-container *ngSwitchDefault>
+          <tr *ngFor="let report of reports">
+            <td>{{ report.slNo }}</td>
+            <td>{{ report.date }}</td>
+            <td>{{ report.title }}</td>
+            <td>{{ report.noOfParticipants || report.noOfTrainees }}</td>
+          </tr>
+        </ng-container>
+
       </tbody>
     </table>
 
@@ -43,43 +74,103 @@
     </div>
   </div>
 
-  <!-- Theme report: SAMETI -->
+  <!-- Theme report -->
   <div *ngIf="themeReports.length > 0" class="report-section mt-4">
-    <h3>SAMETI</h3>
+    <h3>{{ selectedUnitId == 2 ? 'SAMETI' : 'Theme Reports' }}</h3>
+
     <table id="themeReportTable" class="report-table" border="1" cellspacing="0" cellpadding="5">
       <thead>
-        <tr>
-          <th rowspan="2">Sl. No.</th>
-          <th rowspan="2">District</th>
-          <th colspan="2">Completed During the Month</th>
-          <th colspan="2">Ongoing Batches</th>
-          <th colspan="2">Started During the Month</th>
-        </tr>
-        <tr>
-          <th>No of Batches</th>
-          <th>No of Input Dealers</th>
-          <th>No of Batches</th>
-          <th>No of Input Dealers</th>
-          <th>No of Batches</th>
-          <th>No of Input Dealers</th>
-        </tr>
+        <!-- STU header -->
+        <ng-container *ngIf="selectedUnitId == 2">
+          <tr>
+            <th rowspan="2">Sl. No.</th>
+            <th rowspan="2">District</th>
+            <th colspan="2">Completed During the Month</th>
+            <th colspan="2">Ongoing Batches</th>
+            <th colspan="2">Started During the Month</th>
+          </tr>
+          <tr>
+            <th>No of Batches</th>
+            <th>No of Input Dealers</th>
+            <th>No of Batches</th>
+            <th>No of Input Dealers</th>
+            <th>No of Batches</th>
+            <th>No of Input Dealers</th>
+          </tr>
+        </ng-container>
+
+        <!-- FTI header -->
+        <ng-container *ngIf="selectedUnitId == 1">
+          <tr>
+            <th>Sl. No.</th>
+            <th>Category</th>
+            <th>Collaboration</th>
+            <th>Completed</th>
+            <th>Ongoing</th>
+            <th>Started</th>
+            <th>Total Participants</th>
+          </tr>
+        </ng-container>
+
+        <!-- Generic header -->
+        <ng-container *ngIf="selectedUnitId != 1 && selectedUnitId != 2">
+          <tr>
+            <th>Sl. No.</th>
+            <th>Category/Location</th>
+            <th>Completed</th>
+            <th>Ongoing</th>
+            <th>Started</th>
+            <th>Total Participants</th>
+          </tr>
+        </ng-container>
       </thead>
-      <tbody>
-        <tr *ngFor="let item of themeReports; let i = index">
-          <td>{{ i + 1 }}</td>
-          <td>{{ item.location }}</td>
-          <td>{{ item.completedBatches }}</td>
-          <td>{{ item.totalParticipants }}</td>
-          <td>{{ item.ongoingBatches }}</td>
-          <td>{{ item.totalParticipants }}</td>
-          <td>{{ item.startedBatches }}</td>
-          <td>{{ item.totalParticipants }}</td>
-        </tr>
+
+      <tbody [ngSwitch]="selectedUnitId">
+
+        <!-- STU -->
+        <ng-container *ngSwitchCase="2">
+          <tr *ngFor="let item of themeReports; let i = index">
+            <td>{{ i + 1 }}</td>
+            <td>{{ item.location }}</td>
+            <td>{{ item.completedBatches }}</td>
+            <td>{{ item.totalParticipants }}</td>
+            <td>{{ item.ongoingBatches }}</td>
+            <td>{{ item.totalParticipants }}</td>
+            <td>{{ item.startedBatches }}</td>
+            <td>{{ item.totalParticipants }}</td>
+          </tr>
+        </ng-container>
+
+        <!-- FTI -->
+        <ng-container *ngSwitchCase="1">
+          <tr *ngFor="let item of themeReports; let i = index">
+            <td>{{ i + 1 }}</td>
+            <td>{{ item.category }}</td>
+            <td>{{ item.collaboration }}</td>
+            <td>{{ item.completedPrograms }}</td>
+            <td>{{ item.ongoingPrograms }}</td>
+            <td>{{ item.startedPrograms }}</td>
+            <td>{{ item.totalParticipants }}</td>
+          </tr>
+        </ng-container>
+
+        <!-- Generic fallback -->
+        <ng-container *ngSwitchDefault>
+          <tr *ngFor="let item of themeReports; let i = index">
+            <td>{{ i + 1 }}</td>
+            <td>{{ item.category || item.location }}</td>
+            <td>{{ item.completedBatches || item.completedPrograms }}</td>
+            <td>{{ item.ongoingBatches || item.ongoingPrograms }}</td>
+            <td>{{ item.startedBatches || item.startedPrograms }}</td>
+            <td>{{ item.totalParticipants }}</td>
+          </tr>
+        </ng-container>
+
       </tbody>
     </table>
 
     <div class="mt-2">
-      <button (click)="downloadPDF('theme')" class="btn btn-primary">Download SAMETI PDF</button>
+      <button (click)="downloadPDF('theme')" class="btn btn-primary">Download Theme PDF</button>
     </div>
   </div>
 </div>

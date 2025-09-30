@@ -14,8 +14,40 @@ export class Endpoints {
     static getUnitHead = Endpoints.getbaseURL()+'/api/UnitHeads';
     static staff = Endpoints.getbaseURL()+'/api/Trainers';
     static logout = Endpoints.getbaseURL()+'/api/Auth/logout';
+
+    //   ✅ STU Endpoints
     static stuReports = Endpoints.getbaseURL() + '/api/STUReport/AllReports';
     static stuThemeReportsByLocation = Endpoints.getbaseURL() + '/api/STUReport/Last3MonthsThemeReportByLocation';
+
+      // ✅ FTI Endpoints
+  static ftiReports = Endpoints.getbaseURL() + '/api/FTIReport/MonthlyReports';
+  static ftiThemeReports = Endpoints.getbaseURL() + '/api/FTIReport/MonthlyThemeReports';
+
+
+  static fiuReports = Endpoints.getbaseURL() + '/api/FiuReport/MonthlyReports';
+  static fiuThemeReports = Endpoints.getbaseURL() + '/api/FiuReport/MonthlyThemeReports';
+
+  static ibtvReports = Endpoints.getbaseURL() + '/api/IbtvReport/MonthlyReports';
+  static ibtvThemeReports = Endpoints.getbaseURL() + '/api/IbtvReport/MonthlyThemeReports';
+
+  static aticReports = Endpoints.getbaseURL() + '/api/AticReport/MonthlyReports';
+    static aticThemeReports = Endpoints.getbaseURL() + '/api/AticReport/MonthlyThemeReports';
+
+    static deuReports = Endpoints.getbaseURL() + '/api/DeuReport/MonthlyReports';
+    static deuThemeReports = Endpoints.getbaseURL() + '/api/DeuReport/MonthlyThemeReports';
+
+    static asmReports = Endpoints.getbaseURL() + '/api/AsmReport/MonthlyReports';
+    static asmThemeReports = Endpoints.getbaseURL() + '/api/AsmReport/MonthlyThemeReports';
+
+    static naepReports = Endpoints.getbaseURL() + '/api/NaepReport/MonthlyReports';
+    static naepThemeReports = Endpoints.getbaseURL() + '/api/NaepReport/MonthlyThemeReports';
+
+    static eeuReports = Endpoints.getbaseURL() + '/api/EeuReport/MonthlyReports';
+    static eeuThemeReports = Endpoints.getbaseURL() + '/api/EeuReport/MonthlyThemeReports';
+
+    static kvkReports = Endpoints.getbaseURL() + '/api/KvkReport/MonthlyReports';
+    static kvkThemeReports = Endpoints.getbaseURL() + '/api/KvkReport/MonthlyThemeReports';
+
 
     static getbaseURL() {
     //return 'https://gkvk-qaenv.azurewebsites.net';
