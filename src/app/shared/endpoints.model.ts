@@ -24,11 +24,11 @@ export class Endpoints {
   static ftiThemeReports = Endpoints.getbaseURL() + '/api/FTIReport/MonthlyThemeReports';
 
 
-  static fiuReports = Endpoints.getbaseURL() + '/api/FiuReport/MonthlyReports';
-  static fiuThemeReports = Endpoints.getbaseURL() + '/api/FiuReport/MonthlyThemeReports';
+  static fiuReports = Endpoints.getbaseURL() + '/api/FIUReport/MonthlyReports';
+  static fiuOtherActivities = Endpoints.getbaseURL() + '/api/FIUReport/OtherActivities';
 
-  static ibtvReports = Endpoints.getbaseURL() + '/api/IbtvReport/MonthlyReports';
-  static ibtvThemeReports = Endpoints.getbaseURL() + '/api/IbtvReport/MonthlyThemeReports';
+  static ibtvReports = Endpoints.getbaseURL() + '/api/IBTVAReport/MonthlyReport';
+  static ibtvThemeReports = Endpoints.getbaseURL() + '/api/IBTVAReport/MonthlyThemeReports';
 
   static aticReports = Endpoints.getbaseURL() + '/api/AticReport/MonthlyReports';
     static aticThemeReports = Endpoints.getbaseURL() + '/api/AticReport/MonthlyThemeReports';

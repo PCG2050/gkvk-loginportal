@@ -7,13 +7,17 @@
           class="dropdown"
           [(ngModel)]="selectedUnitId"
           (change)="onUnitChange()">
-    <option [ngValue]="null" disabled >Select Unit Name</option>
+    <option [ngValue]="null" disabled>Select Unit Name</option>
     <option *ngFor="let unit of units$ | async" [ngValue]="unit.id">{{ unit.name }}</option>
   </select>
 
   <!-- Main report -->
   <div *ngIf="reports.length > 0" class="report-section">
-    <h3>PROGRESS OF UNITS</h3>
+    <h3>
+      <ng-container *ngIf="selectedUnitId == 3">FIU Monthly Report</ng-container>
+      <ng-container *ngIf="selectedUnitId == 5">ATIC – Sale of Inputs</ng-container>
+      <ng-container *ngIf="selectedUnitId != 3">PROGRESS OF UNITS</ng-container>
+    </h3>
     <p>{{ selectedUnitName }}, GKVK</p>
 
     <!-- STU-specific header -->
@@ -23,17 +27,110 @@
 
     <table id="progressUnitsTable" class="report-table" border="1" cellspacing="0" cellpadding="5">
       <thead>
-        <tr>
-          <th>Sl. No.</th>
-          <th *ngIf="selectedUnitId == 2">Week</th>
-          <th>Date</th>
-          <th *ngIf="selectedUnitId == 1">Title</th>
-          <th *ngIf="selectedUnitId == 1">Duration</th>
-          <th *ngIf="selectedUnitId != 1 && selectedUnitId != 2">Title</th>
-          <th>No. of Participants</th>
-        </tr>
+        <!--KVK header-->
+        <!--NAEP header-->
+        <!--EEU header-->
+        <!--ATIC header -->       
+        <ng-container *ngIf="selectedUnitId == 5">
+         <tr>
+           <th>Sl. No.</th>
+           <th>Particulars</th>
+           <th>Unit</th>
+           <th>Quantity</th>
+           <th>Amount (Rs.)</th>
+           <th>Category</th>
+           <th>Theme</th>
+         </tr>
+        </ng-container>
+        
+        <!--DEU header-->
+        <!--IBTVA header-->        
+        <ng-container *ngIf="selectedUnitId == 4">
+           <tr>
+             <th>Sl. No.</th>
+             <th>Date</th>
+             <th>Title</th>
+             <th>Duration</th>
+             <th>No. of Participants</th>
+           </tr>
+          </ng-container>
+
+        <!-- FIU header -->
+        <ng-container *ngIf="selectedUnitId == 3">
+          <tr>
+            <th>Sl. No.</th>
+            <th>Activity</th>
+            <th>No.</th>
+          </tr>
+        </ng-container>
+
+        <!-- STU header -->
+        <ng-container *ngIf="selectedUnitId == 2">
+          <tr>
+            <th>Sl. No.</th>
+            <th>Week</th>
+            <th>Date</th>
+            <th>No. of Participants</th>
+          </tr>
+        </ng-container>
+
+        <!-- FTI header -->
+        <ng-container *ngIf="selectedUnitId == 1">
+          <tr>
+            <th>Sl. No.</th>
+            <th>Date</th>
+            <th>Title</th>
+            <th>Duration</th>
+            <th>No. of Trainees</th>
+          </tr>
+        </ng-container>
+
+        <!-- Generic header -->
+        <ng-container *ngIf="selectedUnitId != 1 && selectedUnitId != 2 && selectedUnitId != 3 && selectedUnitId!=4 && selectedUnitId != 5">
+          <tr>
+            <th>Sl. No.</th>
+            <th>Date</th>
+            <th>Title</th>
+            <th>No. of Participants</th>
+          </tr>
+        </ng-container>
       </thead>
+
       <tbody [ngSwitch]="selectedUnitId">
+
+        
+        <!-- IBT&VA -->
+      <ng-container *ngSwitchCase="4">
+        <tr *ngFor="let report of reports">
+          <td>{{ report.slNo }}</td>
+          <td>{{ report.date }}</td>
+          <td>{{ report.title }}</td>
+          <td>{{ report.duration }}</td>
+          <td>{{ report.noOfParticipants }}</td>
+        </tr>
+      </ng-container>
+
+        <!-- ATIC -->
+        <ng-container *ngSwitchCase="5">
+          <tr *ngFor="let report of reports">
+            <td>{{ report.slNo }}</td>
+            <td>{{ report.particulars }}</td>
+            <td>{{ report.unit }}</td>
+            <td>{{ report.quantity }}</td>
+            <td>{{ report.amount | number:'1.0-2' }}</td>
+            <td>{{ report.category }}</td>
+            <td>{{ report.theme }}</td>
+          </tr>
+        </ng-container>
+
+        <!-- FIU -->
+        <ng-container *ngSwitchCase="3">
+          <tr *ngFor="let report of reports">
+            <td>{{ report.slNo }}</td>
+            <td>{{ report.activity }}</td>
+            <td>{{ report.no }}</td>
+          </tr>
+        </ng-container>
 
         <!-- STU -->
         <ng-container *ngSwitchCase="2">
@@ -56,7 +153,7 @@
           </tr>
         </ng-container>
 
-        <!-- Generic fallback (units 3–10) -->
+        <!-- Generic fallback -->
         <ng-container *ngSwitchDefault>
           <tr *ngFor="let report of reports">
             <td>{{ report.slNo }}</td>
@@ -70,16 +167,63 @@
     </table>
 
     <div class="mt-2">
-      <button (click)="downloadPDF('progress')" class="btn btn-primary">Download Progress PDF</button>
+      <button *ngIf="selectedUnitId == 3"
+              (click)="downloadPDF('progress')"
+              class="btn btn-primary">Download FIU Monthly PDF</button>
+      <button *ngIf="selectedUnitId == 4"
+              (click)="downloadPDF('progress')"
+              class="btn btn-primary">Download IBT & VA Progress PDF</button>
+      <button *ngIf="selectedUnitId == 5"
+              (click)="downloadPDF('progress')"
+              class="btn btn-primary">Download ATIC – Sale of Inputs PDF</button>
+      <button *ngIf="selectedUnitId != 3 && selectedUnitId!=4 && selectedUnitId != 5 "
+              (click)="downloadPDF('progress')"
+              class="btn btn-primary">Download Progress PDF</button>
     </div>
   </div>
 
   <!-- Theme report -->
   <div *ngIf="themeReports.length > 0" class="report-section mt-4">
-    <h3>{{ selectedUnitId == 2 ? 'SAMETI' : 'Theme Reports' }}</h3>
+    <h3>
+      <ng-container *ngIf="selectedUnitId == 2">SAMETI</ng-container>
+      <ng-container *ngIf="selectedUnitId == 3">FIU Other Activities</ng-container>
+      <ng-container *ngIf="selectedUnitId == 4">b) Total Production of Bakery and Value Added Products</ng-container>
+      <ng-container *ngIf="selectedUnitId == 5">ATIC ExtensionActivities</ng-container>
+      <ng-container *ngIf="selectedUnitId != 2 && selectedUnitId != 3 && selectedUnitId != 4 && selectedUnitId !=5">Theme Reports</ng-container>
+    </h3>
 
     <table id="themeReportTable" class="report-table" border="1" cellspacing="0" cellpadding="5">
       <thead>
+          <!-- ATIC header -->
+        <ng-container *ngIf="selectedUnitId == 5">
+          <tr>
+            <th>Sl. No.</th>
+            <th>Title</th>
+            <th>Category</th>
+            <th>Quantity</th>
+          </tr>
+        </ng-container>
+
+         <!-- IBT & VA Theme Header -->
+        <ng-container *ngIf="selectedUnitId == 4">
+          <tr>
+            <th>Sl. No.</th>
+            <th>Product Type (Theme)</th>
+            <th>Particulars</th>
+            <th>Quantity</th>
+            <th>Amount (Rs.)</th>
+          </tr>
+        </ng-container>
+
+        <!-- FIU Other Activities header -->
+        <ng-container *ngIf="selectedUnitId == 3">
+          <tr>
+            <th>Sl. No.</th>
+            <th>Title</th>
+            <th>Description</th>
+          </tr>
+        </ng-container>
+
         <!-- STU header -->
         <ng-container *ngIf="selectedUnitId == 2">
           <tr>
@@ -113,7 +257,7 @@
         </ng-container>
 
         <!-- Generic header -->
-        <ng-container *ngIf="selectedUnitId != 1 && selectedUnitId != 2">
+        <ng-container *ngIf="selectedUnitId != 1 && selectedUnitId != 2 && selectedUnitId != 3 && selectedUnitId !=4">
           <tr>
             <th>Sl. No.</th>
             <th>Category/Location</th>
@@ -126,6 +270,42 @@
       </thead>
 
       <tbody [ngSwitch]="selectedUnitId">
+
+         <!-- ATIC Extension Activities -->
+        <ng-container *ngSwitchCase="5">
+          <tr *ngFor="let item of themeReports; let i = index">
+            <td>{{ i + 1 }}</td>
+            <td>{{ item.title }}</td>
+            <td>{{ item.category }}</td>
+            <td>{{ item.quantity }}</td>
+          </tr>
+        </ng-container>
+
+          <!-- IBT & VA -->
+        <ng-container *ngSwitchCase="4">
+          <ng-container *ngFor="let theme of themeReports; let i = index">
+            <tr *ngFor="let item of theme.items; let j = index">
+              <td>{{ j + 1 }}</td>
+              <td>{{ theme.theme }}</td>
+              <td>{{ item.product }}</td>
+              <td>{{ item.quantity }}</td>
+              <td>{{ item.amount | number:'1.0-2' }}</td>
+            </tr>
+            <tr class="font-semibold">
+              <td colspan="4" class="text-right">Total ({{ theme.theme }})</td>
+              <td>{{ theme.totalAmount | number:'1.0-2' }}</td>
+            </tr>
+          </ng-container>
+        </ng-container>
+
+        <!-- FIU Other Activities -->
+        <ng-container *ngSwitchCase="3">
+          <tr *ngFor="let item of themeReports; let i = index">
+            <td>{{ i + 1 }}</td>
+            <td>{{ item.title }}</td>
+            <td>{{ item.description }}</td>
+          </tr>
+        </ng-container>
 
         <!-- STU -->
         <ng-container *ngSwitchCase="2">
@@ -170,7 +350,22 @@
     </table>
 
     <div class="mt-2">
-      <button (click)="downloadPDF('theme')" class="btn btn-primary">Download Theme PDF</button>
+      <button *ngIf="selectedUnitId == 3"
+              (click)="downloadPDF('theme')"
+              class="btn btn-primary">Download FIU Other Activities PDF</button>
+
+      <button *ngIf="selectedUnitId == 4"
+              (click)="downloadPDF('theme')"
+              class="btn btn-primary">Download IBT & VA Theme Report PDF</button>
+      
+      <button *ngIf="selectedUnitId == 5"
+              (click)="downloadPDF('theme')"
+              class="btn btn-primary">Download ATIC Extension Activities PDF</button>
+
+      
+      <button *ngIf="selectedUnitId != 3 && selectedUnitId !=4 && selectedUnitId != 5"
+              (click)="downloadPDF('theme')"
+              class="btn btn-primary">Download Theme PDF</button>
     </div>
   </div>
 </div>
