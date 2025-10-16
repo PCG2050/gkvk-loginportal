@@ -50,7 +50,7 @@ export class Endpoints {
 
 
     static getbaseURL() {
-    //return 'https://gkvk-qaenv.azurewebsites.net';
-     return 'https://localhost:7024'
+    return 'https://gkvk-qaenv.azurewebsites.net';
+    //  return 'https://localhost:7024'
 }
 }
