@@ -29,24 +29,25 @@ export class Endpoints {
 
   static ibtvReports = Endpoints.getbaseURL() + '/api/IBTVAReport/MonthlyReport';
   static ibtvThemeReports = Endpoints.getbaseURL() + '/api/IBTVAReport/MonthlyThemeReports';
+  static ibtvExtensionActivities = Endpoints.getbaseURL() +'/api/IBTVAReport/ExtensionActivities';
 
   static aticReports = Endpoints.getbaseURL() + '/api/AticReport/MonthlyReports';
-    static aticThemeReports = Endpoints.getbaseURL() + '/api/AticReport/MonthlyThemeReports';
+  static aticThemeReports = Endpoints.getbaseURL() + '/api/AticReport/MonthlyThemeReports';
 
-    static deuReports = Endpoints.getbaseURL() + '/api/DeuReport/MonthlyReports';
-    static deuThemeReports = Endpoints.getbaseURL() + '/api/DeuReport/MonthlyThemeReports';
+  static deuReports = Endpoints.getbaseURL() + '/api/DeuReport/MonthlyReports';
+  static deuThemeReports = Endpoints.getbaseURL() + '/api/DeuReport/MonthlyThemeReports';
 
-    static asmReports = Endpoints.getbaseURL() + '/api/AsmReport/MonthlyReports';
-    static asmThemeReports = Endpoints.getbaseURL() + '/api/AsmReport/MonthlyThemeReports';
+  static asmReports = Endpoints.getbaseURL() + '/api/AsmReport/MonthlyReports';
+  static asmThemeReports = Endpoints.getbaseURL() + '/api/AsmReport/MonthlyThemeReports';
 
-    static naepReports = Endpoints.getbaseURL() + '/api/NaepReport/MonthlyReports';
-    static naepThemeReports = Endpoints.getbaseURL() + '/api/NaepReport/MonthlyThemeReports';
+  static naepReports = Endpoints.getbaseURL() + '/api/NaepReport/MonthlyReports';
+  static naepThemeReports = Endpoints.getbaseURL() + '/api/NaepReport/MonthlyThemeReports';
 
-    static eeuReports = Endpoints.getbaseURL() + '/api/EeuReport/MonthlyReports';
-    static eeuThemeReports = Endpoints.getbaseURL() + '/api/EeuReport/MonthlyThemeReports';
+  static eeuReports = Endpoints.getbaseURL() + '/api/EeuReport/MonthlyReports';
+  static eeuThemeReports = Endpoints.getbaseURL() + '/api/EeuReport/MonthlyThemeReports';
 
-    static kvkReports = Endpoints.getbaseURL() + '/api/KvkReport/MonthlyReports';
-    static kvkThemeReports = Endpoints.getbaseURL() + '/api/KvkReport/MonthlyThemeReports';
+  static kvkReports = Endpoints.getbaseURL() + '/api/KvkReport/MonthlyReports';
+  static kvkThemeReports = Endpoints.getbaseURL() + '/api/KvkReport/MonthlyThemeReports';
 
 
     static getbaseURL() {
