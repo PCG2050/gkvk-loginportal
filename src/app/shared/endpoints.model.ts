@@ -49,6 +49,9 @@ export class Endpoints {
   static kvkReports = Endpoints.getbaseURL() + '/api/KvkReport/MonthlyReports';
   static kvkThemeReports = Endpoints.getbaseURL() + '/api/KvkReport/MonthlyThemeReports';
 
+  static filterOptions = Endpoints.getbaseURL() + '/api/admin/reports/filter-options';
+  static generateReport = Endpoints.getbaseURL() + '/api/admin/reports/generate';
+
 
     static getbaseURL() {
     return 'https://gkvk-qaenv.azurewebsites.net';

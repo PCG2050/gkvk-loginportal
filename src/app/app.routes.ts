@@ -64,7 +64,7 @@ export const routes: Routes = [
                 title: 'Staff Management'
             },
             {
-                path: 'records',
+                path: 'reports',
                 component: ReportsComponent,
                 title: 'Reports'
             },

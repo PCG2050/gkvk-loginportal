@@ -1,487 +1,221 @@
-<div class="trainer-assignment-container">
-  <h2 class="section-title">Report Management</h2>
+<div class="report-container">
+  <h1>Admin Report</h1>
 
-  <!-- Unit dropdown -->
-  <label for="unitSelect" class="dropdown-label">Select Units</label>
-  <select id="unitSelect"
-          class="dropdown"
-          [(ngModel)]="selectedUnitId"
-          (change)="onUnitChange()">
-    <option [ngValue]="null" disabled>Select Unit Name</option>
-    <option *ngFor="let unit of units$ | async" [ngValue]="unit.id">{{ unit.name }}</option>
-  </select>
-
-  <!-- Main report -->
-  <div *ngIf="reports.length > 0" class="report-section">
-    <h3>
-      <ng-container *ngIf="selectedUnitId == 3">FIU Monthly Report</ng-container>
-      <ng-container *ngIf="selectedUnitId == 4">a) Training Programmes Organized</ng-container>
-      <ng-container *ngIf="selectedUnitId == 5">ATIC – Sale of Inputs</ng-container>
-      <ng-container *ngIf="selectedUnitId != 3 && selectedUnitId != 4 && selectedUnitId != 5">PROGRESS OF UNITS</ng-container>
-    </h3>
-    <p>{{ selectedUnitName }}, GKVK</p>
-
-    <!-- STU-specific header -->
-    <p *ngIf="selectedUnitId == 2">
-      Progress of {{ reports[0]?.theme }} Batch - {{ reports[0]?.batch }}, TP No. {{ reports[0]?.tpNo }} weekly classes
-    </p>
-
-    <table id="progressUnitsTable" class="report-table" border="1" cellspacing="0" cellpadding="5">
-      <thead>
-        <!-- ATIC header -->       
-        <ng-container *ngIf="selectedUnitId == 5">
-         <tr>
-           <th>Sl. No.</th>
-           <th>Particulars</th>
-           <th>Unit</th>
-           <th>Quantity</th>
-           <th>Amount (Rs.)</th>
-           <th>Category</th>
-           <th>Theme</th>
-         </tr>
-        </ng-container>
-        
-        <!-- IBTVA header -->        
-        <ng-container *ngIf="selectedUnitId == 4">
-           <tr>
-             <th>Sl. No.</th>
-             <th>Date</th>
-             <th>Title</th>
-             <th>Duration</th>
-             <th>No. of Participants</th>
-           </tr>
-          </ng-container>
-
-        <!-- FIU header -->
-        <ng-container *ngIf="selectedUnitId == 3">
-          <tr>
-            <th>Sl. No.</th>
-            <th>Activity</th>
-            <th>No.</th>
-          </tr>
-        </ng-container>
-
-        <!-- STU header -->
-        <ng-container *ngIf="selectedUnitId == 2">
-          <tr>
-            <th>Sl. No.</th>
-            <th>Week</th>
-            <th>Date</th>
-            <th>No. of Participants</th>
-          </tr>
-        </ng-container>
-
-        <!-- FTI header -->
-        <ng-container *ngIf="selectedUnitId == 1">
-          <tr>
-            <th>Sl. No.</th>
-            <th>Date</th>
-            <th>Title</th>
-            <th>Duration</th>
-            <th>No. of Trainees</th>
-          </tr>
-        </ng-container>
-
-        <!-- Generic header -->
-        <ng-container *ngIf="selectedUnitId != 1 && selectedUnitId != 2 && selectedUnitId != 3 && selectedUnitId!=4 && selectedUnitId != 5">
-          <tr>
-            <th>Sl. No.</th>
-            <th>Date</th>
-            <th>Title</th>
-            <th>No. of Participants</th>
-          </tr>
-        </ng-container>
-      </thead>
-
-      <tbody [ngSwitch]="selectedUnitId">
-        <!-- IBT&VA -->
-        <ng-container *ngSwitchCase="4">
-          <tr *ngFor="let report of reports; let i = index">
-            <td>{{ i + 1 }}</td>
-            <td>{{ report.date }}</td>
-            <td>{{ report.title }}</td>
-            <td>{{ report.duration }}</td>
-            <td>{{ report.noOfParticipants }}</td>
-          </tr>
-        </ng-container>
-
-        <!-- ATIC -->
-        <ng-container *ngSwitchCase="5">
-          <tr *ngFor="let report of reports">
-            <td>{{ report.slNo }}</td>
-            <td>{{ report.particulars }}</td>
-            <td>{{ report.unit }}</td>
-            <td>{{ report.quantity }}</td>
-            <td>{{ report.amount | number:'1.0-2' }}</td>
-            <td>{{ report.category }}</td>
-            <td>{{ report.theme }}</td>
-          </tr>
-        </ng-container>
-
-        <!-- FIU -->
-        <ng-container *ngSwitchCase="3">
-          <tr *ngFor="let report of reports">
-            <td>{{ report.slNo }}</td>
-            <td>{{ report.activity }}</td>
-            <td>{{ report.no }}</td>
-          </tr>
-        </ng-container>
-
-        <!-- STU -->
-        <ng-container *ngSwitchCase="2">
-          <tr *ngFor="let report of reports">
-            <td>{{ report.slNo }}</td>
-            <td>{{ report.week }}</td>
-            <td>{{ report.date }}</td>
-            <td>{{ report.noOfParticipants }}</td>
-          </tr>
-        </ng-container>
-
-        <!-- FTI -->
-        <ng-container *ngSwitchCase="1">
-          <tr *ngFor="let report of reports">
-            <td>{{ report.slNo }}</td>
-            <td>{{ report.date }}</td>
-            <td>{{ report.title }}</td>
-            <td>{{ report.duration }}</td>
-            <td>{{ report.noOfTrainees }}</td>
-          </tr>
-        </ng-container>
-
-        <!-- Generic fallback -->
-        <ng-container *ngSwitchDefault>
-          <tr *ngFor="let report of reports">
-            <td>{{ report.slNo }}</td>
-            <td>{{ report.date }}</td>
-            <td>{{ report.title }}</td>
-            <td>{{ report.noOfParticipants || report.noOfTrainees }}</td>
-          </tr>
-        </ng-container>
-      </tbody>
-    </table>
-
-    <div class="mt-2">
-      <button *ngIf="selectedUnitId == 3"
-              (click)="downloadPDF('progress')"
-              class="btn btn-primary">Download FIU Monthly PDF</button>
-      <button *ngIf="selectedUnitId == 4"
-              (click)="downloadPDF('progress')"
-              class="btn btn-primary">Download IBT & VA Progress PDF</button>
-      <button *ngIf="selectedUnitId == 5"
-              (click)="downloadPDF('progress')"
-              class="btn btn-primary">Download ATIC – Sale of Inputs PDF</button>
-      <button *ngIf="selectedUnitId != 3 && selectedUnitId!=4 && selectedUnitId != 5 "
-              (click)="downloadPDF('progress')"
-              class="btn btn-primary">Download Progress PDF</button>
+  <!-- Filters -->
+  <div class="filters-section" *ngIf="filterOptions">
+    <div class="filter-group">
+      <label>Unit:</label>
+      <select [(ngModel)]="selectedUnit" (change)="onUnitChange()">
+        <option [value]="null">Select Unit</option>
+        <option *ngFor="let unit of filterOptions.units" [value]="unit.unitId">
+          {{ unit.unitName }}
+        </option>
+      </select>
     </div>
+
+    <div class="filter-group" *ngIf="selectedUnit">
+      <label>Location:</label>
+      <select [(ngModel)]="selectedLocation">
+        <option [value]="null">Select Location</option>
+        <option *ngFor="let loc of availableLocations" [value]="loc.id">
+          {{ loc.name }} ({{ loc.region }})
+        </option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label>Month:</label>
+      <select [(ngModel)]="selectedMonth">
+        <option *ngFor="let m of months" [value]="m.value">{{ m.name }}</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label>Year:</label>
+      <select [(ngModel)]="selectedYear">
+        <option *ngFor="let y of filterOptions.years" [value]="y">{{ y }}</option>
+      </select>
+    </div>
+
+    <button class="btn-generate" (click)="generateReport()" [disabled]="!selectedLocation || loading">
+      {{ loading ? 'Generating...' : 'Generate Report' }}
+    </button>
   </div>
 
-  <!-- Theme report -->
-  <div *ngIf="themeReports.length > 0" class="report-section mt-4">
-    <h3>
-      <ng-container *ngIf="selectedUnitId == 2">SAMETI</ng-container>
-      <ng-container *ngIf="selectedUnitId == 3">FIU Other Activities</ng-container>
-      <ng-container *ngIf="selectedUnitId == 4">b) Total Production of Bakery and Value Added Products</ng-container>
-      <ng-container *ngIf="selectedUnitId == 5">ATIC Extension Activities</ng-container>
-      <ng-container *ngIf="selectedUnitId != 2 && selectedUnitId != 3 && selectedUnitId != 4 && selectedUnitId !=5">Theme Reports</ng-container>
-    </h3>
+  <!-- Error Message -->
+  <div class="error-message" *ngIf="error">
+    {{ error }}
+  </div>
 
-    <table id="themeReportTable" class="report-table" border="1" cellspacing="0" cellpadding="5">
-      <thead>
-        <!-- ATIC header -->
-        <ng-container *ngIf="selectedUnitId == 5">
+  <!-- Report Display -->
+  <div class="report-content" *ngIf="reportData">
+    
+    <!-- Header -->
+    <div class="report-header">
+      <h2>{{ reportData.unitName }}</h2>
+      <p>{{ reportData.unitLocationName }}</p>
+      <p>{{ reportData.monthName }} {{ reportData.year }}</p>
+      <p class="total">Total Approved Entries: {{ reportData.totalEntries }}</p>
+      <button class="btn-download" (click)="downloadPDF()">
+        📥 Download PDF Report
+      </button>
+    </div>
+
+    <!-- PROGRAMS -->
+    <div class="table-section">
+      <h3>PROGRAMS ({{ reportData.programs.length }})</h3>
+      <table *ngIf="reportData.programs.length > 0; else noPrograms">
+        <thead>
           <tr>
-            <th>Sl. No.</th>
+            <th>Program Type</th>
             <th>Title</th>
+            <th>Date From - To</th>
+            <th>Duration</th>
+            <th>Participants</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let p of reportData.programs">
+            <td>{{ p.programType }}</td>
+            <td>{{ p.title }}</td>
+            <td>{{ p.dateFrom }} - {{ p.dateTo }}</td>
+            <td>{{ p.duration }} days</td>
+            <td>{{ p.participants }}</td>
+            <td>{{ p.status }}</td>
+          </tr>
+        </tbody>
+      </table>
+      <ng-template #noPrograms>
+        <p class="no-data">No programs found</p>
+      </ng-template>
+    </div>
+
+    <!-- PUBLICATIONS -->
+    <div class="table-section">
+      <h3>PUBLICATIONS ({{ reportData.publications.length }})</h3>
+      <table *ngIf="reportData.publications.length > 0; else noPublications">
+        <thead>
+          <tr>
             <th>Category</th>
-            <th>Quantity</th>
+            <th>Title</th>
+            <th>Pages</th>
           </tr>
-        </ng-container>
-
-        <!-- IBT & VA Theme Header -->
-        <ng-container *ngIf="selectedUnitId == 4">
-          <tr>
-            <th>Sl. No.</th>
-            <th>Product Type (Theme)</th>
-            <th>Particulars</th>
-            <th>Quantity</th>
-            <th>Amount (Rs.)</th>
+        </thead>
+        <tbody>
+          <tr *ngFor="let p of reportData.publications">
+            <td>{{ p.category }}</td>
+            <td>{{ p.title }}</td>
+            <td>{{ p.pages }}</td>
           </tr>
-        </ng-container>
+        </tbody>
+      </table>
+      <ng-template #noPublications>
+        <p class="no-data">No publications found</p>
+      </ng-template>
+    </div>
 
-        <!-- FIU header -->
-        <ng-container *ngIf="selectedUnitId == 3">
+    <!-- NOMINATION & REWARDS -->
+    <div class="table-section">
+      <h3>NOMINATION & REWARDS ({{ reportData.nominations.length }})</h3>
+      <table *ngIf="reportData.nominations.length > 0; else noNominations">
+        <thead>
           <tr>
-            <th>Sl. No.</th>
+            <th>Type</th>
+            <th>Award Name</th>
+            <th>Category</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let n of reportData.nominations">
+            <td>{{ n.type }}</td>
+            <td>{{ n.awardName }}</td>
+            <td>{{ n.category }}</td>
+            <td>{{ n.date }}</td>
+          </tr>
+        </tbody>
+      </table>
+      <ng-template #noNominations>
+        <p class="no-data">No nominations found</p>
+      </ng-template>
+    </div>
+
+    <!-- CONSULTANCY SERVICES -->
+    <div class="table-section">
+      <h3>CONSULTANCY SERVICES ({{ reportData.consultancies.length }})</h3>
+      <table *ngIf="reportData.consultancies.length > 0; else noConsultancies">
+        <thead>
+          <tr>
+            <th>Category</th>
+            <th>Title</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let c of reportData.consultancies">
+            <td>{{ c.category }}</td>
+            <td>{{ c.title }}</td>
+            <td>{{ c.date }}</td>
+          </tr>
+        </tbody>
+      </table>
+      <ng-template #noConsultancies>
+        <p class="no-data">No consultancies found</p>
+      </ng-template>
+    </div>
+
+    <!-- SERVICES / FACILITIES -->
+    <div class="table-section">
+      <h3>SERVICES / FACILITIES ({{ reportData.services.length }})</h3>
+      <table *ngIf="reportData.services.length > 0; else noServices">
+        <thead>
+          <tr>
+            <th>Category</th>
+            <th>Title</th>
+            <th>Discipline</th>
+            <th>Particular</th>
+            <th>Location</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let s of reportData.services">
+            <td>{{ s.category }}</td>
+            <td>{{ s.title }}</td>
+            <td>{{ s.discipline }}</td>
+            <td>{{ s.particular }}</td>
+            <td>{{ s.location }}</td>
+            <td>{{ s.date }}</td>
+          </tr>
+        </tbody>
+      </table>
+      <ng-template #noServices>
+        <p class="no-data">No services found</p>
+      </ng-template>
+    </div>
+
+    <!-- OTHER ACTIVITIES -->
+    <div class="table-section">
+      <h3>OTHER ACTIVITIES ({{ reportData.otherActivities.length }})</h3>
+      <table *ngIf="reportData.otherActivities.length > 0; else noActivities">
+        <thead>
+          <tr>
             <th>Title</th>
             <th>Description</th>
           </tr>
-        </ng-container>
-
-        <!-- STU header -->
-        <ng-container *ngIf="selectedUnitId == 2">
-          <tr>
-            <th>Sl. No.</th>
-            <th>District</th>
-            <th>Completed Batches</th>
-            <th>Input Dealers</th>
-            <th>Ongoing Batches</th>
-            <th>Input Dealers</th>
-            <th>Started Batches</th>
-            <th>Input Dealers</th>
+        </thead>
+        <tbody>
+          <tr *ngFor="let a of reportData.otherActivities">
+            <td>{{ a.title }}</td>
+            <td>{{ a.description }}</td>
           </tr>
-        </ng-container>
-
-        <!-- FTI header -->
-        <ng-container *ngIf="selectedUnitId == 1">
-          <tr>
-            <th>Sl. No.</th>
-            <th>Category</th>
-            <th>Collaboration</th>
-            <th>Completed</th>
-            <th>Ongoing</th>
-            <th>Started</th>
-            <th>Total Participants</th>
-          </tr>
-        </ng-container>
-
-        <!-- Generic header -->
-        <ng-container *ngIf="selectedUnitId != 1 && selectedUnitId != 2 && selectedUnitId != 3 && selectedUnitId !=4 && selectedUnitId != 5">
-          <tr>
-            <th>Sl. No.</th>
-            <th>Category/Location</th>
-            <th>Completed</th>
-            <th>Ongoing</th>
-            <th>Started</th>
-            <th>Total Participants</th>
-          </tr>
-        </ng-container>
-      </thead>
-
-      <tbody [ngSwitch]="selectedUnitId">
-        <!-- ATIC Extension Activities -->
-        <ng-container *ngSwitchCase="5">
-          <tr *ngFor="let item of themeReports; let i = index">
-            <td>{{ i + 1 }}</td>
-            <td>{{ item.title }}</td>
-            <td>{{ item.category }}</td>
-            <td>{{ item.quantity }}</td>
-          </tr>
-        </ng-container>
-
-        <!-- IBT & VA -->
-        <ng-container *ngSwitchCase="4">
-          <ng-container *ngFor="let theme of themeReports; let i = index">
-            <tr *ngFor="let item of theme.items; let j = index">
-              <td>{{ j + 1 }}</td>
-              <td>{{ theme.theme }}</td>
-              <td>{{ item.product }}</td>
-              <td>{{ item.quantity }}</td>
-              <td>{{ item.amount | number:'1.0-2' }}</td>
-            </tr>
-            <tr class="font-weight-bold">
-              <td colspan="4" class="text-right">Total ({{ theme.theme }})</td>
-              <td>{{ theme.totalAmount | number:'1.0-2' }}</td>
-            </tr>
-          </ng-container>
-        </ng-container>
-
-        <!-- FIU Other Activities -->
-        <ng-container *ngSwitchCase="3">
-          <tr *ngFor="let item of themeReports; let i = index">
-            <td>{{ i + 1 }}</td>
-            <td>{{ item.title }}</td>
-            <td>{{ item.description }}</td>
-          </tr>
-        </ng-container>
-
-        <!-- STU -->
-        <ng-container *ngSwitchCase="2">
-          <tr *ngFor="let item of themeReports; let i = index">
-            <td>{{ i + 1 }}</td>
-            <td>{{ item.location }}</td>
-            <td>{{ item.completedBatches }}</td>
-            <td>{{ item.totalParticipants }}</td>
-            <td>{{ item.ongoingBatches }}</td>
-            <td>{{ item.totalParticipants }}</td>
-            <td>{{ item.startedBatches }}</td>
-            <td>{{ item.totalParticipants }}</td>
-          </tr>
-        </ng-container>
-
-        <!-- FTI -->
-        <ng-container *ngSwitchCase="1">
-          <tr *ngFor="let item of themeReports; let i = index">
-            <td>{{ i + 1 }}</td>
-            <td>{{ item.category }}</td>
-            <td>{{ item.collaboration }}</td>
-            <td>{{ item.completedPrograms }}</td>
-            <td>{{ item.ongoingPrograms }}</td>
-            <td>{{ item.startedPrograms }}</td>
-            <td>{{ item.totalParticipants }}</td>
-          </tr>
-        </ng-container>
-
-        <!-- Generic -->
-        <ng-container *ngSwitchDefault>
-          <tr *ngFor="let item of themeReports; let i = index">
-            <td>{{ i + 1 }}</td>
-            <td>{{ item.category || item.location }}</td>
-            <td>{{ item.completedBatches || item.completedPrograms }}</td>
-            <td>{{ item.ongoingBatches || item.ongoingPrograms }}</td>
-            <td>{{ item.startedBatches || item.startedPrograms }}</td>
-            <td>{{ item.totalParticipants }}</td>
-          </tr>
-        </ng-container>
-      </tbody>
-    </table>
-
-    <div class="mt-2">
-      <button *ngIf="selectedUnitId == 3"
-              (click)="downloadPDF('theme')"
-              class="btn btn-primary">Download FIU Other Activities PDF</button>
-      <button *ngIf="selectedUnitId == 4"
-              (click)="downloadPDF('theme')"
-              class="btn btn-primary">Download IBT & VA Production PDF</button>
-      <button *ngIf="selectedUnitId == 5"
-              (click)="downloadPDF('theme')"
-              class="btn btn-primary">Download ATIC Extension PDF</button>
-      <button *ngIf="selectedUnitId != 3 && selectedUnitId!=4 && selectedUnitId != 5"
-              (click)="downloadPDF('theme')"
-              class="btn btn-primary">Download Theme Report PDF</button>
+        </tbody>
+      </table>
+      <ng-template #noActivities>
+        <p class="no-data">No other activities found</p>
+      </ng-template>
     </div>
+
   </div>
-
-  <!-- ✅ NEW: Extension Activities Section for IBT&VA -->
-  <div *ngIf="selectedUnitId == 4 && extensionActivities && hasExtensionActivitiesData()" class="report-section mt-4">
-    <h3>c) Extension Activities</h3>
-
-    <table id="extensionActivitiesTable" class="report-table" border="1" cellspacing="0" cellpadding="5">
-      <thead>
-        <tr>
-          <th rowspan="2">Sl. No.</th>
-          <th rowspan="2">Title of the Extension Programme</th>
-          <th rowspan="2">No. of Programmes</th>
-          <th colspan="3">No. of Participants</th>
-        </tr>
-        <tr>
-          <th>Male</th>
-          <th>Female</th>
-          <th>Total</th>
-        </tr>
-      </thead>
-      <tbody>
-        <!-- 1. Method/Skill Demonstrations -->
-        <tr>
-          <td>1.</td>
-          <td>Method/ Skill demonstrations Organized</td>
-          <td>{{ extensionActivities.methodSkillDemonstrations.noOfProgrammes }}</td>
-          <td>{{ extensionActivities.methodSkillDemonstrations.noOfParticipants.male }}</td>
-          <td>{{ extensionActivities.methodSkillDemonstrations.noOfParticipants.female }}</td>
-          <td>{{ extensionActivities.methodSkillDemonstrations.noOfParticipants.total }}</td>
-        </tr>
-
-        <!-- 2. Advisory Services -->
-        <tr>
-          <td rowspan="2">2.</td>
-          <td>Advisory services - Face to face contact</td>
-          <td>{{ extensionActivities.advisoryServices.faceToFaceContact.total }}</td>
-          <td>{{ extensionActivities.advisoryServices.faceToFaceContact.male }}</td>
-          <td>{{ extensionActivities.advisoryServices.faceToFaceContact.female }}</td>
-          <td>{{ extensionActivities.advisoryServices.faceToFaceContact.total }}</td>
-        </tr>
-        <tr>
-          <td>Advisory services - Telephone calls</td>
-          <td>{{ extensionActivities.advisoryServices.telephoneCalls.total }}</td>
-          <td>{{ extensionActivities.advisoryServices.telephoneCalls.male }}</td>
-          <td>{{ extensionActivities.advisoryServices.telephoneCalls.female }}</td>
-          <td>{{ extensionActivities.advisoryServices.telephoneCalls.total }}</td>
-        </tr>
-
-        <!-- 3. Exposure Visits -->
-        <tr>
-          <td rowspan="2">3.</td>
-          <td>Exposure visits - Organized</td>
-          <td>{{ extensionActivities.exposureVisits.organized.noOfProgrammes }}</td>
-          <td>{{ extensionActivities.exposureVisits.organized.participants.male }}</td>
-          <td>{{ extensionActivities.exposureVisits.organized.participants.female }}</td>
-          <td>{{ extensionActivities.exposureVisits.organized.participants.total }}</td>
-        </tr>
-        <tr>
-          <td>Exposure visits - Participated</td>
-          <td>{{ extensionActivities.exposureVisits.participated.noOfProgrammes }}</td>
-          <td>{{ extensionActivities.exposureVisits.participated.participants.male }}</td>
-          <td>{{ extensionActivities.exposureVisits.participated.participants.female }}</td>
-          <td>{{ extensionActivities.exposureVisits.participated.participants.total }}</td>
-        </tr>
-
-        <!-- 4. Important Days -->
-        <tr>
-          <td>4.</td>
-          <td>Important days - Participated</td>
-          <td>{{ extensionActivities.importantDays.participated.noOfProgrammes }}</td>
-          <td>{{ extensionActivities.importantDays.participated.participants.male }}</td>
-          <td>{{ extensionActivities.importantDays.participated.participants.female }}</td>
-          <td>{{ extensionActivities.importantDays.participated.participants.total }}</td>
-        </tr>
-
-        <!-- 5. Important Events -->
-        <tr>
-          <td>5.</td>
-          <td>Important events - Participated</td>
-          <td>{{ extensionActivities.importantEvents.participated.noOfProgrammes }}</td>
-          <td>{{ extensionActivities.importantEvents.participated.participants.male }}</td>
-          <td>{{ extensionActivities.importantEvents.participated.participants.female }}</td>
-          <td>{{ extensionActivities.importantEvents.participated.participants.total }}</td>
-        </tr>
-
-        <!-- 6. Melas/Exhibitions -->
-        <tr>
-          <td>6.</td>
-          <td>Melas/Exhibitions - Participated</td>
-          <td>{{ extensionActivities.melasExhibitions.participated.noOfProgrammes }}</td>
-          <td>{{ extensionActivities.melasExhibitions.participated.participants.male }}</td>
-          <td>{{ extensionActivities.melasExhibitions.participated.participants.female }}</td>
-          <td>{{ extensionActivities.melasExhibitions.participated.participants.total }}</td>
-        </tr>
-
-        <!-- 7. Visitors to Institute -->
-        <tr>
-          <td>7.</td>
-          <td>No. of visitors visited the institute</td>
-          <td>{{ extensionActivities.visitorsToInstitute.total }}</td>
-          <td>{{ extensionActivities.visitorsToInstitute.male }}</td>
-          <td>{{ extensionActivities.visitorsToInstitute.female }}</td>
-          <td>{{ extensionActivities.visitorsToInstitute.total }}</td>
-        </tr>
-
-        <!-- 8. WhatsApp Queries -->
-        <tr>
-          <td>8.</td>
-          <td>WhatsApp queries answered</td>
-          <td>{{ extensionActivities.whatsappQueriesAnswered.total }}</td>
-          <td>{{ extensionActivities.whatsappQueriesAnswered.male }}</td>
-          <td>{{ extensionActivities.whatsappQueriesAnswered.female }}</td>
-          <td>{{ extensionActivities.whatsappQueriesAnswered.total }}</td>
-        </tr>
-
-        <!-- 9. Any Other - Meetings -->
-        <tr>
-          <td>9.</td>
-          <td>Any Other (Meeting participated)</td>
-          <td>{{ extensionActivities.anyOther.meetingParticipated.noOfProgrammes }}</td>
-          <td>{{ extensionActivities.anyOther.meetingParticipated.participants.male }}</td>
-          <td>{{ extensionActivities.anyOther.meetingParticipated.participants.female }}</td>
-          <td>{{ extensionActivities.anyOther.meetingParticipated.participants.total }}</td>
-        </tr>
-      </tbody>
-    </table>
-
-    <div class="mt-2">
-      <button (click)="downloadPDF('extension')" class="btn btn-primary">
-        Download Extension Activities PDF
-      </button>
-    </div>
-  </div>
-
 </div>
