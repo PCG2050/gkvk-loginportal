@@ -180,6 +180,173 @@ tbody tr:last-child td {
   font-style: italic;
 }
 
+/* Add these styles to your existing reports.component.css */
+
+/* FIU Activities Table Specific Styles */
+.fiu-activities {
+  margin-bottom: 2rem;
+}
+
+.fiu-activities h3 {
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  color: white;
+  padding: 12px 16px;
+  border-radius: 8px 8px 0 0;
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.fiu-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  border-radius: 0 0 8px 8px;
+  overflow: hidden;
+}
+
+.fiu-table thead {
+  background: linear-gradient(135deg, #66BB6A 0%, #4CAF50 100%);
+}
+
+.fiu-table thead th {
+  color: white;
+  font-weight: 600;
+  padding: 14px 16px;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  letter-spacing: 0.5px;
+  border-bottom: 2px solid #45a049;
+}
+
+.fiu-table tbody tr {
+  border-bottom: 1px solid #e0e0e0;
+  transition: all 0.2s ease;
+}
+
+.fiu-table tbody tr:hover {
+  background-color: #f5f5f5;
+  transform: translateX(2px);
+}
+
+.fiu-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.fiu-table tbody td {
+  padding: 12px 16px;
+  color: #333;
+  font-size: 0.95rem;
+}
+
+.fiu-table tbody td:first-child {
+  font-weight: 600;
+  color: #4CAF50;
+  background-color: #f9f9f9;
+}
+
+.fiu-table tbody td:last-child {
+  font-weight: 600;
+  color: #2196F3;
+  font-size: 1.05rem;
+}
+
+.fiu-table tfoot {
+  background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+  border-top: 3px solid #4CAF50;
+}
+
+.fiu-table tfoot .total-row td {
+  padding: 14px 16px;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1b5e20;
+}
+
+.fiu-table tfoot .total-row td:last-child {
+  color: #0d47a1;
+  font-size: 1.2rem;
+  background-color: rgba(255, 255, 255, 0.5);
+}
+
+/* Responsive Design for FIU Table */
+@media (max-width: 768px) {
+  .fiu-table {
+    font-size: 0.85rem;
+  }
+  
+  .fiu-table thead th,
+  .fiu-table tbody td,
+  .fiu-table tfoot td {
+    padding: 10px 8px;
+  }
+  
+  .fiu-table tbody td:first-child {
+    width: 60px;
+  }
+  
+  .fiu-table tbody td:last-child {
+    width: 80px;
+  }
+}
+
+/* Print Styles for FIU Table */
+@media print {
+  .fiu-table {
+    box-shadow: none;
+  }
+  
+  .fiu-table tbody tr:hover {
+    background-color: transparent;
+    transform: none;
+  }
+  
+  .fiu-table thead {
+    background: #4CAF50 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  
+  .fiu-table tfoot {
+    background: #e8f5e9 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
+
+/* Animation for data loading */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fiu-activities {
+  animation: fadeInUp 0.5s ease-out;
+}
+
+/* Highlight even rows */
+.fiu-table tbody tr:nth-child(even) {
+  background-color: #fafafa;
+}
+
+/* Add subtle border to activity name column */
+.fiu-table tbody td:nth-child(2) {
+  border-left: 3px solid transparent;
+  transition: border-color 0.3s ease;
+}
+
+.fiu-table tbody tr:hover td:nth-child(2) {
+  border-left-color: #4CAF50;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .filters-section {

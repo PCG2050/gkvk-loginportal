@@ -2,15 +2,21 @@ import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { Endpoints } from '../../shared/endpoints.model';
+import { HttpHeaders } from '@angular/common/http';
 
 interface FilterOptions {
   units: Array<{
     unitId: number;
     unitName: string;
     locations: Array<{
-      id: number;
-      name: string;
-      region: string;
+      unitLocationId: number;
+      districtName: string;
+      stateName: string;
+      districtId: number;
+      stateId: number;
     }>;
   }>;
   years: number[];
@@ -33,11 +39,13 @@ interface ReportData {
 }
 
 @Component({
-  selector: 'app-admin-report',
+  selector: 'app-report',
+  standalone: true,
+  imports :[CommonModule, FormsModule],
   templateUrl: './reports.component.html',
   styleUrls: ['./reports.component.css']
 })
-export class AdminReportComponent implements OnInit {
+export class ReportsComponent implements OnInit {
   
   // Filter options
   filterOptions: FilterOptions | null = null;
@@ -74,7 +82,11 @@ export class AdminReportComponent implements OnInit {
   }
 
   loadFilterOptions() {
-    this.http.get<FilterOptions>('http://localhost:5000/api/admin/reports/filter-options')
+  const token = localStorage.getItem('authtoken');
+  const headers = new HttpHeaders({
+    'Authorization': `Bearer ${token}`
+  });  
+    this.http.get<FilterOptions>(Endpoints.filterOptions,{headers})
       .subscribe({
         next: (data) => {
           this.filterOptions = data;
@@ -98,6 +110,10 @@ export class AdminReportComponent implements OnInit {
   }
 
   generateReport() {
+    const token = localStorage.getItem('authtoken');
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${token}`
+    });
     if (!this.selectedLocation) {
       this.error = 'Please select a location';
       return;
@@ -112,7 +128,7 @@ export class AdminReportComponent implements OnInit {
       year: this.selectedYear
     };
 
-    this.http.post<ReportData>('http://localhost:5000/api/admin/reports/generate', filter)
+    this.http.post<ReportData>(Endpoints.generateReport, filter,{headers})
       .subscribe({
         next: (data) => {
           this.reportData = data;
@@ -309,44 +325,45 @@ export class AdminReportComponent implements OnInit {
       currentY = 20;
     }
 
-    // ===== SERVICES / FACILITIES TABLE =====
-    if (this.reportData.services && this.reportData.services.length > 0) {
-      doc.setFontSize(14);
-      doc.setFont('helvetica', 'bold');
-      doc.setFillColor(76, 175, 80);
-      doc.rect(14, currentY - 5, pageWidth - 28, 8, 'F');
-      doc.setTextColor(255, 255, 255);
-      doc.text(`SERVICES / FACILITIES (${this.reportData.services.length})`, 16, currentY);
-      doc.setTextColor(0, 0, 0);
-      currentY += 8;
+    
+   
 
-      autoTable(doc, {
-        startY: currentY,
-        head: [['Category', 'Title', 'Discipline', 'Particular', 'Location', 'Date']],
-        body: this.reportData.services.map(s => [
-          s.category || '-',
-          s.title || '-',
-          s.discipline || '-',
-          s.particular || '-',
-          s.location || '-',
-          s.date || '-'
-        ]),
-        theme: 'grid',
-        headStyles: { fillColor: [76, 175, 80], textColor: 255, fontStyle: 'bold' },
-        margin: { left: 14, right: 14 },
-        styles: { fontSize: 8, cellPadding: 2 }
-      });
+// ===== SERVICES / FACILITIES TABLE =====
+if (this.reportData.services && this.reportData.services.length > 0) {
+  doc.setFontSize(14);
+  doc.setFont('helvetica', 'bold');
+  doc.setFillColor(76, 175, 80);
+  doc.rect(14, currentY - 5, pageWidth - 28, 8, 'F');
+  doc.setTextColor(255, 255, 255);
+  doc.text(`SERVICES / FACILITIES (${this.reportData.services.length})`, 16, currentY);
+  doc.setTextColor(0, 0, 0);
+  currentY += 8;
 
-      currentY = (doc as any).lastAutoTable.finalY + 10;
-    } else {
-      this.addNoDataSection(doc, 'SERVICES / FACILITIES', currentY);
-      currentY += 15;
+  autoTable(doc, {
+    startY: currentY,
+    head: [['Category', 'Particulars', 'Theme', 'Unit', 'Quantity', 'Amount']],
+    body: this.reportData.services.map(s => [
+      s.category || '-',
+      s.title || '-',
+      s.theme || '-',
+      s.unit || '-',
+      s.quantity?.toString() || '-',
+      s.amount ? `₹${s.amount.toFixed(2)}` : '-'
+    ]),
+    theme: 'grid',
+    headStyles: { fillColor: [76, 175, 80], textColor: 255, fontStyle: 'bold' },
+    margin: { left: 14, right: 14 },
+    styles: { fontSize: 8, cellPadding: 2 },
+    columnStyles: {
+      5: { halign: 'right' }  // Right-align amount column
     }
+  });
 
-    if (currentY > 250) {
-      doc.addPage();
-      currentY = 20;
-    }
+  currentY = (doc as any).lastAutoTable.finalY + 10;
+} else {
+  this.addNoDataSection(doc, 'SERVICES / FACILITIES', currentY);
+  currentY += 15;
+}
 
     // ===== OTHER ACTIVITIES TABLE =====
     if (this.reportData.otherActivities && this.reportData.otherActivities.length > 0) {

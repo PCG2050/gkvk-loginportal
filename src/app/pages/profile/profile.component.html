@@ -76,7 +76,7 @@
         </div>
         }
         <label for="phone">Phone<span class="asterisk">*</span></label>
-        <input type="text" formControlName="phone" class="form-control" required>
+        <input aria-label="Phone" type="text" formControlName="phone" class="form-control" required>
         @if(profileForm.get('phone')?.invalid && (profileForm.get('phone')?.dirty ||
         profileForm.get('phone')?.touched)){
         <div class="alert">

@@ -48,6 +48,8 @@ export class Endpoints {
 
   static kvkReports = Endpoints.getbaseURL() + '/api/KvkReport/MonthlyReports';
   static kvkThemeReports = Endpoints.getbaseURL() + '/api/KvkReport/MonthlyThemeReports';
+  
+  // report
 
   static filterOptions = Endpoints.getbaseURL() + '/api/admin/reports/filter-options';
   static generateReport = Endpoints.getbaseURL() + '/api/admin/reports/generate';

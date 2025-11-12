@@ -4,36 +4,36 @@
   <!-- Filters -->
   <div class="filters-section" *ngIf="filterOptions">
     <div class="filter-group">
-      <label>Unit:</label>
-      <select [(ngModel)]="selectedUnit" (change)="onUnitChange()">
-        <option [value]="null">Select Unit</option>
-        <option *ngFor="let unit of filterOptions.units" [value]="unit.unitId">
+      <label for="unitSelect">Unit:</label>
+      <select id="unitSelect" title="Select unit" aria-label="Select unit" [(ngModel)]="selectedUnit" (change)="onUnitChange()">
+        <option [ngValue]="null">Select Unit</option>
+        <option *ngFor="let unit of filterOptions.units" [ngValue]="unit.unitId">
           {{ unit.unitName }}
         </option>
       </select>
     </div>
 
     <div class="filter-group" *ngIf="selectedUnit">
-      <label>Location:</label>
-      <select [(ngModel)]="selectedLocation">
-        <option [value]="null">Select Location</option>
-        <option *ngFor="let loc of availableLocations" [value]="loc.id">
-          {{ loc.name }} ({{ loc.region }})
+      <label for="locationSelect">Location:</label>
+      <select id="locationSelect" title="Select location" aria-label="Select location" [(ngModel)]="selectedLocation">
+        <option [ngValue]="null">Select Location</option>
+        <option *ngFor="let loc of availableLocations" [ngValue]="loc.unitLocationId">
+          {{ loc.districtName }} ({{ loc.stateName }})
         </option>
       </select>
     </div>
 
     <div class="filter-group">
-      <label>Month:</label>
-      <select [(ngModel)]="selectedMonth">
-        <option *ngFor="let m of months" [value]="m.value">{{ m.name }}</option>
+      <label for="monthSelect">Month:</label>
+      <select id="monthSelect" title="Select month" aria-label="Select month" [(ngModel)]="selectedMonth">
+        <option *ngFor="let m of months" [ngValue]="m.value">{{ m.name }}</option>
       </select>
     </div>
 
     <div class="filter-group">
-      <label>Year:</label>
-      <select [(ngModel)]="selectedYear">
-        <option *ngFor="let y of filterOptions.years" [value]="y">{{ y }}</option>
+      <label for="yearSelect">Year:</label>
+      <select id="yearSelect" title="Select year" aria-label="Select year" [(ngModel)]="selectedYear">
+        <option *ngFor="let y of filterOptions.years" [ngValue]="y">{{ y }}</option>
       </select>
     </div>
 
@@ -67,6 +67,7 @@
       <table *ngIf="reportData.programs.length > 0; else noPrograms">
         <thead>
           <tr>
+            <th>Sl.No</th>
             <th>Program Type</th>
             <th>Title</th>
             <th>Date From - To</th>
@@ -76,7 +77,8 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let p of reportData.programs">
+          <tr *ngFor="let p of reportData.programs;let i = index">
+            <td>{{ i + 1 }}</td>
             <td>{{ p.programType }}</td>
             <td>{{ p.title }}</td>
             <td>{{ p.dateFrom }} - {{ p.dateTo }}</td>
@@ -97,13 +99,15 @@
       <table *ngIf="reportData.publications.length > 0; else noPublications">
         <thead>
           <tr>
+            <th>Sl.No</th>
             <th>Category</th>
             <th>Title</th>
             <th>Pages</th>
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let p of reportData.publications">
+          <tr *ngFor="let p of reportData.publications; let i = index">
+            <td>{{ i + 1 }}</td>
             <td>{{ p.category }}</td>
             <td>{{ p.title }}</td>
             <td>{{ p.pages }}</td>
@@ -121,6 +125,7 @@
       <table *ngIf="reportData.nominations.length > 0; else noNominations">
         <thead>
           <tr>
+            <th>Sl.No</th>
             <th>Type</th>
             <th>Award Name</th>
             <th>Category</th>
@@ -128,7 +133,8 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let n of reportData.nominations">
+          <tr *ngFor="let n of reportData.nominations;let i = index">
+            <td>{{ i + 1 }}</td>
             <td>{{ n.type }}</td>
             <td>{{ n.awardName }}</td>
             <td>{{ n.category }}</td>
@@ -147,13 +153,15 @@
       <table *ngIf="reportData.consultancies.length > 0; else noConsultancies">
         <thead>
           <tr>
+            <th>Sl.No</th>
             <th>Category</th>
             <th>Title</th>
             <th>Date</th>
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let c of reportData.consultancies">
+          <tr *ngFor="let c of reportData.consultancies;let i = index">
+            <td>{{ i + 1 }}</td>
             <td>{{ c.category }}</td>
             <td>{{ c.title }}</td>
             <td>{{ c.date }}</td>
@@ -166,34 +174,36 @@
     </div>
 
     <!-- SERVICES / FACILITIES -->
-    <div class="table-section">
-      <h3>SERVICES / FACILITIES ({{ reportData.services.length }})</h3>
-      <table *ngIf="reportData.services.length > 0; else noServices">
-        <thead>
-          <tr>
-            <th>Category</th>
-            <th>Title</th>
-            <th>Discipline</th>
-            <th>Particular</th>
-            <th>Location</th>
-            <th>Date</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let s of reportData.services">
-            <td>{{ s.category }}</td>
-            <td>{{ s.title }}</td>
-            <td>{{ s.discipline }}</td>
-            <td>{{ s.particular }}</td>
-            <td>{{ s.location }}</td>
-            <td>{{ s.date }}</td>
-          </tr>
-        </tbody>
-      </table>
-      <ng-template #noServices>
-        <p class="no-data">No services found</p>
-      </ng-template>
-    </div>
+<div class="table-section">
+  <h3>SERVICES / FACILITIES ({{ reportData.services.length }})</h3>
+  <table *ngIf="reportData.services.length > 0; else noServices">
+    <thead>
+      <tr>
+        <th>Sl.No</th>
+        <th>Category</th>
+        <th>Particulars/Title</th>
+        <th>Theme</th>
+        <th>Unit</th>
+        <th>Quantity</th>
+        <th>Amount</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let s of reportData.services; let i = index">
+        <td>{{ i + 1 }}</td>
+        <td>{{ s.category }}</td>
+        <td>{{ s.title }}</td>
+        <td>{{ s.theme }}</td>
+        <td>{{ s.unit }}</td>
+        <td>{{ s.quantity ?? '-' }}</td>
+        <td>{{ s.amount | currency:'INR':'symbol':'1.2-2' }}</td>
+      </tr>
+    </tbody>
+  </table>
+  <ng-template #noServices>
+    <p class="no-data">No services found</p>
+  </ng-template>
+</div>
 
     <!-- OTHER ACTIVITIES -->
     <div class="table-section">
@@ -201,12 +211,14 @@
       <table *ngIf="reportData.otherActivities.length > 0; else noActivities">
         <thead>
           <tr>
+            <th>Sl.No</th>
             <th>Title</th>
             <th>Description</th>
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let a of reportData.otherActivities">
+          <tr *ngFor="let a of reportData.otherActivities; let i = index">
+            <td>{{ i + 1 }}</td>
             <td>{{ a.title }}</td>
             <td>{{ a.description }}</td>
           </tr>
