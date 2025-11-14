@@ -122,6 +122,19 @@ h1 {
   box-shadow: 0 4px 12px rgba(0,0,0,0.3);
 }
 
+/* DOCX Button Styling */
+.docx-btn {
+  background: #2196F3 !important;
+  color: white !important;
+  margin-left: 10px;
+}
+
+.docx-btn:hover {
+  background: #1976D2 !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
 /* Table Sections */
 .table-section {
   padding: 30px;

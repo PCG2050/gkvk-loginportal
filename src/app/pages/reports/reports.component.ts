@@ -6,6 +6,9 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Endpoints } from '../../shared/endpoints.model';
 import { HttpHeaders } from '@angular/common/http';
+import { Document, Packer, Paragraph, AlignmentType, HeadingLevel, TextRun } from 'docx';
+import { saveAs } from 'file-saver';
+import { DOCXTableBuilder } from '../../shared/docx-table-builder';
 
 interface FilterOptions {
   units: Array<{
@@ -611,6 +614,185 @@ export class ReportsComponent implements OnInit {
     // SAVE PDF
     const filename = `Report_${this.reportData.unitName}_${this.reportData.monthName}_${this.reportData.year}.pdf`;
     doc.save(filename);
+  }
+
+  /**
+   * Download report as editable DOCX file
+   */
+  async downloadDOCX() {
+    if (!this.reportData) return;
+
+    const children: any[] = [
+      // ===== DOCUMENT HEADER =====
+      new Paragraph({
+        text: 'Administrative Report',
+        heading: HeadingLevel.HEADING_1,
+        alignment: AlignmentType.CENTER,
+        spacing: { after: 200 },
+      }),
+      new Paragraph({
+        text: this.reportData.unitName,
+        alignment: AlignmentType.CENTER,
+        spacing: { after: 100 },
+      }),
+      new Paragraph({
+        text: this.reportData.unitLocationName,
+        alignment: AlignmentType.CENTER,
+        spacing: { after: 100 },
+      }),
+      new Paragraph({
+        text: `${this.reportData.monthName} ${this.reportData.year}`,
+        alignment: AlignmentType.CENTER,
+        spacing: { after: 100 },
+      }),
+      new Paragraph({
+        text: `Generated: ${new Date(this.reportData.generatedAt).toLocaleString()}`,
+        alignment: AlignmentType.CENTER,
+        spacing: { after: 100 },
+      }),
+      new Paragraph({
+        children: [new TextRun({
+          text: `Total Approved Entries: ${this.reportData.totalEntries}`,
+          bold: true
+        })],
+        alignment: AlignmentType.CENTER,
+        spacing: { after: 400 },
+      }),
+    ];
+
+    // ===== FIU UNIT REPORT =====
+    if (this.isFIUUnit && this.reportData.fiuActivities) {
+      // FIU Activities Table
+      children.push(
+        DOCXTableBuilder.sectionHeading(
+          `FIU MEDIA ACTIVITIES (Total: ${this.reportData.fiuActivities.totalCount})`
+        ),
+        DOCXTableBuilder.createFIUTable(this.reportData.fiuActivities.activities),
+        DOCXTableBuilder.emptyLine(),
+      );
+
+      // Other Activities for FIU
+      if (this.reportData.otherActivities && this.reportData.otherActivities.length > 0) {
+        children.push(
+          DOCXTableBuilder.sectionHeading(
+            `OTHER ACTIVITIES (${this.reportData.otherActivities.length})`
+          ),
+          DOCXTableBuilder.createOtherActivitiesTable(this.reportData.otherActivities),
+          DOCXTableBuilder.emptyLine(),
+        );
+      }
+    }
+
+    // ===== ASM UNIT REPORT =====
+    else if (this.isASMUnit && this.reportData.asmActivities) {
+      // ASM Visitor Statistics Table
+      children.push(
+        DOCXTableBuilder.sectionHeading(
+          `ASM VISITOR STATISTICS (Total: ${this.reportData.asmActivities.totalVisitors})`
+        ),
+        DOCXTableBuilder.createASMTable(this.reportData.asmActivities.visitors),
+        DOCXTableBuilder.emptyLine(),
+      );
+
+      // Other Activities for ASM
+      if (this.reportData.otherActivities && this.reportData.otherActivities.length > 0) {
+        children.push(
+          DOCXTableBuilder.sectionHeading(
+            `OTHER ACTIVITIES (${this.reportData.otherActivities.length})`
+          ),
+          DOCXTableBuilder.createOtherActivitiesTable(this.reportData.otherActivities),
+          DOCXTableBuilder.emptyLine(),
+        );
+      }
+    }
+
+    // ===== OTHER UNITS REPORT =====
+    else {
+      // 1. PROGRAMS
+      if (this.reportData.programs && this.reportData.programs.length > 0) {
+        children.push(
+          DOCXTableBuilder.sectionHeading(`PROGRAMS (${this.reportData.programs.length})`),
+          DOCXTableBuilder.createProgramsTable(this.reportData.programs),
+          DOCXTableBuilder.emptyLine(),
+        );
+      }
+
+      // 2. PUBLICATIONS
+      if (this.reportData.publications && this.reportData.publications.length > 0) {
+        children.push(
+          DOCXTableBuilder.sectionHeading(`PUBLICATIONS (${this.reportData.publications.length})`),
+          DOCXTableBuilder.createPublicationsTable(this.reportData.publications),
+          DOCXTableBuilder.emptyLine(),
+        );
+      }
+
+      // 3. NOMINATION & REWARDS
+      if (this.reportData.nominations && this.reportData.nominations.length > 0) {
+        children.push(
+          DOCXTableBuilder.sectionHeading(`NOMINATION & REWARDS (${this.reportData.nominations.length})`),
+          DOCXTableBuilder.createNominationsTable(this.reportData.nominations),
+          DOCXTableBuilder.emptyLine(),
+        );
+      }
+
+      // 4. CONSULTANCY SERVICES
+      if (this.reportData.consultancies && this.reportData.consultancies.length > 0) {
+        children.push(
+          DOCXTableBuilder.sectionHeading(`CONSULTANCY SERVICES (${this.reportData.consultancies.length})`),
+          DOCXTableBuilder.createConsultanciesTable(this.reportData.consultancies),
+          DOCXTableBuilder.emptyLine(),
+        );
+      }
+
+      // 5. SERVICES / FACILITIES
+      if (this.reportData.services && this.reportData.services.length > 0) {
+        children.push(
+          DOCXTableBuilder.sectionHeading(`SERVICES / FACILITIES (${this.reportData.services.length})`),
+          DOCXTableBuilder.createServicesTable(this.reportData.services),
+          DOCXTableBuilder.emptyLine(),
+        );
+      }
+
+      // 6. OTHER ACTIVITIES
+      if (this.reportData.otherActivities && this.reportData.otherActivities.length > 0) {
+        children.push(
+          DOCXTableBuilder.sectionHeading(`OTHER ACTIVITIES (${this.reportData.otherActivities.length})`),
+          DOCXTableBuilder.createOtherActivitiesTable(this.reportData.otherActivities),
+          DOCXTableBuilder.emptyLine(),
+        );
+      }
+    }
+
+    // ===== CREATE DOCX DOCUMENT =====
+    const doc = new Document({
+      sections: [{
+        properties: {
+          page: {
+            margin: {
+              top: 720,    // 0.5 inch
+              right: 720,
+              bottom: 720,
+              left: 720,
+            },
+          },
+        },
+        children,
+      }],
+    });
+
+    // ===== DOWNLOAD FILE =====
+    const blob = await Packer.toBlob(doc);
+    let docxFilename: string;
+
+    if (this.isFIUUnit) {
+      docxFilename = `FIU_Report_${this.reportData.unitName}_${this.reportData.monthName}_${this.reportData.year}.docx`;
+    } else if (this.isASMUnit) {
+      docxFilename = `ASM_Report_${this.reportData.unitName}_${this.reportData.monthName}_${this.reportData.year}.docx`;
+    } else {
+      docxFilename = `Report_${this.reportData.unitName}_${this.reportData.monthName}_${this.reportData.year}.docx`;
+    }
+
+    saveAs(blob, docxFilename);
   }
 
   private addNoDataSection(doc: jsPDF, title: string, y: number) {
