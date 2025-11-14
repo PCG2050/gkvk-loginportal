@@ -61,173 +61,298 @@
       </button>
     </div>
 
-    <!-- PROGRAMS -->
-    <div class="table-section">
-      <h3>PROGRAMS ({{ reportData.programs.length }})</h3>
-      <table *ngIf="reportData.programs.length > 0; else noPrograms">
-        <thead>
-          <tr>
-            <th>Sl.No</th>
-            <th>Program Type</th>
-            <th>Title</th>
-            <th>Date From - To</th>
-            <th>Duration</th>
-            <th>Participants</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let p of reportData.programs;let i = index">
-            <td>{{ i + 1 }}</td>
-            <td>{{ p.programType }}</td>
-            <td>{{ p.title }}</td>
-            <td>{{ p.dateFrom }} - {{ p.dateTo }}</td>
-            <td>{{ p.duration }} days</td>
-            <td>{{ p.participants }}</td>
-            <td>{{ p.status }}</td>
-          </tr>
-        </tbody>
-      </table>
-      <ng-template #noPrograms>
-        <p class="no-data">No programs found</p>
-      </ng-template>
-    </div>
+    <!-- ========================================= -->
+    <!-- FIU UNIT SECTION -->
+    <!-- ========================================= -->
+    <ng-container *ngIf="isFIUUnit">
+      <!-- FIU ACTIVITIES -->
+      <div class="table-section fiu-activities" *ngIf="reportData.fiuActivities">
+        <h3>FIU MEDIA ACTIVITIES (Total Count: {{ reportData.fiuActivities.totalCount }})</h3>
+        <table *ngIf="reportData.fiuActivities.activities.length > 0; else noFIUActivities" class="fiu-table">
+          <thead>
+            <tr>
+              <th style="width: 80px; text-align: center;">Sl. No.</th>
+              <th style="width: auto; text-align: left;">Activity</th>
+              <th style="width: 100px; text-align: center;">No.</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let activity of reportData.fiuActivities.activities">
+              <td style="text-align: center;">{{ activity.slNo }}</td>
+              <td style="text-align: left;">{{ activity.activityName }}</td>
+              <td style="text-align: center;"><strong>{{ activity.count }}</strong></td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr class="total-row">
+              <td colspan="2" style="text-align: right; font-weight: bold;">TOTAL</td>
+              <td style="text-align: center; font-weight: bold;">{{ reportData.fiuActivities.totalCount }}</td>
+            </tr>
+          </tfoot>
+        </table>
+        <ng-template #noFIUActivities>
+          <p class="no-data">No FIU activities found for this period</p>
+        </ng-template>
+      </div>
 
-    <!-- PUBLICATIONS -->
-    <div class="table-section">
-      <h3>PUBLICATIONS ({{ reportData.publications.length }})</h3>
-      <table *ngIf="reportData.publications.length > 0; else noPublications">
-        <thead>
-          <tr>
-            <th>Sl.No</th>
-            <th>Category</th>
-            <th>Title</th>
-            <th>Pages</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let p of reportData.publications; let i = index">
-            <td>{{ i + 1 }}</td>
-            <td>{{ p.category }}</td>
-            <td>{{ p.title }}</td>
-            <td>{{ p.pages }}</td>
-          </tr>
-        </tbody>
-      </table>
-      <ng-template #noPublications>
-        <p class="no-data">No publications found</p>
-      </ng-template>
-    </div>
+      <!-- OTHER ACTIVITIES (FIU) -->
+      <div class="table-section">
+        <h3>OTHER ACTIVITIES ({{ reportData.otherActivities.length }})</h3>
+        <table *ngIf="reportData.otherActivities && reportData.otherActivities.length > 0; else noActivities">
+          <thead>
+            <tr>
+              <th>Sl.No</th>
+              <th>Title</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let a of reportData.otherActivities; let i = index">
+              <td>{{ i + 1 }}</td>
+              <td>{{ a.title }}</td>
+              <td>{{ a.description }}</td>
+            </tr>
+          </tbody>
+        </table>
+        <ng-template #noActivities>
+          <p class="no-data">No other activities found</p>
+        </ng-template>
+      </div>
+    </ng-container>
 
-    <!-- NOMINATION & REWARDS -->
-    <div class="table-section">
-      <h3>NOMINATION & REWARDS ({{ reportData.nominations.length }})</h3>
-      <table *ngIf="reportData.nominations.length > 0; else noNominations">
-        <thead>
-          <tr>
-            <th>Sl.No</th>
-            <th>Type</th>
-            <th>Award Name</th>
-            <th>Category</th>
-            <th>Date</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let n of reportData.nominations;let i = index">
-            <td>{{ i + 1 }}</td>
-            <td>{{ n.type }}</td>
-            <td>{{ n.awardName }}</td>
-            <td>{{ n.category }}</td>
-            <td>{{ n.date }}</td>
-          </tr>
-        </tbody>
-      </table>
-      <ng-template #noNominations>
-        <p class="no-data">No nominations found</p>
-      </ng-template>
-    </div>
+    <!-- ========================================= -->
+    <!-- ASM UNIT SECTION -->
+    <!-- ========================================= -->
+    <ng-container *ngIf="isASMUnit">
+      <!-- ASM VISITOR STATISTICS -->
+      <div class="table-section asm-activities" *ngIf="reportData.asmActivities">
+        <h3>ASM VISITOR STATISTICS (Total Visitors: {{ reportData.asmActivities.totalVisitors }})</h3>
+        <table *ngIf="reportData.asmActivities.visitors.length > 0; else noASMVisitors" class="asm-table">
+          <thead>
+            <tr>
+              <th style="width: 80px; text-align: center;">Sl. No.</th>
+              <th style="width: auto; text-align: left;">Particulars</th>
+              <th style="width: 150px; text-align: center;">No. of visitors</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let visitor of reportData.asmActivities.visitors">
+              <td style="text-align: center;">{{ visitor.slNo }}</td>
+              <td style="text-align: left;">{{ visitor.particulars }}</td>
+              <td style="text-align: center;"><strong>{{ visitor.noOfVisitors }}</strong></td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr class="total-row">
+              <td colspan="2" style="text-align: right; font-weight: bold;">Total</td>
+              <td style="text-align: center; font-weight: bold;">{{ reportData.asmActivities.totalVisitors }}</td>
+            </tr>
+          </tfoot>
+        </table>
+        <ng-template #noASMVisitors>
+          <p class="no-data">No visitor data found for this period</p>
+        </ng-template>
+      </div>
 
-    <!-- CONSULTANCY SERVICES -->
-    <div class="table-section">
-      <h3>CONSULTANCY SERVICES ({{ reportData.consultancies.length }})</h3>
-      <table *ngIf="reportData.consultancies.length > 0; else noConsultancies">
-        <thead>
-          <tr>
-            <th>Sl.No</th>
-            <th>Category</th>
-            <th>Title</th>
-            <th>Date</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let c of reportData.consultancies;let i = index">
-            <td>{{ i + 1 }}</td>
-            <td>{{ c.category }}</td>
-            <td>{{ c.title }}</td>
-            <td>{{ c.date }}</td>
-          </tr>
-        </tbody>
-      </table>
-      <ng-template #noConsultancies>
-        <p class="no-data">No consultancies found</p>
-      </ng-template>
-    </div>
+      <!-- OTHER ACTIVITIES (ASM) -->
+      <div class="table-section">
+        <h3>OTHER ACTIVITIES ({{ reportData.otherActivities.length }})</h3>
+        <table *ngIf="reportData.otherActivities && reportData.otherActivities.length > 0; else noActivitiesASM">
+          <thead>
+            <tr>
+              <th>Sl.No</th>
+              <th>Title</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let a of reportData.otherActivities; let i = index">
+              <td>{{ i + 1 }}</td>
+              <td>{{ a.title }}</td>
+              <td>{{ a.description }}</td>
+            </tr>
+          </tbody>
+        </table>
+        <ng-template #noActivitiesASM>
+          <p class="no-data">No other activities found</p>
+        </ng-template>
+      </div>
+    </ng-container>
 
-    <!-- SERVICES / FACILITIES -->
-<div class="table-section">
-  <h3>SERVICES / FACILITIES ({{ reportData.services.length }})</h3>
-  <table *ngIf="reportData.services.length > 0; else noServices">
-    <thead>
-      <tr>
-        <th>Sl.No</th>
-        <th>Category</th>
-        <th>Particulars/Title</th>
-        <th>Theme</th>
-        <th>Unit</th>
-        <th>Quantity</th>
-        <th>Amount</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let s of reportData.services; let i = index">
-        <td>{{ i + 1 }}</td>
-        <td>{{ s.category }}</td>
-        <td>{{ s.title }}</td>
-        <td>{{ s.theme }}</td>
-        <td>{{ s.unit }}</td>
-        <td>{{ s.quantity ?? '-' }}</td>
-        <td>{{ s.amount | currency:'INR':'symbol':'1.2-2' }}</td>
-      </tr>
-    </tbody>
-  </table>
-  <ng-template #noServices>
-    <p class="no-data">No services found</p>
-  </ng-template>
-</div>
+    <!-- ========================================= -->
+    <!-- OTHER UNITS SECTION (NOT FIU, NOT ASM) -->
+    <!-- ========================================= -->
+    <ng-container *ngIf="!isFIUUnit && !isASMUnit">
+      
+      <!-- PROGRAMS -->
+      <div class="table-section">
+        <h3>PROGRAMS ({{ reportData.programs.length }})</h3>
+        <table *ngIf="reportData.programs.length > 0; else noPrograms">
+          <thead>
+            <tr>
+              <th>Sl.No</th>
+              <th>Program Type</th>
+              <th>Title</th>
+              <th>Date From - To</th>
+              <th>Duration</th>
+              <th>Participants</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let p of reportData.programs;let i = index">
+              <td>{{ i + 1 }}</td>
+              <td>{{ p.programType }}</td>
+              <td>{{ p.title }}</td>
+              <td>{{ p.dateFrom }} - {{ p.dateTo }}</td>
+              <td>{{ p.duration }} days</td>
+              <td>{{ p.participants }}</td>
+              <td>{{ p.status }}</td>
+            </tr>
+          </tbody>
+        </table>
+        <ng-template #noPrograms>
+          <p class="no-data">No programs found</p>
+        </ng-template>
+      </div>
 
-    <!-- OTHER ACTIVITIES -->
-    <div class="table-section">
-      <h3>OTHER ACTIVITIES ({{ reportData.otherActivities.length }})</h3>
-      <table *ngIf="reportData.otherActivities.length > 0; else noActivities">
-        <thead>
-          <tr>
-            <th>Sl.No</th>
-            <th>Title</th>
-            <th>Description</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let a of reportData.otherActivities; let i = index">
-            <td>{{ i + 1 }}</td>
-            <td>{{ a.title }}</td>
-            <td>{{ a.description }}</td>
-          </tr>
-        </tbody>
-      </table>
-      <ng-template #noActivities>
-        <p class="no-data">No other activities found</p>
-      </ng-template>
-    </div>
+      <!-- PUBLICATIONS -->
+      <div class="table-section">
+        <h3>PUBLICATIONS ({{ reportData.publications.length }})</h3>
+        <table *ngIf="reportData.publications.length > 0; else noPublications">
+          <thead>
+            <tr>
+              <th>Sl.No</th>
+              <th>Category</th>
+              <th>Title</th>
+              <th>Pages</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let p of reportData.publications; let i = index">
+              <td>{{ i + 1 }}</td>
+              <td>{{ p.category }}</td>
+              <td>{{ p.title }}</td>
+              <td>{{ p.pages }}</td>
+            </tr>
+          </tbody>
+        </table>
+        <ng-template #noPublications>
+          <p class="no-data">No publications found</p>
+        </ng-template>
+      </div>
+
+      <!-- NOMINATION & REWARDS -->
+      <div class="table-section">
+        <h3>NOMINATION & REWARDS ({{ reportData.nominations.length }})</h3>
+        <table *ngIf="reportData.nominations.length > 0; else noNominations">
+          <thead>
+            <tr>
+              <th>Sl.No</th>
+              <th>Type</th>
+              <th>Award Name</th>
+              <th>Category</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let n of reportData.nominations;let i = index">
+              <td>{{ i + 1 }}</td>
+              <td>{{ n.type }}</td>
+              <td>{{ n.awardName }}</td>
+              <td>{{ n.category }}</td>
+              <td>{{ n.date }}</td>
+            </tr>
+          </tbody>
+        </table>
+        <ng-template #noNominations>
+          <p class="no-data">No nominations found</p>
+        </ng-template>
+      </div>
+
+      <!-- CONSULTANCY SERVICES -->
+      <div class="table-section">
+        <h3>CONSULTANCY SERVICES ({{ reportData.consultancies.length }})</h3>
+        <table *ngIf="reportData.consultancies.length > 0; else noConsultancies">
+          <thead>
+            <tr>
+              <th>Sl.No</th>
+              <th>Category</th>
+              <th>Title</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let c of reportData.consultancies;let i = index">
+              <td>{{ i + 1 }}</td>
+              <td>{{ c.category }}</td>
+              <td>{{ c.title }}</td>
+              <td>{{ c.date }}</td>
+            </tr>
+          </tbody>
+        </table>
+        <ng-template #noConsultancies>
+          <p class="no-data">No consultancies found</p>
+        </ng-template>
+      </div>
+
+      <!-- SERVICES / FACILITIES -->
+      <div class="table-section">
+        <h3>SERVICES / FACILITIES ({{ reportData.services.length }})</h3>
+        <table *ngIf="reportData.services.length > 0; else noServices">
+          <thead>
+            <tr>
+              <th>Sl.No</th>
+              <th>Category</th>
+              <th>Particulars/Title</th>
+              <th>Theme</th>
+              <th>Unit</th>
+              <th>Quantity</th>
+              <th>Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let s of reportData.services; let i = index">
+              <td>{{ i + 1 }}</td>
+              <td>{{ s.category }}</td>
+              <td>{{ s.title }}</td>
+              <td>{{ s.theme }}</td>
+              <td>{{ s.unit }}</td>
+              <td>{{ s.quantity ?? '-' }}</td>
+              <td>{{ s.amount | currency:'INR':'symbol':'1.2-2' }}</td>
+            </tr>
+          </tbody>
+        </table>
+        <ng-template #noServices>
+          <p class="no-data">No services found</p>
+        </ng-template>
+      </div>
+
+      <!-- OTHER ACTIVITIES -->
+      <div class="table-section">
+        <h3>OTHER ACTIVITIES ({{ reportData.otherActivities.length }})</h3>
+        <table *ngIf="reportData.otherActivities.length > 0; else noOtherActivities">
+          <thead>
+            <tr>
+              <th>Sl.No</th>
+              <th>Title</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let a of reportData.otherActivities; let i = index">
+              <td>{{ i + 1 }}</td>
+              <td>{{ a.title }}</td>
+              <td>{{ a.description }}</td>
+            </tr>
+          </tbody>
+        </table>
+        <ng-template #noOtherActivities>
+          <p class="no-data">No other activities found</p>
+        </ng-template>
+      </div>
+
+    </ng-container>
 
   </div>
 </div>

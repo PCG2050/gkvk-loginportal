@@ -270,6 +270,39 @@ tbody tr:last-child td {
   font-size: 1.2rem;
   background-color: rgba(255, 255, 255, 0.5);
 }
+/* ASM Activities Table */
+.asm-activities h3 {
+  background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+  color: white;
+  padding: 12px 16px;
+  border-radius: 8px 8px 0 0;
+}
+
+.asm-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.asm-table thead {
+  background: linear-gradient(135deg, #42A5F5 0%, #2196F3 100%);
+}
+
+.asm-table thead th {
+  color: white;
+  font-weight: 600;
+  padding: 14px 16px;
+}
+
+.asm-table tbody tr:hover {
+  background-color: #E3F2FD;
+}
+
+.asm-table tfoot {
+  background: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%);
+  border-top: 3px solid #2196F3;
+}
 
 /* Responsive Design for FIU Table */
 @media (max-width: 768px) {
