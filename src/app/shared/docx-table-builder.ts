@@ -21,7 +21,7 @@ import {
 export class DOCXTableBuilder {
 
   /**
-   * Create a styled header cell with green background and white text
+   * Create a styled header cell with blue background and white text
    */
   static headerCell(text: string, bold = true): TableCell {
     return new TableCell({
@@ -30,7 +30,7 @@ export class DOCXTableBuilder {
         alignment: AlignmentType.CENTER,
       })],
       shading: {
-        fill: '4CAF50',  // Green background
+        fill: '2196F3',  // Blue background
         type: ShadingType.SOLID,
       },
     });
