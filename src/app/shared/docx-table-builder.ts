@@ -137,7 +137,7 @@ export class DOCXTableBuilder {
 
   /**
    * Create Programs Table
-   * Columns: Type | Title | Date From | Date To | Duration | Participants | Status
+   * Columns: Sl.No | Type | Title | Date From | Date To | Duration | Participants | Status
    */
   static createProgramsTable(programs: any[]): Table {
     return new Table({
@@ -146,6 +146,7 @@ export class DOCXTableBuilder {
         // Header row
         new TableRow({
           children: [
+            this.headerCell('Sl.No'),
             this.headerCell('Type'),
             this.headerCell('Title'),
             this.headerCell('Date From'),
@@ -156,8 +157,9 @@ export class DOCXTableBuilder {
           ],
         }),
         // Data rows
-        ...programs.map(p => new TableRow({
+        ...programs.map((p, i) => new TableRow({
           children: [
+            this.dataCell(i + 1, AlignmentType.CENTER),
             this.dataCell(p.programType || '-'),
             this.dataCell(p.title || '-'),
             this.dataCell(p.dateFrom || '-', AlignmentType.CENTER),
@@ -173,7 +175,7 @@ export class DOCXTableBuilder {
 
   /**
    * Create Publications Table
-   * Columns: Category | Title | Pages
+   * Columns: Sl.No | Category | Title | Pages
    */
   static createPublicationsTable(publications: any[]): Table {
     return new Table({
@@ -181,13 +183,15 @@ export class DOCXTableBuilder {
       rows: [
         new TableRow({
           children: [
+            this.headerCell('Sl.No'),
             this.headerCell('Category'),
             this.headerCell('Title'),
             this.headerCell('Pages'),
           ],
         }),
-        ...publications.map(p => new TableRow({
+        ...publications.map((p, i) => new TableRow({
           children: [
+            this.dataCell(i + 1, AlignmentType.CENTER),
             this.dataCell(p.category || '-'),
             this.dataCell(p.title || '-'),
             this.dataCell(p.pages || '-', AlignmentType.CENTER),
@@ -199,7 +203,7 @@ export class DOCXTableBuilder {
 
   /**
    * Create Nominations Table
-   * Columns: Type | Award Name | Category | Date
+   * Columns: Sl.No | Type | Award Name | Category | Date
    */
   static createNominationsTable(nominations: any[]): Table {
     return new Table({
@@ -207,14 +211,16 @@ export class DOCXTableBuilder {
       rows: [
         new TableRow({
           children: [
+            this.headerCell('Sl.No'),
             this.headerCell('Type'),
             this.headerCell('Award Name'),
             this.headerCell('Category'),
             this.headerCell('Date'),
           ],
         }),
-        ...nominations.map(n => new TableRow({
+        ...nominations.map((n, i) => new TableRow({
           children: [
+            this.dataCell(i + 1, AlignmentType.CENTER),
             this.dataCell(n.type || '-'),
             this.dataCell(n.awardName || '-'),
             this.dataCell(n.category || '-'),
@@ -227,7 +233,7 @@ export class DOCXTableBuilder {
 
   /**
    * Create Consultancies Table
-   * Columns: Category | Title | Date
+   * Columns: Sl.No | Category | Title | Date
    */
   static createConsultanciesTable(consultancies: any[]): Table {
     return new Table({
@@ -235,13 +241,15 @@ export class DOCXTableBuilder {
       rows: [
         new TableRow({
           children: [
+            this.headerCell('Sl.No'),
             this.headerCell('Category'),
             this.headerCell('Title'),
             this.headerCell('Date'),
           ],
         }),
-        ...consultancies.map(c => new TableRow({
+        ...consultancies.map((c, i) => new TableRow({
           children: [
+            this.dataCell(i + 1, AlignmentType.CENTER),
             this.dataCell(c.category || '-'),
             this.dataCell(c.title || '-'),
             this.dataCell(c.date || '-', AlignmentType.CENTER),
@@ -253,7 +261,7 @@ export class DOCXTableBuilder {
 
   /**
    * Create Services Table
-   * Columns: Category | Title | Theme | Unit | Quantity | Amount
+   * Columns: Sl.No | Category | Title | Theme | Unit | Quantity | Amount
    */
   static createServicesTable(services: any[]): Table {
     return new Table({
@@ -261,6 +269,7 @@ export class DOCXTableBuilder {
       rows: [
         new TableRow({
           children: [
+            this.headerCell('Sl.No'),
             this.headerCell('Category'),
             this.headerCell('Title'),
             this.headerCell('Theme'),
@@ -269,8 +278,9 @@ export class DOCXTableBuilder {
             this.headerCell('Amount'),
           ],
         }),
-        ...services.map(s => new TableRow({
+        ...services.map((s, i) => new TableRow({
           children: [
+            this.dataCell(i + 1, AlignmentType.CENTER),
             this.dataCell(s.category || '-'),
             this.dataCell(s.title || '-'),
             this.dataCell(s.theme || '-'),
