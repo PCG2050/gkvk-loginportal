@@ -38,7 +38,7 @@ export class DOCXTableBuilder {
   /**
    * Create a regular data cell
    */
-  static dataCell(text: string | number, align = AlignmentType.LEFT): TableCell {
+  static dataCell(text: string | number, align: any = AlignmentType.LEFT): TableCell {
     return new TableCell({
       children: [new Paragraph({
         text: text?.toString() || '-',
@@ -50,7 +50,7 @@ export class DOCXTableBuilder {
   /**
    * Create a total/footer cell with gray background and bold text
    */
-  static totalCell(text: string | number, align = AlignmentType.RIGHT): TableCell {
+  static totalCell(text: string | number, align: any = AlignmentType.RIGHT): TableCell {
     return new TableCell({
       children: [new Paragraph({
         children: [new TextRun({ text: text?.toString() || '0', bold: true })],
