@@ -1,11 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Endpoints } from '../../shared/endpoints.model';
 import { HttpHeaders } from '@angular/common/http';
+import { Document, Packer, Paragraph, AlignmentType, HeadingLevel, TextRun } from 'docx';
+import { saveAs } from 'file-saver';
+import { DOCXTableBuilder } from '../../shared/docx-table-builder';
 
 interface FilterOptions {
   units: Array<{
@@ -184,450 +185,182 @@ export class ReportsComponent implements OnInit {
       });
   }
 
-  downloadPDF() {
+  /**
+   * Download report as editable DOCX file
+   */
+  async downloadDOCX() {
     if (!this.reportData) return;
 
-    const doc = new jsPDF('p', 'mm', 'a4');
-    const pageWidth = doc.internal.pageSize.getWidth();
-    let currentY = 20;
+    const children: any[] = [
+      // ===== DOCUMENT HEADER =====
+      new Paragraph({
+        text: 'Administrative Report',
+        heading: HeadingLevel.HEADING_1,
+        alignment: AlignmentType.CENTER,
+        spacing: { after: 200 },
+      }),
+      new Paragraph({
+        text: this.reportData.unitName,
+        alignment: AlignmentType.CENTER,
+        spacing: { after: 100 },
+      }),
+      new Paragraph({
+        text: this.reportData.unitLocationName,
+        alignment: AlignmentType.CENTER,
+        spacing: { after: 100 },
+      }),
+      new Paragraph({
+        text: `${this.reportData.monthName} ${this.reportData.year}`,
+        alignment: AlignmentType.CENTER,
+        spacing: { after: 100 },
+      }),
+      new Paragraph({
+        text: `Generated: ${new Date(this.reportData.generatedAt).toLocaleString()}`,
+        alignment: AlignmentType.CENTER,
+        spacing: { after: 100 },
+      }),
+      new Paragraph({
+        children: [new TextRun({
+          text: `Total Approved Entries: ${this.reportData.totalEntries}`,
+          bold: true
+        })],
+        alignment: AlignmentType.CENTER,
+        spacing: { after: 400 },
+      }),
+    ];
 
-    // ===== HEADER =====
-    doc.setFontSize(20);
-    doc.setFont('helvetica', 'bold');
-    doc.text('Administrative Report', pageWidth / 2, currentY, { align: 'center' });
-    
-    currentY += 10;
-    doc.setFontSize(12);
-    doc.setFont('helvetica', 'normal');
-    doc.text(this.reportData.unitName, pageWidth / 2, currentY, { align: 'center' });
-    
-    currentY += 6;
-    doc.text(this.reportData.unitLocationName, pageWidth / 2, currentY, { align: 'center' });
-    
-    currentY += 6;
-    doc.text(`${this.reportData.monthName} ${this.reportData.year}`, pageWidth / 2, currentY, { align: 'center' });
-    
-    currentY += 6;
-    doc.setFontSize(10);
-    doc.text(`Generated: ${new Date(this.reportData.generatedAt).toLocaleString()}`, pageWidth / 2, currentY, { align: 'center' });
-    
-    currentY += 6;
-    doc.setFont('helvetica', 'bold');
-    doc.text(`Total Approved Entries: ${this.reportData.totalEntries}`, pageWidth / 2, currentY, { align: 'center' });
-    
-    currentY += 12;
+    // ===== FIU UNIT REPORT =====
+    if (this.isFIUUnit && this.reportData.fiuActivities) {
+      // FIU Activities Table
+      children.push(
+        DOCXTableBuilder.sectionHeading(
+          `FIU MEDIA ACTIVITIES (Total: ${this.reportData.fiuActivities.totalCount})`
+        ),
+        DOCXTableBuilder.createFIUTable(this.reportData.fiuActivities.activities),
+        DOCXTableBuilder.emptyLine(),
+      );
 
-    // ===== FIU UNIT: FIU Activities + Other Activities =====
+      // Other Activities for FIU
+      if (this.reportData.otherActivities && this.reportData.otherActivities.length > 0) {
+        children.push(
+          DOCXTableBuilder.sectionHeading(
+            `OTHER ACTIVITIES (${this.reportData.otherActivities.length})`
+          ),
+          DOCXTableBuilder.createOtherActivitiesTable(this.reportData.otherActivities),
+          DOCXTableBuilder.emptyLine(),
+        );
+      }
+    }
+
+    // ===== ASM UNIT REPORT =====
+    else if (this.isASMUnit && this.reportData.asmActivities) {
+      // ASM Visitor Statistics Table
+      children.push(
+        DOCXTableBuilder.sectionHeading(
+          `ASM VISITOR STATISTICS (Total: ${this.reportData.asmActivities.totalVisitors})`
+        ),
+        DOCXTableBuilder.createASMTable(this.reportData.asmActivities.visitors),
+        DOCXTableBuilder.emptyLine(),
+      );
+
+      // Other Activities for ASM
+      if (this.reportData.otherActivities && this.reportData.otherActivities.length > 0) {
+        children.push(
+          DOCXTableBuilder.sectionHeading(
+            `OTHER ACTIVITIES (${this.reportData.otherActivities.length})`
+          ),
+          DOCXTableBuilder.createOtherActivitiesTable(this.reportData.otherActivities),
+          DOCXTableBuilder.emptyLine(),
+        );
+      }
+    }
+
+    // ===== OTHER UNITS REPORT =====
+    else {
+      // 1. PROGRAMS
+      if (this.reportData.programs && this.reportData.programs.length > 0) {
+        children.push(
+          DOCXTableBuilder.sectionHeading(`PROGRAMS (${this.reportData.programs.length})`),
+          DOCXTableBuilder.createProgramsTable(this.reportData.programs),
+          DOCXTableBuilder.emptyLine(),
+        );
+      }
+
+      // 2. PUBLICATIONS
+      if (this.reportData.publications && this.reportData.publications.length > 0) {
+        children.push(
+          DOCXTableBuilder.sectionHeading(`PUBLICATIONS (${this.reportData.publications.length})`),
+          DOCXTableBuilder.createPublicationsTable(this.reportData.publications),
+          DOCXTableBuilder.emptyLine(),
+        );
+      }
+
+      // 3. NOMINATION & REWARDS
+      if (this.reportData.nominations && this.reportData.nominations.length > 0) {
+        children.push(
+          DOCXTableBuilder.sectionHeading(`NOMINATION & REWARDS (${this.reportData.nominations.length})`),
+          DOCXTableBuilder.createNominationsTable(this.reportData.nominations),
+          DOCXTableBuilder.emptyLine(),
+        );
+      }
+
+      // 4. CONSULTANCY SERVICES
+      if (this.reportData.consultancies && this.reportData.consultancies.length > 0) {
+        children.push(
+          DOCXTableBuilder.sectionHeading(`CONSULTANCY SERVICES (${this.reportData.consultancies.length})`),
+          DOCXTableBuilder.createConsultanciesTable(this.reportData.consultancies),
+          DOCXTableBuilder.emptyLine(),
+        );
+      }
+
+      // 5. SERVICES / FACILITIES
+      if (this.reportData.services && this.reportData.services.length > 0) {
+        children.push(
+          DOCXTableBuilder.sectionHeading(`SERVICES / FACILITIES (${this.reportData.services.length})`),
+          DOCXTableBuilder.createServicesTable(this.reportData.services),
+          DOCXTableBuilder.emptyLine(),
+        );
+      }
+
+      // 6. OTHER ACTIVITIES
+      if (this.reportData.otherActivities && this.reportData.otherActivities.length > 0) {
+        children.push(
+          DOCXTableBuilder.sectionHeading(`OTHER ACTIVITIES (${this.reportData.otherActivities.length})`),
+          DOCXTableBuilder.createOtherActivitiesTable(this.reportData.otherActivities),
+          DOCXTableBuilder.emptyLine(),
+        );
+      }
+    }
+
+    // ===== CREATE DOCX DOCUMENT =====
+    const doc = new Document({
+      sections: [{
+        properties: {
+          page: {
+            margin: {
+              top: 720,    // 0.5 inch
+              right: 720,
+              bottom: 720,
+              left: 720,
+            },
+          },
+        },
+        children,
+      }],
+    });
+
+    // ===== DOWNLOAD FILE =====
+    const blob = await Packer.toBlob(doc);
+    let docxFilename: string;
+
     if (this.isFIUUnit) {
-      // FIU ACTIVITIES
-      if (this.reportData.fiuActivities && this.reportData.fiuActivities.activities.length > 0) {
-        doc.setFontSize(14);
-        doc.setFont('helvetica', 'bold');
-        doc.setFillColor(76, 175, 80);
-        doc.rect(14, currentY - 5, pageWidth - 28, 8, 'F');
-        doc.setTextColor(255, 255, 255);
-        doc.text(`FIU MEDIA ACTIVITIES (Total: ${this.reportData.fiuActivities.totalCount})`, 16, currentY);
-        doc.setTextColor(0, 0, 0);
-        currentY += 8;
-
-        autoTable(doc, {
-          startY: currentY,
-          head: [['Sl. No.', 'Activity', 'No.']],
-          body: this.reportData.fiuActivities.activities.map(a => [
-            a.slNo?.toString() || '-',
-            a.activityName || '-',
-            a.count?.toString() || '-'
-          ]),
-          theme: 'grid',
-          headStyles: {
-            fillColor: [76, 175, 80],
-            textColor: 255,
-            fontStyle: 'bold',
-            halign: 'center'
-          },
-          columnStyles: {
-            0: { halign: 'center', cellWidth: 20 },
-            1: { halign: 'left', cellWidth: 120 },
-            2: { halign: 'center', cellWidth: 30 }
-          },
-          margin: { left: 14, right: 14 },
-          styles: { fontSize: 9, cellPadding: 3 },
-          foot: [[
-            '',
-            { content: 'TOTAL', styles: { fontStyle: 'bold', halign: 'right' } },
-            { content: this.reportData.fiuActivities.totalCount.toString(), styles: { fontStyle: 'bold', halign: 'center' } }
-          ]],
-          footStyles: {
-            fillColor: [240, 240, 240],
-            textColor: 0,
-            fontStyle: 'bold'
-          }
-        });
-
-        currentY = (doc as any).lastAutoTable?.finalY + 10 || currentY + 10;
-      } else {
-        this.addNoDataSection(doc, 'FIU MEDIA ACTIVITIES', currentY);
-        currentY += 15;
-      }
-
-      // OTHER ACTIVITIES (FIU)
-      if (currentY > 250) { doc.addPage(); currentY = 20; }
-
-      if (this.reportData.otherActivities && this.reportData.otherActivities.length > 0) {
-        doc.setFontSize(14);
-        doc.setFont('helvetica', 'bold');
-        doc.setFillColor(76, 175, 80);
-        doc.rect(14, currentY - 5, pageWidth - 28, 8, 'F');
-        doc.setTextColor(255, 255, 255);
-        doc.text(`OTHER ACTIVITIES (${this.reportData.otherActivities.length})`, 16, currentY);
-        doc.setTextColor(0, 0, 0);
-        currentY += 8;
-
-        autoTable(doc, {
-          startY: currentY,
-          head: [['Sl.No', 'Title', 'Description']],
-          body: this.reportData.otherActivities.map((a, i) => [
-            (i + 1).toString(),
-            a.title || '-',
-            a.description || '-'
-          ]),
-          theme: 'grid',
-          headStyles: { fillColor: [76, 175, 80], textColor: 255, fontStyle: 'bold' },
-          margin: { left: 14, right: 14 },
-          styles: { fontSize: 8, cellPadding: 2 }
-        });
-      } else {
-        this.addNoDataSection(doc, 'OTHER ACTIVITIES', currentY);
-      }
-
-      const filename = `FIU_Report_${this.reportData.unitName}_${this.reportData.monthName}_${this.reportData.year}.pdf`;
-      doc.save(filename);
-      return;
-    }
-
-    // ===== ASM UNIT: ASM Visitors + Other Activities =====
-    if (this.isASMUnit) {
-      // ASM VISITOR STATISTICS
-      if (this.reportData.asmActivities && this.reportData.asmActivities.visitors.length > 0) {
-        doc.setFontSize(14);
-        doc.setFont('helvetica', 'bold');
-        doc.setFillColor(33, 150, 243);
-        doc.rect(14, currentY - 5, pageWidth - 28, 8, 'F');
-        doc.setTextColor(255, 255, 255);
-        doc.text(`ASM VISITOR STATISTICS (Total: ${this.reportData.asmActivities.totalVisitors})`, 16, currentY);
-        doc.setTextColor(0, 0, 0);
-        currentY += 8;
-
-        autoTable(doc, {
-          startY: currentY,
-          head: [['Sl. No.', 'Particulars', 'No. of visitors']],
-          body: this.reportData.asmActivities.visitors.map(v => [
-            v.slNo.toString(),
-            v.particulars,
-            v.noOfVisitors.toString()
-          ]),
-          theme: 'grid',
-          headStyles: {
-            fillColor: [33, 150, 243],
-            textColor: 255,
-            fontStyle: 'bold',
-            halign: 'center'
-          },
-          columnStyles: {
-            0: { halign: 'center', cellWidth: 25 },
-            1: { halign: 'left', cellWidth: 115 },
-            2: { halign: 'center', cellWidth: 40 }
-          },
-          margin: { left: 14, right: 14 },
-          styles: {
-            fontSize: 10,
-            cellPadding: 4
-          },
-          foot: [[
-            '',
-            { content: 'Total', styles: { fontStyle: 'bold', halign: 'right' } },
-            { content: this.reportData.asmActivities.totalVisitors.toString(), styles: { fontStyle: 'bold', halign: 'center' } }
-          ]],
-          footStyles: {
-            fillColor: [227, 242, 253],
-            textColor: 0,
-            fontStyle: 'bold'
-          }
-        });
-
-        currentY = (doc as any).lastAutoTable.finalY + 10;
-      } else {
-        this.addNoDataSection(doc, 'ASM VISITOR STATISTICS', currentY);
-        currentY += 15;
-      }
-
-      // OTHER ACTIVITIES (ASM)
-      if (currentY > 250) { doc.addPage(); currentY = 20; }
-
-      if (this.reportData.otherActivities && this.reportData.otherActivities.length > 0) {
-        doc.setFontSize(14);
-        doc.setFont('helvetica', 'bold');
-        doc.setFillColor(33, 150, 243);
-        doc.rect(14, currentY - 5, pageWidth - 28, 8, 'F');
-        doc.setTextColor(255, 255, 255);
-        doc.text(`OTHER ACTIVITIES (${this.reportData.otherActivities.length})`, 16, currentY);
-        doc.setTextColor(0, 0, 0);
-        currentY += 8;
-
-        autoTable(doc, {
-          startY: currentY,
-          head: [['Sl.No', 'Title', 'Description']],
-          body: this.reportData.otherActivities.map((a, i) => [
-            (i + 1).toString(),
-            a.title || '-',
-            a.description || '-'
-          ]),
-          theme: 'grid',
-          headStyles: { fillColor: [33, 150, 243], textColor: 255, fontStyle: 'bold' },
-          margin: { left: 14, right: 14 },
-          styles: { fontSize: 8, cellPadding: 2 }
-        });
-      } else {
-        this.addNoDataSection(doc, 'OTHER ACTIVITIES', currentY);
-      }
-
-      const filename = `ASM_Report_${this.reportData.unitName}_${this.reportData.monthName}_${this.reportData.year}.pdf`;
-      doc.save(filename);
-      return;
-    }
-
-    // ===== OTHER UNITS: All Standard Tables =====
-    
-    // Check if we need a new page
-    if (currentY > 250) {
-      doc.addPage();
-      currentY = 20;
-    }
-
-    // PROGRAMS TABLE
-    if (this.reportData.programs && this.reportData.programs.length > 0) {
-      doc.setFontSize(14);
-      doc.setFont('helvetica', 'bold');
-      doc.setFillColor(76, 175, 80);
-      doc.rect(14, currentY - 5, pageWidth - 28, 8, 'F');
-      doc.setTextColor(255, 255, 255);
-      doc.text(`PROGRAMS (${this.reportData.programs.length})`, 16, currentY);
-      doc.setTextColor(0, 0, 0);
-      currentY += 8;
-
-      autoTable(doc, {
-        startY: currentY,
-        head: [['Type', 'Title', 'Date From', 'Date To', 'Duration', 'Participants', 'Status']],
-        body: this.reportData.programs.map(p => [
-          p.programType || '-',
-          p.title || '-',
-          p.dateFrom || '-',
-          p.dateTo || '-',
-          p.duration?.toString() || '-',
-          p.participants?.toString() || '-',
-          p.status || '-'
-        ]),
-        theme: 'grid',
-        headStyles: { fillColor: [76, 175, 80], textColor: 255, fontStyle: 'bold' },
-        margin: { left: 14, right: 14 },
-        styles: { fontSize: 8, cellPadding: 2 }
-      });
-
-      currentY = (doc as any).lastAutoTable.finalY + 10;
+      docxFilename = `FIU_Report_${this.reportData.unitName}_${this.reportData.monthName}_${this.reportData.year}.docx`;
+    } else if (this.isASMUnit) {
+      docxFilename = `ASM_Report_${this.reportData.unitName}_${this.reportData.monthName}_${this.reportData.year}.docx`;
     } else {
-      this.addNoDataSection(doc, 'PROGRAMS', currentY);
-      currentY += 15;
+      docxFilename = `Report_${this.reportData.unitName}_${this.reportData.monthName}_${this.reportData.year}.docx`;
     }
 
-    if (currentY > 250) { doc.addPage(); currentY = 20; }
-
-    // PUBLICATIONS TABLE
-    if (this.reportData.publications && this.reportData.publications.length > 0) {
-      doc.setFontSize(14);
-      doc.setFont('helvetica', 'bold');
-      doc.setFillColor(76, 175, 80);
-      doc.rect(14, currentY - 5, pageWidth - 28, 8, 'F');
-      doc.setTextColor(255, 255, 255);
-      doc.text(`PUBLICATIONS (${this.reportData.publications.length})`, 16, currentY);
-      doc.setTextColor(0, 0, 0);
-      currentY += 8;
-
-      autoTable(doc, {
-        startY: currentY,
-        head: [['Category', 'Title', 'Pages']],
-        body: this.reportData.publications.map(p => [
-          p.category || '-',
-          p.title || '-',
-          p.pages || '-'
-        ]),
-        theme: 'grid',
-        headStyles: { fillColor: [76, 175, 80], textColor: 255, fontStyle: 'bold' },
-        margin: { left: 14, right: 14 },
-        styles: { fontSize: 8, cellPadding: 2 }
-      });
-
-      currentY = (doc as any).lastAutoTable.finalY + 10;
-    } else {
-      this.addNoDataSection(doc, 'PUBLICATIONS', currentY);
-      currentY += 15;
-    }
-
-    if (currentY > 250) { doc.addPage(); currentY = 20; }
-
-    // NOMINATION & REWARDS TABLE
-    if (this.reportData.nominations && this.reportData.nominations.length > 0) {
-      doc.setFontSize(14);
-      doc.setFont('helvetica', 'bold');
-      doc.setFillColor(76, 175, 80);
-      doc.rect(14, currentY - 5, pageWidth - 28, 8, 'F');
-      doc.setTextColor(255, 255, 255);
-      doc.text(`NOMINATION & REWARDS (${this.reportData.nominations.length})`, 16, currentY);
-      doc.setTextColor(0, 0, 0);
-      currentY += 8;
-
-      autoTable(doc, {
-        startY: currentY,
-        head: [['Type', 'Award Name', 'Category', 'Date']],
-        body: this.reportData.nominations.map(n => [
-          n.type || '-',
-          n.awardName || '-',
-          n.category || '-',
-          n.date || '-'
-        ]),
-        theme: 'grid',
-        headStyles: { fillColor: [76, 175, 80], textColor: 255, fontStyle: 'bold' },
-        margin: { left: 14, right: 14 },
-        styles: { fontSize: 8, cellPadding: 2 }
-      });
-
-      currentY = (doc as any).lastAutoTable.finalY + 10;
-    } else {
-      this.addNoDataSection(doc, 'NOMINATION & REWARDS', currentY);
-      currentY += 15;
-    }
-
-    if (currentY > 250) { doc.addPage(); currentY = 20; }
-
-    // CONSULTANCY SERVICES TABLE
-    if (this.reportData.consultancies && this.reportData.consultancies.length > 0) {
-      doc.setFontSize(14);
-      doc.setFont('helvetica', 'bold');
-      doc.setFillColor(76, 175, 80);
-      doc.rect(14, currentY - 5, pageWidth - 28, 8, 'F');
-      doc.setTextColor(255, 255, 255);
-      doc.text(`CONSULTANCY SERVICES (${this.reportData.consultancies.length})`, 16, currentY);
-      doc.setTextColor(0, 0, 0);
-      currentY += 8;
-
-      autoTable(doc, {
-        startY: currentY,
-        head: [['Category', 'Title', 'Date']],
-        body: this.reportData.consultancies.map(c => [
-          c.category || '-',
-          c.title || '-',
-          c.date || '-'
-        ]),
-        theme: 'grid',
-        headStyles: { fillColor: [76, 175, 80], textColor: 255, fontStyle: 'bold' },
-        margin: { left: 14, right: 14 },
-        styles: { fontSize: 8, cellPadding: 2 }
-      });
-
-      currentY = (doc as any).lastAutoTable.finalY + 10;
-    } else {
-      this.addNoDataSection(doc, 'CONSULTANCY SERVICES', currentY);
-      currentY += 15;
-    }
-
-    if (currentY > 250) { doc.addPage(); currentY = 20; }
-
-    // SERVICES / FACILITIES TABLE
-    if (this.reportData.services && this.reportData.services.length > 0) {
-      doc.setFontSize(14);
-      doc.setFont('helvetica', 'bold');
-      doc.setFillColor(76, 175, 80);
-      doc.rect(14, currentY - 5, pageWidth - 28, 8, 'F');
-      doc.setTextColor(255, 255, 255);
-      doc.text(`SERVICES / FACILITIES (${this.reportData.services.length})`, 16, currentY);
-      doc.setTextColor(0, 0, 0);
-      currentY += 8;
-
-      autoTable(doc, {
-        startY: currentY,
-        head: [['Category', 'Particulars', 'Theme', 'Unit', 'Quantity', 'Amount']],
-        body: this.reportData.services.map(s => [
-          s.category || '-',
-          s.title || '-',
-          s.theme || '-',
-          s.unit || '-',
-          s.quantity?.toString() || '-',
-          s.amount ? `₹${s.amount.toFixed(2)}` : '-'
-        ]),
-        theme: 'grid',
-        headStyles: { fillColor: [76, 175, 80], textColor: 255, fontStyle: 'bold' },
-        margin: { left: 14, right: 14 },
-        styles: { fontSize: 8, cellPadding: 2 },
-        columnStyles: {
-          5: { halign: 'right' }
-        }
-      });
-
-      currentY = (doc as any).lastAutoTable.finalY + 10;
-    } else {
-      this.addNoDataSection(doc, 'SERVICES / FACILITIES', currentY);
-      currentY += 15;
-    }
-
-    if (currentY > 250) { doc.addPage(); currentY = 20; }
-
-    // OTHER ACTIVITIES TABLE
-    if (this.reportData.otherActivities && this.reportData.otherActivities.length > 0) {
-      doc.setFontSize(14);
-      doc.setFont('helvetica', 'bold');
-      doc.setFillColor(76, 175, 80);
-      doc.rect(14, currentY - 5, pageWidth - 28, 8, 'F');
-      doc.setTextColor(255, 255, 255);
-      doc.text(`OTHER ACTIVITIES (${this.reportData.otherActivities.length})`, 16, currentY);
-      doc.setTextColor(0, 0, 0);
-      currentY += 8;
-
-      autoTable(doc, {
-        startY: currentY,
-        head: [['Sl.No', 'Title', 'Description']],
-        body: this.reportData.otherActivities.map((a, i) => [
-          (i + 1).toString(),
-          a.title || '-',
-          a.description || '-'
-        ]),
-        theme: 'grid',
-        headStyles: { fillColor: [76, 175, 80], textColor: 255, fontStyle: 'bold' },
-        margin: { left: 14, right: 14 },
-        styles: { fontSize: 8, cellPadding: 2 }
-      });
-    } else {
-      this.addNoDataSection(doc, 'OTHER ACTIVITIES', currentY);
-    }
-
-    // SAVE PDF
-    const filename = `Report_${this.reportData.unitName}_${this.reportData.monthName}_${this.reportData.year}.pdf`;
-    doc.save(filename);
-  }
-
-  private addNoDataSection(doc: jsPDF, title: string, y: number) {
-    const pageWidth = doc.internal.pageSize.getWidth();
-    
-    doc.setFontSize(14);
-    doc.setFont('helvetica', 'bold');
-    doc.setFillColor(76, 175, 80);
-    doc.rect(14, y - 5, pageWidth - 28, 8, 'F');
-    doc.setTextColor(255, 255, 255);
-    doc.text(title, 16, y);
-    doc.setTextColor(0, 0, 0);
-    
-    doc.setFontSize(10);
-    doc.setFont('helvetica', 'italic');
-    doc.setTextColor(150, 150, 150);
-    doc.text(`No ${title.toLowerCase()} found`, pageWidth / 2, y + 10, { align: 'center' });
-    doc.setTextColor(0, 0, 0);
+    saveAs(blob, docxFilename);
   }
 }
