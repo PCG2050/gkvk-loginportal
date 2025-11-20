@@ -100,5 +100,58 @@ export class UserService {
     return this.httpClient.delete(`${endPoint}/${staffId}`, { headers })
   }
 
+  // ===== UNIT HEAD STATISTICS METHODS =====
+
+  /**
+   * Get statistics for a unit head dashboard
+   * Returns counts for units, trainers, pending approvals, and approved entries
+   */
+  getUnitHeadStatistics(unitHeadId: number): Observable<{
+    assignedUnitsCount: number;
+    trainersCount: number;
+    pendingApprovalsCount: number;
+    approvedThisMonthCount: number;
+  }> {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${this.token}`
+    })
+    // TODO: Replace with actual backend endpoint when available
+    // return this.httpClient.get(`${Endpoints.unitHead}/${unitHeadId}/statistics`, { headers });
+
+    // For now, return mock data
+    // This should be replaced with actual API call
+    return new Observable(observer => {
+      observer.next({
+        assignedUnitsCount: 3,
+        trainersCount: 12,
+        pendingApprovalsCount: 8,
+        approvedThisMonthCount: 45
+      });
+      observer.complete();
+    });
+  }
+
+  /**
+   * Get units assigned to a specific unit head
+   */
+  getUnitHeadAssignedUnits(unitHeadId: number) {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${this.token}`
+    })
+    // TODO: Replace with actual endpoint
+    return this.httpClient.get(`${Endpoints.unitHead}/${unitHeadId}/units`, { headers });
+  }
+
+  /**
+   * Get trainers managed by a specific unit head
+   */
+  getUnitHeadTrainers(unitHeadId: number) {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${this.token}`
+    })
+    // TODO: Replace with actual endpoint
+    return this.httpClient.get(`${Endpoints.unitHead}/${unitHeadId}/trainers`, { headers });
+  }
+
   constructor() { }
 }

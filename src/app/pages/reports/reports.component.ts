@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -7,6 +7,7 @@ import { HttpHeaders } from '@angular/common/http';
 import { Document, Packer, Paragraph, AlignmentType, HeadingLevel, TextRun } from 'docx';
 import { saveAs } from 'file-saver';
 import { DOCXTableBuilder } from '../../shared/docx-table-builder';
+import { UserService } from '../../core/services/user.service';
 
 interface FilterOptions {
   units: Array<{
@@ -87,8 +88,17 @@ export class ReportsComponent implements OnInit {
 
   public isFIUUnit: boolean = false;
   public isASMUnit: boolean = false;
+  public isUnitHead: boolean = false;
   readonly FIU_UNIT_ID = 3;
   readonly ASM_UNIT_ID = 7;
+
+  // Unit Head Statistics
+  unitHeadStats = {
+    assignedUnitsCount: 0,
+    trainersCount: 0,
+    pendingApprovalsCount: 0,
+    approvedThisMonthCount: 0
+  };
 
   // Months for dropdown
   months = [
@@ -106,10 +116,36 @@ export class ReportsComponent implements OnInit {
     { value: 12, name: 'December' }
   ];
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private userService: UserService) {}
 
   ngOnInit() {
     this.loadFilterOptions();
+
+    // Check if user is a unit head and load statistics
+    const userRole = localStorage.getItem('role');
+    if (userRole === 'UNITHEAD') {
+      this.isUnitHead = true;
+      this.loadUnitHeadStatistics();
+    }
+  }
+
+  /**
+   * Load statistics for unit head
+   */
+  loadUnitHeadStatistics() {
+    const userId = localStorage.getItem('userId');
+    if (userId) {
+      const unitHeadId = parseInt(userId);
+      this.userService.getUnitHeadStatistics(unitHeadId).subscribe({
+        next: (stats) => {
+          this.unitHeadStats = stats;
+          console.log('Unit Head Statistics (Reports):', stats);
+        },
+        error: (err) => {
+          console.error('Error fetching unit head statistics:', err);
+        }
+      });
+    }
   }
 
   loadFilterOptions() {
