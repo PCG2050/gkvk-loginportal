@@ -409,6 +409,16 @@ button:disabled {
   color: #ff9800;
 }
 
+.pending-icon {
+  background-color: #fff4e6; /* Light amber for pending */
+  color: #ff9800;
+}
+
+.approved-icon {
+  background-color: #e8f5e9; /* Light green for approved */
+  color: #4caf50;
+}
+
 /* --- Card Content Area --- */
 .card-content {
   flex-grow: 1; /* Allows content to take up available space */
@@ -459,6 +469,15 @@ button:disabled {
     text-decoration: underline; /* Add underline on hover for clearer interaction */
   }
 }
+
+.card-link-disabled {
+  color: #999;             /* Gray color for disabled state */
+  font-weight: 500;
+  font-size: 0.95rem;
+  cursor: not-allowed;     /* Show not-allowed cursor */
+  font-style: italic;      /* Italic to indicate it's not clickable */
+}
+
  .alert{
     color: red;
     padding: 0px;

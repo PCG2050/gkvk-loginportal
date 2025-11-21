@@ -110,6 +110,7 @@ export class Dashboard {
     else if (userRole === 'UNITHEAD') {
       this.Role = 'Unit-Head';
       this.isUnitHeadLoggedIn = true;
+      this.loadUnitHeadStatistics(); // Load statistics for unit head
     }
   }
 
@@ -426,8 +427,32 @@ export class Dashboard {
     });
   }
 
+  // ===== UNIT HEAD STATISTICS =====
+  unitHeadStats = {
+    assignedUnitsCount: 0,
+    trainersCount: 0,
+    pendingApprovalsCount: 0,
+    approvedThisMonthCount: 0
+  };
 
-  //get api to fetch specific unitHead unit and location
+  /**
+   * Load statistics for unit head dashboard
+   */
+  loadUnitHeadStatistics() {
+    const userId = localStorage.getItem('userId');
+    if (userId) {
+      const unitHeadId = parseInt(userId);
+      this.userService.getUnitHeadStatistics(unitHeadId).subscribe({
+        next: (stats) => {
+          this.unitHeadStats = stats;
+          console.log('Unit Head Statistics:', stats);
+        },
+        error: (err) => {
+          console.error('Error fetching unit head statistics:', err);
+        }
+      });
+    }
+  }
 
-  
+
 }

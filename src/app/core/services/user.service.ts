@@ -100,5 +100,59 @@ export class UserService {
     return this.httpClient.delete(`${endPoint}/${staffId}`, { headers })
   }
 
+  // ===== UNIT HEAD STATISTICS METHODS =====
+
+  /**
+   * Get statistics for a unit head dashboard
+   * Returns counts for units, trainers, pending approvals, and approved entries
+   */
+  getUnitHeadStatistics(unitHeadId: number): Observable<{
+    assignedUnitsCount: number;
+    trainersCount: number;
+    pendingApprovalsCount: number;
+    approvedThisMonthCount: number;
+  }> {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${this.token}`
+    });
+   
+    return this.httpClient.get<{
+      assignedUnitsCount: number;
+      trainersCount: number;
+      pendingApprovalsCount: number;
+      approvedThisMonthCount: number;
+    }>(`${Endpoints.unitHead}/${unitHeadId}/statistics`, { headers });
+  }
+
+   /**
+   * Get units assigned to a specific unit head
+   */
+  getUnitHeadAssignedUnits(unitHeadId: number) {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${this.token}`
+    });
+    return this.httpClient.get<{
+      assignedUnitsCount: number;
+      trainersCount: number;
+      pendingApprovalsCount: number;
+      approvedThisMonthCount: number;
+    }>(`${Endpoints.unitHead}/${unitHeadId}/units`, { headers });
+  }
+
+  /**
+   * Get trainers managed by a specific unit head
+   */
+  getUnitHeadTrainers(unitHeadId: number) {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${this.token}`
+    });
+    return this.httpClient.get<{
+      assignedUnitsCount: number;
+      trainersCount: number;
+      pendingApprovalsCount: number;
+      approvedThisMonthCount: number;
+    }>(`${Endpoints.unitHead}/${unitHeadId}/trainers`, { headers });
+  }
+
   constructor() { }
 }

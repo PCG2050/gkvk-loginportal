@@ -313,25 +313,77 @@
 </ul> -->
 
 </div>
-<div class="unitHeadDiv" *ngIf = "isUnitHeadLoggedIn">
-  <div>
-    <!-- <form action="" [formGroup]="unitLocForm"> -->
-    <!-- <select name="" id=""  (change)="OnUnitChange()" formControlName ="unit">
-      <option value="">Select unit</option>
-      <option [value]="unit.unitId" *ngFor="let unit of unitLoc">{{unit.unitName}}</option>
-    </select>
-    <div>
-     <select name="" id="" formControlName="state" (change)="onStateChange()">
-      <option value="">Select state</option>
-      <option [value]="loc.stateId" *ngFor="let loc of selectedState">{{loc.stateName}}</option>
-    </select>
-     <select name="" id="" formControlName="district" (change)="onDistrictChange()">
-      <option value="">Select district</option>
-      <option [value]="loc.districtId" *ngFor="let loc of selectedUnitLoc">{{loc.districtName}}</option>
-    </select>
-    </div> -->
-    
-  <!-- </form> -->
+<div class="unitHeadDiv" *ngIf="isUnitHeadLoggedIn">
+  <div *ngIf="isLoading">
+    <app-loading-spinner style="text-align:center;"></app-loading-spinner>
+  </div>
+  <h1 class="dashboard-title">{{Role}} Dashboard</h1>
+  <div class="dashboard-cards-container">
+
+    <!-- Card 1: Assigned Units -->
+    <div class="dashboard-card">
+      <div class="card-icon units-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" />
+        </svg>
+      </div>
+      <div class="card-content">
+        <div class="card-title">Assigned Units</div>
+        <div class="card-number">{{unitHeadStats.assignedUnitsCount}}</div>
+      </div>
+      <div class="card-footer">
+        <!-- <a [routerLink]="['/Edit-Units']" class="card-link">View My Units &rarr;</a> -->
+      </div>
+    </div>
+
+    <!-- Card 2: Trainers Under Me -->
+    <div class="dashboard-card">
+      <div class="card-icon trainers-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+        </svg>
+      </div>
+      <div class="card-content">
+        <div class="card-title">Staff Under Me</div>
+        <div class="card-number">{{unitHeadStats.trainersCount}}</div>
+      </div>
+      <div class="card-footer">
+        <a [routerLink]="['/Staff']" class="card-link">View My Staff &rarr;</a>
+      </div>
+    </div>
+
+    <!-- Card 3: Pending Approvals (No link, just number) -->
+    <div class="dashboard-card">
+      <div class="card-icon pending-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+        </svg>
+      </div>
+      <div class="card-content">
+        <div class="card-title">Pending Approvals</div>
+        <div class="card-number">{{unitHeadStats.pendingApprovalsCount}}</div>
+      </div>
+      <div class="card-footer">
+        <span class="card-link-disabled">Awaiting Review</span>
+      </div>
+    </div>
+
+    <!-- Card 4: Approved This Month -->
+    <div class="dashboard-card">
+      <div class="card-icon approved-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+        </svg>
+      </div>
+      <div class="card-content">
+        <div class="card-title">Approved This Month</div>
+        <div class="card-number">{{unitHeadStats.approvedThisMonthCount}}</div>
+      </div>
+      <div class="card-footer">
+        <a [routerLink]="['/records']" class="card-link">View Reports &rarr;</a>
+      </div>
+    </div>
+
   </div>
 </div>
 </div>
