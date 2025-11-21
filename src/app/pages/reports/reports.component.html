@@ -52,6 +52,14 @@
     </div>
   </div>
 
+  <!-- Info message for Unit Heads -->
+  <div class="info-message" *ngIf="isUnitHead && filterOptions">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+    </svg>
+    <span>Showing only your assigned units ({{ filterOptions.units.length }})</span>
+  </div>
+
   <!-- Filters -->
   <div class="filters-section" *ngIf="filterOptions">
     <div class="filter-group">
@@ -66,7 +74,7 @@
 
     <div class="filter-group" *ngIf="selectedUnit">
       <label for="locationSelect">Location:</label>
-      <select id="locationSelect" title="Select location" aria-label="Select location" [(ngModel)]="selectedLocation">
+      <select id="locationSelect" title="Select location" aria-label="Select location" [(ngModel)]="selectedLocation" (change)="onLocationChange()">
         <option [ngValue]="null">Select Location</option>
         <option *ngFor="let loc of availableLocations" [ngValue]="loc.unitLocationId">
           {{ loc.districtName }} ({{ loc.stateName }})
@@ -76,14 +84,14 @@
 
     <div class="filter-group">
       <label for="monthSelect">Month:</label>
-      <select id="monthSelect" title="Select month" aria-label="Select month" [(ngModel)]="selectedMonth">
+      <select id="monthSelect" title="Select month" aria-label="Select month" [(ngModel)]="selectedMonth" (change)="onMonthChange()">
         <option *ngFor="let m of months" [ngValue]="m.value">{{ m.name }}</option>
       </select>
     </div>
 
     <div class="filter-group">
       <label for="yearSelect">Year:</label>
-      <select id="yearSelect" title="Select year" aria-label="Select year" [(ngModel)]="selectedYear">
+      <select id="yearSelect" title="Select year" aria-label="Select year" [(ngModel)]="selectedYear" (change)="onYearChange()">
         <option *ngFor="let y of filterOptions.years" [ngValue]="y">{{ y }}</option>
       </select>
     </div>

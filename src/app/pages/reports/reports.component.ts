@@ -179,9 +179,25 @@ export class ReportsComponent implements OnInit {
   onUnitChange() {
     this.selectedLocation = null;
     this.reportData = null;
+    this.error = null; // Clear any previous errors
     // Check if selected unit is FIU or ASM
     this.isFIUUnit = this.selectedUnit === this.FIU_UNIT_ID;
     this.isASMUnit = this.selectedUnit === this.ASM_UNIT_ID;
+  }
+
+  onLocationChange() {
+    this.reportData = null;
+    this.error = null; // Clear any previous errors
+  }
+
+  onMonthChange() {
+    this.reportData = null;
+    this.error = null; // Clear any previous errors
+  }
+
+  onYearChange() {
+    this.reportData = null;
+    this.error = null; // Clear any previous errors
   }
 
   generateReport() {
@@ -214,9 +230,18 @@ export class ReportsComponent implements OnInit {
           this.loading = false;
         },
         error: (err) => {
-          this.error = 'Failed to generate report';
+          // Handle specific error cases
+          if (err.status === 403) {
+            this.error = 'Access Denied: You do not have permission to view this unit location. Please select from your assigned units only.';
+          } else if (err.status === 401) {
+            this.error = 'Unauthorized: Please log in again.';
+          } else if (err.status === 404) {
+            this.error = 'No data found for the selected filters.';
+          } else {
+            this.error = 'Failed to generate report. Please try again.';
+          }
           this.loading = false;
-          console.error(err);
+          console.error('Report generation error:', err);
         }
       });
   }

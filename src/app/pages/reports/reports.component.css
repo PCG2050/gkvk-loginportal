@@ -158,15 +158,44 @@ h1 {
 }
 
 /* ========================================= */
+/* INFO MESSAGE */
+/* ========================================= */
+.info-message {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #e3f2fd;
+  color: #1565c0;
+  padding: 12px 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  border-left: 4px solid #2196F3;
+  font-size: 14px;
+}
+
+.info-message svg {
+  flex-shrink: 0;
+  color: #2196F3;
+}
+
+.info-message span {
+  font-weight: 500;
+}
+
+/* ========================================= */
 /* ERROR MESSAGE */
 /* ========================================= */
 .error-message {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   background: #ffebee;
   color: #c62828;
   padding: 15px;
-  border-radius: 4px;
+  border-radius: 8px;
   margin-bottom: 20px;
   border-left: 4px solid #c62828;
+  font-weight: 500;
 }
 
 /* ========================================= */
