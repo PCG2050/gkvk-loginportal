@@ -153,7 +153,7 @@ export class ReportsComponent implements OnInit {
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${token}`
     });
-    
+
     this.http.get<FilterOptions>(Endpoints.filterOptions, { headers })
       .subscribe({
         next: (data) => {
@@ -162,10 +162,13 @@ export class ReportsComponent implements OnInit {
             data.units = data.units.slice().sort((a, b) => a.unitId - b.unitId);
           }
           this.filterOptions = data ?? null;
+          console.log('Filter options loaded successfully:', data);
         },
         error: (err) => {
           this.error = 'Failed to load filter options';
-          console.error(err);
+          console.error('Filter options error - Status:', err.status);
+          console.error('Filter options error - Message:', err.error);
+          console.error('Filter options error - Full error:', err);
         }
       });
   }
