@@ -165,7 +165,16 @@ export class ReportsComponent implements OnInit {
           console.log('Filter options loaded successfully:', data);
         },
         error: (err) => {
-          this.error = 'Failed to load filter options';
+          // Handle specific error cases
+          if (err.status === 403) {
+            this.error = 'Access Denied: Your role is not authorized to access reports. Please contact your administrator.';
+            console.error('⚠️ 403 FORBIDDEN: Backend authorization failed for Unit Head role');
+            console.error('💡 Fix: Configure RoleClaimType in backend JWT authentication settings');
+          } else if (err.status === 401) {
+            this.error = 'Your session has expired. Please log in again.';
+          } else {
+            this.error = 'Failed to load filter options. Please try again or contact support.';
+          }
           console.error('Filter options error - Status:', err.status);
           console.error('Filter options error - Message:', err.error);
           console.error('Filter options error - Full error:', err);
