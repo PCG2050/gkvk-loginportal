@@ -89,18 +89,17 @@ export class ReportsComponent implements OnInit {
   public isFIUUnit: boolean = false;
   public isASMUnit: boolean = false;
   public isUnitHead: boolean = false;
-  readonly FIU_UNIT_ID = 3;
-  readonly ASM_UNIT_ID = 7;
-
-  // Unit Head Statistics
-  unitHeadStats = {
+  
+  unitHeadStats: any = {
     assignedUnitsCount: 0,
     trainersCount: 0,
     pendingApprovalsCount: 0,
     approvedThisMonthCount: 0
   };
 
-  // Months for dropdown
+  readonly FIU_UNIT_ID = 3;
+  readonly ASM_UNIT_ID = 7;
+
   months = [
     { value: 1, name: 'January' },
     { value: 2, name: 'February' },
@@ -116,36 +115,37 @@ export class ReportsComponent implements OnInit {
     { value: 12, name: 'December' }
   ];
 
-  constructor(private http: HttpClient, private userService: UserService) {}
+  constructor(private http: HttpClient) {}
 
   ngOnInit() {
-    this.loadFilterOptions();
-
-    // Check if user is a unit head and load statistics
+    // Get user role from localStorage
     const userRole = localStorage.getItem('role');
-    if (userRole === 'UNITHEAD') {
-      this.isUnitHead = true;
+    this.isUnitHead = userRole === 'UNITHEAD';
+    
+    this.loadFilterOptions();
+    
+    if (this.isUnitHead) {
       this.loadUnitHeadStatistics();
     }
   }
 
-  /**
-   * Load statistics for unit head
-   */
   loadUnitHeadStatistics() {
-    const userId = localStorage.getItem('userId');
-    if (userId) {
-      const unitHeadId = parseInt(userId);
-      this.userService.getUnitHeadStatistics(unitHeadId).subscribe({
-        next: (stats) => {
-          this.unitHeadStats = stats;
-          console.log('Unit Head Statistics (Reports):', stats);
+    const unitHeadId = localStorage.getItem('userId');
+    if (!unitHeadId) return;
+
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${localStorage.getItem('authtoken')}`
+    });
+
+    this.http.get<any>(`${Endpoints.unitHead}/${unitHeadId}/statistics`, { headers })
+      .subscribe({
+        next: (data) => {
+          this.unitHeadStats = data;
         },
         error: (err) => {
-          console.error('Error fetching unit head statistics:', err);
+          console.error('Failed to load unit head statistics', err);
         }
       });
-    }
   }
 
   loadFilterOptions() {
@@ -153,7 +153,7 @@ export class ReportsComponent implements OnInit {
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${token}`
     });
-    
+
     this.http.get<FilterOptions>(Endpoints.filterOptions, { headers })
       .subscribe({
         next: (data) => {
@@ -162,10 +162,13 @@ export class ReportsComponent implements OnInit {
             data.units = data.units.slice().sort((a, b) => a.unitId - b.unitId);
           }
           this.filterOptions = data ?? null;
+          console.log('Filter options loaded successfully:', data);
         },
         error: (err) => {
           this.error = 'Failed to load filter options';
-          console.error(err);
+          console.error('Filter options error - Status:', err.status);
+          console.error('Filter options error - Message:', err.error);
+          console.error('Filter options error - Full error:', err);
         }
       });
   }
@@ -179,9 +182,25 @@ export class ReportsComponent implements OnInit {
   onUnitChange() {
     this.selectedLocation = null;
     this.reportData = null;
+    this.error = null; // Clear any previous errors
     // Check if selected unit is FIU or ASM
     this.isFIUUnit = this.selectedUnit === this.FIU_UNIT_ID;
     this.isASMUnit = this.selectedUnit === this.ASM_UNIT_ID;
+  }
+
+  onLocationChange() {
+    this.reportData = null;
+    this.error = null; // Clear any previous errors
+  }
+
+  onMonthChange() {
+    this.reportData = null;
+    this.error = null; // Clear any previous errors
+  }
+
+  onYearChange() {
+    this.reportData = null;
+    this.error = null; // Clear any previous errors
   }
 
   generateReport() {
@@ -214,9 +233,18 @@ export class ReportsComponent implements OnInit {
           this.loading = false;
         },
         error: (err) => {
-          this.error = 'Failed to generate report';
+          // Handle specific error cases
+          if (err.status === 403) {
+            this.error = 'Access Denied: You do not have permission to view this unit location. Please select from your assigned units only.';
+          } else if (err.status === 401) {
+            this.error = 'Unauthorized: Please log in again.';
+          } else if (err.status === 404) {
+            this.error = 'No data found for the selected filters.';
+          } else {
+            this.error = 'Failed to generate report. Please try again.';
+          }
           this.loading = false;
-          console.error(err);
+          console.error('Report generation error:', err);
         }
       });
   }
