@@ -1,18 +1,45 @@
 <div class="profile-container">
   <div class="personal-details">
     <div class="profile-img">
-      <!-- <img *ngIf="(user$ | async)?.profileImageUrl as profileImg" [src]="profileImg" /> -->
-      <img src="assets/images/profileIcon.png" alt="Profile" width="80" style="border-radius: 50%;" />
+      <!-- Profile Image with Loading Overlay -->
+      <div class="profile-img-wrapper">
+        <img [src]="getProfileImageUrl()" alt="Profile" width="80" style="border-radius: 50%;" />
 
-      <label for="photo-upload" class="edit-pen">
-        <input type="file" id="photo-upload" hidden />
+        <!-- Loading Overlay -->
+        <div class="upload-overlay" *ngIf="isUploadingPhoto">
+          <div class="spinner"></div>
+          <span>Uploading...</span>
+        </div>
+      </div>
+
+      <!-- Upload Button -->
+      <label for="photo-upload" class="edit-pen" [class.disabled]="isUploadingPhoto">
+        <input
+          type="file"
+          id="photo-upload"
+          accept="image/png, image/jpeg, image/jpg, image/gif, image/webp"
+          (change)="onPhotoUpload($event)"
+          [disabled]="isUploadingPhoto"
+          hidden
+        />
         <i class="bi bi-pencil-square"></i>
       </label>
     </div>
+
+    <!-- Upload Status Messages -->
+    <div class="upload-status">
+      <div class="success-message" *ngIf="uploadSuccess">
+        <i class="bi bi-check-circle-fill"></i> Profile picture updated successfully!
+      </div>
+      <div class="error-message" *ngIf="uploadError">
+        <i class="bi bi-exclamation-circle-fill"></i> {{ uploadError }}
+      </div>
+    </div>
+
     <div class="details">
-      <p><span style="font-weight: bold;">Name:</span> {{user.firstName}} {{user.lastName}}</p>
-      <p><span style="font-weight: bold;">Email:</span> {{user.email}}</p>
-      <p><span style="font-weight: bold;">Phone:</span>{{user.phone}}</p>
+      <p><span style="font-weight: bold;">Name:</span> {{user?.firstName}} {{user?.lastName}}</p>
+      <p><span style="font-weight: bold;">Email:</span> {{user?.email}}</p>
+      <p><span style="font-weight: bold;">Phone:</span> {{user?.phone}}</p>
     </div>
   </div>
 

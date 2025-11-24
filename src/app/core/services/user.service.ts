@@ -25,6 +25,21 @@ export class UserService {
     })
     return this.httpClient.patch(`${this.endpoint}/${userId}`, updateDto, { headers })
   }
+
+  /**
+   * Update user profile picture URL
+   * @param userId - User ID
+   * @param profileImageUrl - Azure Blob Storage URL of the profile picture
+   */
+  updateProfilePicture(userId: number, profileImageUrl: string): Observable<any> {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${this.token}`
+    })
+    return this.httpClient.patch(`${this.endpoint}/${userId}/profile-picture`,
+      { profileImageUrl },
+      { headers }
+    )
+  }
   getAdmins(instituteId: number): Observable<Admins[]> {
     const headers = new HttpHeaders({
       'Authorization': `Bearer ${this.token}`
