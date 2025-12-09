@@ -1,5 +1,64 @@
 <div class="report-container">
-  <h1>Admin Report</h1>
+  <h1>{{isUnitHead ? 'UnitHead Report' : 'Admin Report'}}</h1>
+
+  <!-- Unit Head Statistics Section -->
+  <div class="stats-section" *ngIf="isUnitHead">
+    <div class="stat-card">
+      <div class="stat-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" />
+        </svg>
+      </div>
+      <div class="stat-content">
+        <div class="stat-title">My Units</div>
+        <div class="stat-number">{{unitHeadStats.assignedUnitsCount}}</div>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon trainers">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+        </svg>
+      </div>
+      <div class="stat-content">
+        <div class="stat-title">My Trainers</div>
+        <div class="stat-number">{{unitHeadStats.trainersCount}}</div>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon entries">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z" />
+        </svg>
+      </div>
+      <div class="stat-content">
+        <div class="stat-title">Entries This Month</div>
+        <div class="stat-number">{{unitHeadStats.approvedThisMonthCount}}</div>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon pending">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+        </svg>
+      </div>
+      <div class="stat-content">
+        <div class="stat-title">Pending Approvals</div>
+        <div class="stat-number">{{unitHeadStats.pendingApprovalsCount}}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Info message for Unit Heads -->
+  <div class="info-message" *ngIf="isUnitHead && filterOptions">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+    </svg>
+    <span>Showing only your assigned units ({{ filterOptions.units.length }})</span>
+  </div>
 
   <!-- Filters -->
   <div class="filters-section" *ngIf="filterOptions">
@@ -15,7 +74,7 @@
 
     <div class="filter-group" *ngIf="selectedUnit">
       <label for="locationSelect">Location:</label>
-      <select id="locationSelect" title="Select location" aria-label="Select location" [(ngModel)]="selectedLocation">
+      <select id="locationSelect" title="Select location" aria-label="Select location" [(ngModel)]="selectedLocation" (change)="onLocationChange()">
         <option [ngValue]="null">Select Location</option>
         <option *ngFor="let loc of availableLocations" [ngValue]="loc.unitLocationId">
           {{ loc.districtName }} ({{ loc.stateName }})
@@ -25,14 +84,14 @@
 
     <div class="filter-group">
       <label for="monthSelect">Month:</label>
-      <select id="monthSelect" title="Select month" aria-label="Select month" [(ngModel)]="selectedMonth">
+      <select id="monthSelect" title="Select month" aria-label="Select month" [(ngModel)]="selectedMonth" (change)="onMonthChange()">
         <option *ngFor="let m of months" [ngValue]="m.value">{{ m.name }}</option>
       </select>
     </div>
 
     <div class="filter-group">
       <label for="yearSelect">Year:</label>
-      <select id="yearSelect" title="Select year" aria-label="Select year" [(ngModel)]="selectedYear">
+      <select id="yearSelect" title="Select year" aria-label="Select year" [(ngModel)]="selectedYear" (change)="onYearChange()">
         <option *ngFor="let y of filterOptions.years" [ngValue]="y">{{ y }}</option>
       </select>
     </div>
@@ -304,7 +363,7 @@
             <tr>
               <th>Sl.No</th>
               <th>Category</th>
-              <th>Particulars/Title</th>
+              <!-- <th>Particulars/Title</th> -->
               <th>Theme</th>
               <th>Unit</th>
               <th>Quantity</th>
@@ -315,7 +374,7 @@
             <tr *ngFor="let s of reportData.services; let i = index">
               <td>{{ i + 1 }}</td>
               <td>{{ s.category }}</td>
-              <td>{{ s.title }}</td>
+              <!-- <td>{{ s.title }}</td> -->
               <td>{{ s.theme }}</td>
               <td>{{ s.unit }}</td>
               <td>{{ s.quantity ?? '-' }}</td>
