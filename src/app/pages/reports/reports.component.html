@@ -106,7 +106,72 @@
     {{ error }}
   </div>
 
-  <!-- Report Display -->
+  <!-- Section Selection (Dynamic Reports Only) -->
+  <div class="section-selection" *ngIf="useDynamicReport && reportConfiguration && selectedUnit">
+    <h3>Select Sections to Include:</h3>
+    <div class="section-checkboxes">
+      <label *ngFor="let section of reportConfiguration.availableSections" class="section-checkbox">
+        <input
+          type="checkbox"
+          [checked]="isSectionSelected(section.sectionKey)"
+          (change)="toggleSection(section.sectionKey)"
+        />
+        <span>{{ section.displayName }}</span>
+      </label>
+    </div>
+  </div>
+
+  <!-- Dynamic Report Display -->
+  <div class="report-content" *ngIf="dynamicReportData">
+
+    <!-- Header -->
+    <div class="report-header">
+      <h2>{{ dynamicReportData.unitName }}</h2>
+      <p>{{ dynamicReportData.unitLocationName }}</p>
+      <p>{{ dynamicReportData.monthName }} {{ dynamicReportData.year }}</p>
+      <p class="total">Total Approved Entries: {{ dynamicReportData.totalEntries }}</p>
+      <button class="btn-download" (click)="downloadDOCX()">
+        📥 Download Report (DOCX)
+      </button>
+    </div>
+
+    <!-- Dynamic Sections -->
+    <div *ngFor="let section of dynamicReportData.sections" class="table-section" [ngClass]="section.cssClass">
+      <h3>{{ section.displayName }} ({{ section.totalRecords }})</h3>
+
+      <table *ngIf="section.rows.length > 0; else noData">
+        <thead>
+          <tr>
+            <th>Sl.No</th>
+            <th *ngFor="let col of section.columns" [style.width.%]="col.width">
+              {{ col.displayName }}
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let row of section.rows; let i = index">
+            <td>{{ i + 1 }}</td>
+            <td *ngFor="let col of section.columns" [attr.data-type]="col.dataType">
+              {{ formatCellValue(row[col.key], col.dataType) }}
+            </td>
+          </tr>
+        </tbody>
+        <tfoot *ngIf="section.showTotal && section.totalValue !== null && section.totalValue !== undefined">
+          <tr class="total-row">
+            <td [attr.colspan]="section.columns.length" style="text-align: right; font-weight: bold;">TOTAL</td>
+            <td style="text-align: center; font-weight: bold;">{{ section.totalValue }}</td>
+          </tr>
+        </tfoot>
+      </table>
+
+      <ng-template #noData>
+        <p class="no-data">No data found for this section</p>
+      </ng-template>
+    </div>
+
+  </div>
+
+  <!-- Legacy Report Display -->
   <div class="report-content" *ngIf="reportData">
     
     <!-- Header -->

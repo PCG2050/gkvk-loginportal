@@ -68,9 +68,15 @@ src/
 - Institute management
 
 ### Reporting & Documents
+- **Dynamic Report System** (NEW)
+  - Backend-driven section configuration
+  - Unit-specific sections and columns
+  - Customizable section selection
+  - Smart column width calculation
+  - No frontend code changes needed for new units/sections
 - PDF report generation (jsPDF with autotable)
 - DOCX file downloads
-- Unit-based reports
+- Unit-based reports (Legacy and Dynamic)
 - UnitHead statistics
 - IBTVA reports
 - ATIC reports
@@ -151,6 +157,81 @@ Key models include:
 - Feature branches: Use `claude/` prefix for AI-assisted development
 - Always commit with clear, descriptive messages
 
+## Dynamic Report System
+
+The application now implements a flexible dynamic report system that allows backend-driven configuration of report sections and columns.
+
+### Architecture
+
+**Frontend (Angular):**
+- `src/app/pages/reports/dynamic-report.models.ts` - TypeScript interfaces
+- `src/app/pages/reports/reports.component.ts` - Component logic with dual support (legacy + dynamic)
+- `src/app/pages/reports/reports.component.html` - Template with dynamic section rendering
+- `src/app/shared/endpoints.model.ts` - API endpoint definitions
+
+**Backend Endpoints:**
+- `GET /api/admin/reports/dynamic/configuration?unitId={unitId}` - Get available sections/columns
+- `POST /api/admin/reports/dynamic/generate` - Generate report with selected sections
+- `POST /api/admin/reports/dynamic/preview` - Preview report (5 rows max)
+
+### Key Models
+
+**Request:**
+```typescript
+DynamicReportRequest {
+  unitLocationId: number;
+  month: number;
+  year: number;
+  sections: SectionRequest[];
+}
+
+SectionRequest {
+  sectionKey: string;
+  selectedColumns: string[];
+  sortBy?: string;
+  sortDirection?: string;
+}
+```
+
+**Response:**
+```typescript
+DynamicReportData {
+  unitName: string;
+  unitLocationName: string;
+  monthName: string;
+  month: number;
+  year: number;
+  generatedAt: string;
+  totalEntries: number;
+  sections: ReportSection[];
+}
+
+ReportSection {
+  sectionKey: string;
+  displayName: string;
+  totalRecords: number;
+  columns: ColumnMetadata[];
+  rows: Record<string, any>[];
+  cssClass?: string;
+  showTotal?: boolean;
+  totalValue?: number;
+}
+```
+
+### Benefits
+
+1. **No Frontend Changes**: Adding new units or sections requires only backend updates
+2. **Flexible Configuration**: Backend controls which sections/columns are available per unit
+3. **Smart Formatting**: Automatic data type-based formatting (date, currency, number, etc.)
+4. **Customizable**: Users can select which sections to include in reports
+5. **Backward Compatible**: Legacy report system still available via `useDynamicReport` flag
+
+### Toggle Between Systems
+
+The component has a `useDynamicReport` boolean flag (default: `true`) to switch between:
+- **Dynamic System**: Backend-driven, flexible, configuration-based
+- **Legacy System**: Hardcoded sections, unit-specific templates
+
 ## Notes for AI Assistance
 
 - This is an active project with frequent updates to reporting features
@@ -159,3 +240,4 @@ Key models include:
 - Authentication and authorization are critical - maintain security best practices
 - Bootstrap is used for styling - maintain consistency with existing UI patterns
 - Follow Angular 19 best practices (standalone components, signals, etc.)
+- **Dynamic reports** are the preferred approach for new features - avoid hardcoding sections

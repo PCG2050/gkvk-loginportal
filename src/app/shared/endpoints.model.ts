@@ -49,10 +49,15 @@ export class Endpoints {
   static kvkReports = Endpoints.getbaseURL() + '/api/KvkReport/MonthlyReports';
   static kvkThemeReports = Endpoints.getbaseURL() + '/api/KvkReport/MonthlyThemeReports';
   
-  // report
+  // report (Legacy endpoints)
 
   static filterOptions = Endpoints.getbaseURL() + '/api/admin/reports/filter-options';
   static generateReport = Endpoints.getbaseURL() + '/api/admin/reports/generate';
+
+  // Dynamic Report endpoints
+  static dynamicReportConfiguration = Endpoints.getbaseURL() + '/api/admin/reports/dynamic/configuration';
+  static dynamicReportGenerate = Endpoints.getbaseURL() + '/api/admin/reports/dynamic/generate';
+  static dynamicReportPreview = Endpoints.getbaseURL() + '/api/admin/reports/dynamic/preview';
 
 
     static getbaseURL() {
