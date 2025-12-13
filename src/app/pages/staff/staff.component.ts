@@ -100,11 +100,12 @@ export class StaffComponent {
     const unitLocIds = this.addStaffForm.get('unitLoc')?.value || [];
     const UnitLocationIds = unitLocIds.map((unit: any) => unit.unitlocationId);
     console.log("loc", UnitLocationIds);
-    const staffDetails = {
+
+    // Base staff details without password
+    const staffDetails: any = {
       firstName: this.addStaffForm.controls.staffFirstName.value,
       lastName: this.addStaffForm.controls.staffLastName.value,
       email: this.addStaffForm.controls.staffEmail.value,
-      password: this.addStaffForm.controls.staffPassword.value,
       phone: this.addStaffForm.controls.staffPhone.value,
       role: 1,
       isDeactivated: true,
@@ -115,33 +116,50 @@ export class StaffComponent {
       gender: Number(this.addStaffForm.controls.staffGender.value),
       employmentType: Number(this.addStaffForm.controls.staffEmploymentType.value),
       organizationUnitLocationIds: UnitLocationIds
+    };
+
+    // Only include password if it's provided (Create mode or Edit mode with new password)
+    const password = this.addStaffForm.controls.staffPassword.value;
+    if (password && password.trim() !== '') {
+      staffDetails.password = password;
     }
 
     if (this.formMode === "Edit") {
       this.userService.updateStaff(this.trainerId, staffDetails).subscribe({
         next: (res: any) => {
-          this.isLoading = false
+          this.isLoading = false;
           this.showAddStaffModal = false;
-          this.setResponseMsg("Trainer Updated successfully", true)
+          this.setResponseMsg("Trainer updated successfully", true);
+          this.getStaff(); // Refresh the staff list
         },
         error: (err: any) => {
           this.isLoading = false;
           this.showAddStaffModal = false;
-          this.setResponseMsg("failed to update Trainer, Please try again", false)
+          console.error('Update error:', err);
+          this.setResponseMsg("Failed to update Trainer. Please try again", false);
         }
       })
     }
     if (this.formMode === 'Create') {
+      // Password is required for create mode
+      if (!staffDetails.password) {
+        this.isLoading = false;
+        this.setResponseMsg("Password is required for new trainers", false);
+        return;
+      }
+
       this.userService.addStaff(staffDetails).subscribe({
         next: (res: any) => {
           this.isLoading = false;
           this.showAddStaffModal = false;
-          this.setResponseMsg("Trainer addedd successfully", true)
+          this.setResponseMsg("Trainer added successfully", true);
+          this.getStaff(); // Refresh the staff list
         },
         error: (err: any) => {
           this.isLoading = false;
           this.showAddStaffModal = false;
-          this.setResponseMsg("Failed to add Trainer, Please try again later", false)
+          console.error('Create error:', err);
+          this.setResponseMsg("Failed to add Trainer. Please try again later", false);
         }
       })
     }
@@ -157,8 +175,7 @@ export class StaffComponent {
         this.staff.forEach((staffMember: any) => {
           const locations = staffMember.unitLocationDetails || [];
           const unitId = Number(localStorage.getItem('unitId'));
-          const districtId = Number(localStorage.getItem('districtId'))
-          this.setResponseMsg("Fetched sfaff succesfully", true)
+          const districtId = Number(localStorage.getItem('districtId'));
           staffMember.isMapped = locations.some((loc: any) =>
             loc.unitId === unitId && loc.districtId === districtId
           );
@@ -167,7 +184,8 @@ export class StaffComponent {
       },
       error:(err:any)=>{
         this.isLoading = false;
-        this.setResponseMsg("Failed to get staff",false)
+        console.error('Failed to fetch staff:', err);
+        this.setResponseMsg("Failed to load staff data", false);
       }
     })
   }
@@ -179,9 +197,11 @@ export class StaffComponent {
       assignedLocIds.includes(unit.unitlocationId)
     );
     console.log(preSelectedUnits);
-    this.trainerId = staff.trainerId
+    this.trainerId = staff.trainerId;
     this.formMode = "Edit";
     console.log(this.formMode);
+
+    // Patch form values
     this.addStaffForm.patchValue({
       staffEmail: staff.email,
       staffFirstName: staff.firstName,
@@ -193,10 +213,13 @@ export class StaffComponent {
       staffDOB: staff.dateOfBirth,
       staffDOJ: staff.dateOfJoining,
       unitLoc: preSelectedUnits
-    })
-    this.addStaffForm.get('staffPassword')?.removeValidators;
+    });
+
+    // Clear password field and remove validators for edit mode
     const passwordControl = this.addStaffForm.get('staffPassword');
-    passwordControl?.clearValidators();
+    passwordControl?.setValue(''); // Clear password value
+    passwordControl?.clearValidators(); // Remove validators
+    passwordControl?.updateValueAndValidity(); // Update validity state
   }
 
   confirmDelete(item: any) {
@@ -210,12 +233,16 @@ export class StaffComponent {
     this.showDeleteConfirm = false;
     this.userService.deleteStaff(this.trainerId).subscribe({
       next: () => {
-        this.isLoading = false
-        this.setResponseMsg("Trainer deleted successfully", true)
-      },
-      error: () => {
         this.isLoading = false;
-        this.setResponseMsg("Failed to delete trainer, Please try again", false)
+        this.setResponseMsg("Trainer deleted successfully", true);
+        this.getStaff(); // Refresh the staff list after delete
+      },
+      error: (err: any) => {
+        this.isLoading = false;
+        console.error('Delete error:', err);
+        // Provide more specific error message if available
+        const errorMsg = err.error?.message || "Failed to delete trainer. Please try again";
+        this.setResponseMsg(errorMsg, false);
       }
     })
   }
