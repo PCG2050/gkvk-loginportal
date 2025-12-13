@@ -331,11 +331,11 @@
             </ng-container>
           </td>
           <td>
-            <label class="modern-switch" (click)="toggleStatus(item)" style="cursor: pointer;">
+            <label class="modern-switch" style="cursor: pointer;">
               <input
                 type="checkbox"
                 [checked]="!item.isDeactivated"
-                (click)="$event.preventDefault()"
+                (change)="toggleStatus(item)"
                 name="status{{i}}"
                 style="cursor: pointer;"
               />

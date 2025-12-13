@@ -284,8 +284,15 @@ export class StaffComponent {
       organizationUnitLocationIds: trainer.assignedLocationIds || []
     };
 
+    console.log('📤 Sending status update:', {
+      trainerId: trainer.trainerId,
+      newStatus,
+      updateData
+    });
+
     this.userService.updateStaff(trainer.trainerId, updateData).subscribe({
-      next: () => {
+      next: (response: any) => {
+        console.log('📥 Backend response:', response);
         this.isLoading = false;
         this.setResponseMsg(
           `Trainer ${newStatus ? 'deactivated' : 'activated'} successfully`,
@@ -295,7 +302,7 @@ export class StaffComponent {
       },
       error: (err: any) => {
         this.isLoading = false;
-        console.error('Status toggle error:', err);
+        console.error('❌ Status toggle error:', err);
         this.setResponseMsg("Failed to update trainer status. Please try again", false);
       }
     });
