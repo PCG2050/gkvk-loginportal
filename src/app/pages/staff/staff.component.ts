@@ -49,8 +49,11 @@ export class StaffComponent {
   // Staff data
   filteredStaff: Staff[] = [];
   staff: any[] = [];
-    p: number = 1;
+  p: number = 1;
   total: number = 0;
+
+  // Status filter
+  showInactive: boolean = false; // Toggle to show/hide inactive trainers
 
   // Add staff modal state
   showAddStaffModal = false;
@@ -249,9 +252,72 @@ export class StaffComponent {
   cancelDelete() {
     this.showDeleteConfirm = false;
   }
-  toggleStatus(item: any) {
-  item.status = !item.status;
-}
+
+  /**
+   * Toggle trainer active/inactive status
+   */
+  toggleStatus(trainer: any) {
+    const newStatus = !trainer.isDeactivated;
+    const statusAction = newStatus ? 'deactivate' : 'activate';
+
+    // Confirm action
+    if (!confirm(`Are you sure you want to ${statusAction} ${trainer.firstName} ${trainer.lastName}?`)) {
+      return;
+    }
+
+    this.isLoading = true;
+
+    // Update only the isDeactivated field
+    const updateData = {
+      firstName: trainer.firstName,
+      lastName: trainer.lastName,
+      email: trainer.email,
+      phone: trainer.phone,
+      role: 1,
+      isDeactivated: newStatus,
+      organization: Number(localStorage.getItem('organizationId')),
+      qualification: trainer.qualification,
+      dateOfJoining: trainer.dateOfJoining,
+      dateOfBirth: trainer.dateOfBirth,
+      gender: Number(trainer.gender),
+      employmentType: Number(trainer.employementType),
+      organizationUnitLocationIds: trainer.assignedLocationIds || []
+    };
+
+    this.userService.updateStaff(trainer.trainerId, updateData).subscribe({
+      next: () => {
+        this.isLoading = false;
+        this.setResponseMsg(
+          `Trainer ${newStatus ? 'deactivated' : 'activated'} successfully`,
+          true
+        );
+        this.getStaff(); // Refresh the staff list
+      },
+      error: (err: any) => {
+        this.isLoading = false;
+        console.error('Status toggle error:', err);
+        this.setResponseMsg("Failed to update trainer status. Please try again", false);
+      }
+    });
+  }
+
+  /**
+   * Get filtered staff based on active/inactive toggle
+   */
+  get displayedStaff() {
+    if (this.showInactive) {
+      return this.staff; // Show all trainers
+    }
+    return this.staff.filter(s => !s.isDeactivated); // Show only active trainers
+  }
+
+  /**
+   * Toggle show/hide inactive trainers
+   */
+  toggleShowInactive() {
+    this.showInactive = !this.showInactive;
+    this.p = 1; // Reset to first page when toggling filter
+  }
 
   mapUnit(staff: any) {
     const staffId = staff.userId;
