@@ -32,6 +32,9 @@ return this.httpClient.post(`${this.endpoint}/reset-password`,password,{headers}
 return this.httpClient.post(`${this.endpoint}/verify-reset-otp`,verifyOtpData)
   }
   resendOtp(otp:any){
-    return this.httpClient.post(`${this.endpoint}/resend-reset-otp​`,otp)
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json'
+    });
+    return this.httpClient.post(`${this.endpoint}/resend-reset-otp`, otp, {headers})
   }
 }
