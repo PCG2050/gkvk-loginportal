@@ -121,62 +121,37 @@
 
           <!-- Storage Info -->
           <div class="form-group">
-            <label>Private Container Name *</label>
-            <input type="text" [(ngModel)]="form.storageInfo.storageContainerName" name="privateContainer" required
-              placeholder="Enter private container" #privateContainerName="ngModel" maxlength="100" minlength="3" pattern="^[a-zA-Z]*$" />
-            @if (privateContainerName.invalid && (privateContainerName.dirty || privateContainerName.touched)) {
+            <label>Storage Container Name *</label>
+            <input type="text" [(ngModel)]="form.storageInfo.storageContainerName" name="containerName" required
+              placeholder="Enter container name (e.g., gkvk)" #containerName="ngModel" maxlength="60" minlength="3" pattern="^[a-z0-9-]*$" />
+            @if (containerName.invalid && (containerName.dirty || containerName.touched)) {
             <div class="alert">
-              @if (privateContainerName.hasError('required')) {
+              @if (containerName.hasError('required')) {
               <div>
-                Private Container Name is required
+                Container Name is required
               </div>
               }
-               @if(privateContainerName.hasError('minlength')){
+               @if(containerName.hasError('minlength')){
                 <div>
-                  Private ContainerName length should be more than 3 characters
+                  Container name must be at least 3 characters
                 </div>
               }
-              @if(privateContainerName.hasError('maxlength')){
+              @if(containerName.hasError('maxlength')){
                 <div>
-                  Private ContainerName length should be less than 100 characters
+                  Container name must be less than 60 characters (max 63 for Azure)
                 </div>
               }
-              @if(privateContainerName.hasError('pattern')){
+              @if(containerName.hasError('pattern')){
                 <div>
-                  Private ContainerName should contain only alphabetical characters
+                  Container name must be lowercase letters, numbers, and hyphens only
                 </div>
               }
             </div>
             }
-          </div>
-          <div class="form-group">
-            <label>Public Container Name *</label>
-            <input type="text" [(ngModel)]="form.storageInfo.storageContainerNamePublic" name="publicContainer" required
-              placeholder="Enter public container" #publicContainerName="ngModel" minlength="3" maxlength="100" pattern="^[a-zA-Z-]*$"/>
-            @if (publicContainerName.invalid && (publicContainerName.dirty || publicContainerName.touched)) {
-            <div class="alert">
-              @if (publicContainerName.hasError('required')) {
-              <div>
-                Public Container Name is required
-              </div>
-              }
-               @if(publicContainerName.hasError('minlength')){
-                <div>
-                  Public ContainerName length should be more than 3 characters
-                </div>
-              }
-              @if(publicContainerName.hasError('maxlength')){
-                <div>
-                  Public ContainerName length should be less than 100 characters
-                </div>
-              }
-              @if(publicContainerName.hasError('pattern')){
-                <div>
-                  Public ContainerName should contain only alphabetical characters
-                </div>
-              }
+            <div class="note" style="margin-top: 8px; font-size: 0.9em; color: #666;">
+              Private container: <strong>{{ form.storageInfo.storageContainerName || 'your-container-name' }}</strong><br>
+              Public container: <strong>{{ (form.storageInfo.storageContainerName || 'your-container-name') + '-public' }}</strong>
             </div>
-            }
           </div>
 
           <!-- Address -->
