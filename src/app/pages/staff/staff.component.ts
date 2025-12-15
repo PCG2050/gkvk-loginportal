@@ -319,10 +319,10 @@ export class StaffComponent {
   }
 
   /**
-   * Toggle show/hide inactive trainers
+   * Handle show/hide inactive trainers change
+   * Note: The toggle is handled by [(ngModel)], this just resets pagination
    */
-  toggleShowInactive() {
-    this.showInactive = !this.showInactive;
+  onShowInactiveChange() {
     this.p = 1; // Reset to first page when toggling filter
   }
 
