@@ -1,4 +1,4 @@
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { switchMap, tap, catchError } from 'rxjs/operators';
@@ -13,20 +13,15 @@ export class InstituteService {
   private httpClient = inject(HttpClient);
   private azureStorageService = inject(AzureStorageService);
   private endpoint = Endpoints.institutes;
-  private token = localStorage.getItem('authtoken')
   constructor() { }
   /**
    * Add a new institute/organization
    * This will create the institute in the backend and automatically create Azure containers
    */
   addInstitute(instituteData: any): Observable<any> {
-    const headers = new HttpHeaders({
-      'Authorization': `Bearer ${this.token}`
-    });
-
     // The backend will handle container creation automatically
     // when the organization is created (see AZURE_STORAGE_BACKEND_IMPLEMENTATION.md)
-    return this.httpClient.post(this.endpoint, instituteData, { headers });
+    return this.httpClient.post(this.endpoint, instituteData);
   }
 
   /**
@@ -35,12 +30,8 @@ export class InstituteService {
    * @param instituteData Institute data including container names
    */
   addInstituteWithContainers(instituteData: any): Observable<any> {
-    const headers = new HttpHeaders({
-      'Authorization': `Bearer ${this.token}`
-    });
-
     // Step 1: Create the institute
-    return this.httpClient.post(this.endpoint, instituteData, { headers }).pipe(
+    return this.httpClient.post(this.endpoint, instituteData).pipe(
       switchMap((response: any) => {
         const organizationId = response.id;
 
@@ -55,39 +46,27 @@ export class InstituteService {
           }),
           // Return the original response with container info
           switchMap(containerResult => {
-            return this.httpClient.get(`${this.endpoint}/${organizationId}`, { headers });
+            return this.httpClient.get(`${this.endpoint}/${organizationId}`);
           }),
           catchError(error => {
             console.error('⚠️ Container creation failed, but organization was created:', error);
             // Still return the organization even if container creation failed
-            return this.httpClient.get(`${this.endpoint}/${organizationId}`, { headers });
+            return this.httpClient.get(`${this.endpoint}/${organizationId}`);
           })
         );
       })
     );
   }
   getInstitutes():Observable<Institute[]>{
-    const headers = new HttpHeaders({
-      'Authorization': `Bearer ${this.token}`
-    })
-    return this.httpClient.get<Institute[]>(this.endpoint,{headers});
+    return this.httpClient.get<Institute[]>(this.endpoint);
   }
   updateInstitutes(updatedIntititeData:any,organizationId:number){
-    const headers = new HttpHeaders({
-      'Authorization': `Bearer ${this.token}`
-    })
-    return this.httpClient.patch(`${this.endpoint}/${organizationId}`, updatedIntititeData,{headers})
+    return this.httpClient.patch(`${this.endpoint}/${organizationId}`, updatedIntititeData)
   }
   getInstituteById(instituteId:number){
-    const headers = new HttpHeaders({
-      'Authorization':`Bearer ${this.token}`
-    })
     return this.httpClient.get(`${this.endpoint}/${instituteId}`)
   }
   deleteInstituteById(instituteId:number){
-    const headers = new HttpHeaders({
-      'Authorization':`Bearer ${this.token}`
-    })
-    return this.httpClient.delete(`${this.endpoint}/${instituteId}`,{headers})
+    return this.httpClient.delete(`${this.endpoint}/${instituteId}`)
   }
 }

@@ -13,7 +13,8 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
     '/api/Users/forgot-password',
     '/api/Users/reset-password',
     '/api/Users/verify-reset-otp',
-    '/api/Users/resend-reset-otp'
+    '/api/Users/resend-reset-otp',
+    '/api/Locations/states'  // Public location endpoints
   ];
 
   // Check if the current request URL matches any excluded endpoint
