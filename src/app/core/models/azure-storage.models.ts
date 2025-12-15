@@ -7,6 +7,7 @@ export enum FileCategory {
   PROFILE_PICTURE = 'profile-pics',
   DOCUMENT = 'documents',
   PHOTO = 'photos',
+  VIDEO = 'videos',
   REPORT = 'reports',
   CERTIFICATE = 'certificates',
   LOGO = 'logos',

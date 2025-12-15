@@ -180,6 +180,10 @@ Each organization has **two containers**:
 │           │   │   ├── field-visit-1.jpg
 │           │   │   ├── workshop-2024.jpg
 │           │   │   └── demonstration.png
+│           │   ├── videos/
+│           │   │   ├── training-session.mp4
+│           │   │   ├── field-demo.mp4
+│           │   │   └── workshop-recording.mov
 │           │   ├── certificates/
 │           │   │   ├── qualification.pdf
 │           │   │   └── workshop-cert.pdf
@@ -189,12 +193,16 @@ Each organization has **two containers**:
 │           ├── 1000/                       (another trainer)
 │           │   ├── documents/
 │           │   │   └── module.pdf
-│           │   └── photos/
-│           │       └── training.jpg
+│           │   ├── photos/
+│           │   │   └── training.jpg
+│           │   └── videos/
+│           │       └── demonstration.mp4
 │           │
 │           └── 1001/                       (another trainer)
-│               └── documents/
-│                   └── presentation.pptx
+│               ├── documents/
+│               │   └── presentation.pptx
+│               └── videos/
+│                   └── lecture.mp4
 ```
 
 **Decision Rule:**
@@ -203,6 +211,7 @@ Each organization has **two containers**:
 **Categories:**
 - `documents/` - Training modules, lesson plans, assignments
 - `photos/` - Field visits, workshops, training sessions, demonstrations
+- `videos/` - Training videos, demonstrations, workshop recordings (MP4, MOV, AVI)
 - `certificates/` - Trainer qualifications, certifications
 - `reports/` - Activity reports, progress reports
 - `other/` - Miscellaneous files
@@ -225,6 +234,7 @@ Each organization has **two containers**:
 | **UnitHead** | Certificates | Private | `units/{unit}/unitheads/{userId}/certificates/cert.pdf` |
 | **Trainer** | Documents | Private | `units/{unit}/trainers/{userId}/documents/file.pdf` |
 | **Trainer** | Photos | Private | `units/{unit}/trainers/{userId}/photos/photo.jpg` |
+| **Trainer** | Videos | Private | `units/{unit}/trainers/{userId}/videos/video.mp4` |
 | **Trainer** | Certificates | Private | `units/{unit}/trainers/{userId}/certificates/cert.pdf` |
 | **Trainer** | Reports | Private | `units/{unit}/trainers/{userId}/reports/report.pdf` |
 | **Organization** | Logo | Public | `logos/{orgId}/logo.png` |
@@ -439,6 +449,7 @@ deleteFile(blobPath: string) {
 | **Profile Picture** | `PROFILE_PICTURE` | User avatar/photo | Any user's profile picture |
 | **Document** | `DOCUMENT` | Official documents | Policies, guidelines, memos, modules, lesson plans |
 | **Photo** | `PHOTO` | Event photos | Field visits, workshops, meetings, demonstrations |
+| **Video** | `VIDEO` | Training videos | Training sessions, demonstrations, workshop recordings |
 | **Report** | `REPORT` | Reports and summaries | Monthly reports, activity reports, progress reports |
 | **Certificate** | `CERTIFICATE` | Certificates and awards | Qualifications, training certificates, accreditations |
 | **Logo** | `LOGO` | Organization logos | Main logo, dark logo, favicon |
@@ -508,11 +519,16 @@ gkvk-private/                              (Private Container)
     │       │   ├── photos/
     │       │   │   ├── field-visit-1.jpg
     │       │   │   └── workshop-2024.jpg
+    │       │   ├── videos/
+    │       │   │   ├── training-session.mp4
+    │       │   │   └── demonstration.mov
     │       │   └── certificates/
     │       │       └── qualification.pdf
     │       └── 1000/
-    │           └── documents/
-    │               └── module.pdf
+    │           ├── documents/
+    │           │   └── module.pdf
+    │           └── videos/
+    │               └── workshop.mp4
     │
     └── gkvk-mysore/
         ├── unitheads/
@@ -548,7 +564,7 @@ gkvk-public/                               (Public Container)
 1. **Unit-Based Organization**: UnitHeads and Trainers files are organized under `units/{unitName}/`
 2. **Role-Based Folders**: Separate folders for superadmin, admin, unitheads, trainers
 3. **User Isolation**: Each user has their own folder identified by userId
-4. **Category Separation**: Documents, photos, reports, certificates in separate folders
+4. **Category Separation**: Documents, photos, videos, reports, certificates in separate folders
 5. **Public vs Private**: Profile pictures and logos are public, everything else is private
 
 ### File Path Examples
@@ -557,6 +573,7 @@ gkvk-public/                               (Public Container)
 |------|-----------|------------|
 | Trainer (ID: 999) | Document | `units/gkvk-bangalore/trainers/999/documents/module.pdf` |
 | Trainer (ID: 999) | Photo | `units/gkvk-bangalore/trainers/999/photos/event.jpg` |
+| Trainer (ID: 999) | Video | `units/gkvk-bangalore/trainers/999/videos/training.mp4` |
 | UnitHead (ID: 789) | Report | `units/gkvk-bangalore/unitheads/789/reports/monthly.xlsx` |
 | Admin (ID: 123) | Document | `admin/123/documents/policy.pdf` |
 | Any User (ID: 999) | Profile Pic | `profile-pics/999/avatar.jpg` |

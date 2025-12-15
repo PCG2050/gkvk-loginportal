@@ -432,4 +432,44 @@ export class AzureStorageEnhancedService {
       isPublic: true
     });
   }
+
+  /**
+   * Helper: Upload trainer video
+   */
+  uploadTrainerVideo(
+    trainerId: number,
+    unitName: string,
+    file: File,
+    privateContainerName: string
+  ): Observable<FileUploadResult> {
+    return this.uploadFileWithContext({
+      file,
+      containerName: privateContainerName,
+      userId: trainerId,
+      userRole: UserRole.TRAINER,
+      unitName,
+      category: FileCategory.VIDEO,
+      isPublic: false
+    });
+  }
+
+  /**
+   * Helper: Upload trainer photo
+   */
+  uploadTrainerPhoto(
+    trainerId: number,
+    unitName: string,
+    file: File,
+    privateContainerName: string
+  ): Observable<FileUploadResult> {
+    return this.uploadFileWithContext({
+      file,
+      containerName: privateContainerName,
+      userId: trainerId,
+      userRole: UserRole.TRAINER,
+      unitName,
+      category: FileCategory.PHOTO,
+      isPublic: false
+    });
+  }
 }
