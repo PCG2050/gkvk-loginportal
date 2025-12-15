@@ -12,13 +12,30 @@
     </div>
   </div>
 
-  <!-- Add Staff Button (left-aligned) -->
+  <!-- Add Staff Button and Filter Controls -->
   <div style="
       display: flex;
-      justify-content: flex-end;
+      justify-content: space-between;
+      align-items: center;
       margin-bottom: 16px;
       margin-right: 16px;
     ">
+    <!-- Show Inactive Toggle -->
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <label class="filter-toggle" style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+        <input
+          type="checkbox"
+          [(ngModel)]="showInactive"
+          (ngModelChange)="onShowInactiveChange()"
+          style="cursor: pointer; width: 18px; height: 18px;"
+        />
+        <span style="font-size: 14px; font-weight: 500;">Show Inactive Trainers</span>
+      </label>
+      <span style="color: #666; font-size: 13px;">
+        ({{ showInactive ? staff.length : displayedStaff.length }} displayed)
+      </span>
+    </div>
+
     <button class="add-btn" (click)="openAddStaffModal()">
       + Add Staff
     </button>
@@ -299,7 +316,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let item of staff | filterBy: itemFilter | paginate: { itemsPerPage: 5, currentPage: p }; let i = index">
+        <tr *ngFor="let item of displayedStaff | filterBy: itemFilter | paginate: { itemsPerPage: 5, currentPage: p }; let i = index">
           <td>{{ (p - 1) * 5 + i + 1  }}</td>
           <td>{{ item.firstName }} {{item.lastName}}</td>
           <td>{{ item.email }}</td>
@@ -314,25 +331,32 @@
             </ng-container>
           </td>
           <td>
-            <label class="modern-switch">
-              <input type="checkbox" [(ngModel)]="item.status" name="status{{i}}" />
+            <label class="modern-switch" style="cursor: pointer;">
+              <input
+                type="checkbox"
+                [checked]="!item.isDeactivated"
+                (change)="toggleStatus(item)"
+                name="status{{i}}"
+                style="cursor: pointer;"
+              />
               <span class="modern-slider"></span>
             </label>
-            <span class="status-label" [ngClass]="{ 'deactive': item.status, 'active': !item.status }">
-              {{ item.status ? 'Deactive' : 'Active' }}
+            <span class="status-label" [ngClass]="{ 'active': !item.isDeactivated, 'deactive': item.isDeactivated }">
+              {{ item.isDeactivated ? 'Inactive' : 'Active' }}
             </span>
-
           </td>
           <td>
-            <button class="reassign-btn" (click)="editStaff(item)"><i class="fa fa-edit"></i></button>
-            <button class="delete-btn" (click)="confirmDelete(item)">
+            <button class="reassign-btn" (click)="editStaff(item)" [title]="'Edit ' + item.firstName">
+              <i class="fa fa-edit"></i>
+            </button>
+            <button class="delete-btn" (click)="confirmDelete(item)" [title]="'Delete ' + item.firstName">
               <i class="fa fa-trash"></i>
             </button>
           </td>
         </tr>
-        <tr *ngIf="staff.length === 0">
-          <td colspan="5" class="no-data-message">
-            No staff found matching the criteria.
+        <tr *ngIf="displayedStaff.length === 0">
+          <td colspan="6" class="no-data-message">
+            {{ showInactive ? 'No staff found.' : 'No active staff found. Toggle "Show Inactive Trainers" to see all.' }}
           </td>
         </tr>
       </tbody>

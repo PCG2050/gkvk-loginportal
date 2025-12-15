@@ -10,7 +10,7 @@ export class Endpoints {
     static addUnitHead = Endpoints.getbaseURL()+'/api/RegisterUser';
     static user = Endpoints.getbaseURL()+'/api/Users';
     static unitHead = Endpoints.getbaseURL()+'/api/UnitHeads';
-    static updateUnitHead = Endpoints.getbaseURL+'/api/Users/{id}/UnitHead'
+    static updateUnitHead = Endpoints.getbaseURL()+'/api/Users/{id}/UnitHead'
     static getUnitHead = Endpoints.getbaseURL()+'/api/UnitHeads';
     static staff = Endpoints.getbaseURL()+'/api/Trainers';
     static logout = Endpoints.getbaseURL()+'/api/Auth/logout';

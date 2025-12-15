@@ -218,7 +218,7 @@ export class Dashboard {
         districtId: this.form.address.district,
         logoUrl: this.form.logoUrl,
         storageContainerName: this.form.storageInfo.storageContainerName,
-        storageContainerNamePublic: this.form.storageInfo.storageContainerNamePublic,
+        // Public container name is auto-generated as {storageContainerName}-public by backend
         pinCode:this.form.address.pincode
       }
       this.instituteServices.updateInstitutes(updatedInstitute,this.organizationId).subscribe({

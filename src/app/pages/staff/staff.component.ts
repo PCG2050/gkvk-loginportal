@@ -49,8 +49,11 @@ export class StaffComponent {
   // Staff data
   filteredStaff: Staff[] = [];
   staff: any[] = [];
-    p: number = 1;
+  p: number = 1;
   total: number = 0;
+
+  // Status filter
+  showInactive: boolean = false; // Toggle to show/hide inactive trainers
 
   // Add staff modal state
   showAddStaffModal = false;
@@ -100,11 +103,12 @@ export class StaffComponent {
     const unitLocIds = this.addStaffForm.get('unitLoc')?.value || [];
     const UnitLocationIds = unitLocIds.map((unit: any) => unit.unitlocationId);
     console.log("loc", UnitLocationIds);
-    const staffDetails = {
+
+    // Base staff details without password
+    const staffDetails: any = {
       firstName: this.addStaffForm.controls.staffFirstName.value,
       lastName: this.addStaffForm.controls.staffLastName.value,
       email: this.addStaffForm.controls.staffEmail.value,
-      password: this.addStaffForm.controls.staffPassword.value,
       phone: this.addStaffForm.controls.staffPhone.value,
       role: 1,
       isDeactivated: true,
@@ -115,33 +119,50 @@ export class StaffComponent {
       gender: Number(this.addStaffForm.controls.staffGender.value),
       employmentType: Number(this.addStaffForm.controls.staffEmploymentType.value),
       organizationUnitLocationIds: UnitLocationIds
+    };
+
+    // Only include password if it's provided (Create mode or Edit mode with new password)
+    const password = this.addStaffForm.controls.staffPassword.value;
+    if (password && password.trim() !== '') {
+      staffDetails.password = password;
     }
 
     if (this.formMode === "Edit") {
       this.userService.updateStaff(this.trainerId, staffDetails).subscribe({
         next: (res: any) => {
-          this.isLoading = false
+          this.isLoading = false;
           this.showAddStaffModal = false;
-          this.setResponseMsg("Trainer Updated successfully", true)
+          this.setResponseMsg("Trainer updated successfully", true);
+          this.getStaff(); // Refresh the staff list
         },
         error: (err: any) => {
           this.isLoading = false;
           this.showAddStaffModal = false;
-          this.setResponseMsg("failed to update Trainer, Please try again", false)
+          console.error('Update error:', err);
+          this.setResponseMsg("Failed to update Trainer. Please try again", false);
         }
       })
     }
     if (this.formMode === 'Create') {
+      // Password is required for create mode
+      if (!staffDetails.password) {
+        this.isLoading = false;
+        this.setResponseMsg("Password is required for new trainers", false);
+        return;
+      }
+
       this.userService.addStaff(staffDetails).subscribe({
         next: (res: any) => {
           this.isLoading = false;
           this.showAddStaffModal = false;
-          this.setResponseMsg("Trainer addedd successfully", true)
+          this.setResponseMsg("Trainer added successfully", true);
+          this.getStaff(); // Refresh the staff list
         },
         error: (err: any) => {
           this.isLoading = false;
           this.showAddStaffModal = false;
-          this.setResponseMsg("Failed to add Trainer, Please try again later", false)
+          console.error('Create error:', err);
+          this.setResponseMsg("Failed to add Trainer. Please try again later", false);
         }
       })
     }
@@ -157,8 +178,7 @@ export class StaffComponent {
         this.staff.forEach((staffMember: any) => {
           const locations = staffMember.unitLocationDetails || [];
           const unitId = Number(localStorage.getItem('unitId'));
-          const districtId = Number(localStorage.getItem('districtId'))
-          this.setResponseMsg("Fetched sfaff succesfully", true)
+          const districtId = Number(localStorage.getItem('districtId'));
           staffMember.isMapped = locations.some((loc: any) =>
             loc.unitId === unitId && loc.districtId === districtId
           );
@@ -167,7 +187,8 @@ export class StaffComponent {
       },
       error:(err:any)=>{
         this.isLoading = false;
-        this.setResponseMsg("Failed to get staff",false)
+        console.error('Failed to fetch staff:', err);
+        this.setResponseMsg("Failed to load staff data", false);
       }
     })
   }
@@ -179,9 +200,11 @@ export class StaffComponent {
       assignedLocIds.includes(unit.unitlocationId)
     );
     console.log(preSelectedUnits);
-    this.trainerId = staff.trainerId
+    this.trainerId = staff.trainerId;
     this.formMode = "Edit";
     console.log(this.formMode);
+
+    // Patch form values
     this.addStaffForm.patchValue({
       staffEmail: staff.email,
       staffFirstName: staff.firstName,
@@ -193,10 +216,13 @@ export class StaffComponent {
       staffDOB: staff.dateOfBirth,
       staffDOJ: staff.dateOfJoining,
       unitLoc: preSelectedUnits
-    })
-    this.addStaffForm.get('staffPassword')?.removeValidators;
+    });
+
+    // Clear password field and remove validators for edit mode
     const passwordControl = this.addStaffForm.get('staffPassword');
-    passwordControl?.clearValidators();
+    passwordControl?.setValue(''); // Clear password value
+    passwordControl?.clearValidators(); // Remove validators
+    passwordControl?.updateValueAndValidity(); // Update validity state
   }
 
   confirmDelete(item: any) {
@@ -210,21 +236,93 @@ export class StaffComponent {
     this.showDeleteConfirm = false;
     this.userService.deleteStaff(this.trainerId).subscribe({
       next: () => {
-        this.isLoading = false
-        this.setResponseMsg("Trainer deleted successfully", true)
-      },
-      error: () => {
         this.isLoading = false;
-        this.setResponseMsg("Failed to delete trainer, Please try again", false)
+        this.setResponseMsg("Trainer deleted successfully", true);
+        this.getStaff(); // Refresh the staff list after delete
+      },
+      error: (err: any) => {
+        this.isLoading = false;
+        console.error('Delete error:', err);
+        // Provide more specific error message if available
+        const errorMsg = err.error?.message || "Failed to delete trainer. Please try again";
+        this.setResponseMsg(errorMsg, false);
       }
     })
   }
   cancelDelete() {
     this.showDeleteConfirm = false;
   }
-  toggleStatus(item: any) {
-  item.status = !item.status;
-}
+
+  /**
+   * Toggle trainer active/inactive status
+   */
+  toggleStatus(trainer: any) {
+    const newStatus = !trainer.isDeactivated;
+    const statusAction = newStatus ? 'deactivate' : 'activate';
+
+    // Confirm action
+    if (!confirm(`Are you sure you want to ${statusAction} ${trainer.firstName} ${trainer.lastName}?`)) {
+      return;
+    }
+
+    this.isLoading = true;
+
+    // Update only the isDeactivated field
+    const updateData = {
+      firstName: trainer.firstName,
+      lastName: trainer.lastName,
+      email: trainer.email,
+      phone: trainer.phone,
+      role: 1,
+      isDeactivated: newStatus,
+      organization: Number(localStorage.getItem('organizationId')),
+      qualification: trainer.qualification,
+      dateOfJoining: trainer.dateOfJoining,
+      dateOfBirth: trainer.dateOfBirth,
+      gender: Number(trainer.gender),
+      employmentType: Number(trainer.employementType),
+      organizationUnitLocationIds: trainer.assignedLocationIds || []
+    };
+
+    console.log('📤 Sending status update:', {
+      trainerId: trainer.trainerId,
+      newStatus,
+      updateData
+    });
+
+    this.userService.updateStaff(trainer.trainerId, updateData).subscribe({
+      next: (response: any) => {
+        console.log('📥 Backend response:', response);
+        this.isLoading = false;
+        this.setResponseMsg(
+          `Trainer ${newStatus ? 'deactivated' : 'activated'} successfully`,
+          true
+        );
+        this.getStaff(); // Refresh the staff list
+      },
+      error: (err: any) => {
+        this.isLoading = false;
+        console.error('❌ Status toggle error:', err);
+        this.setResponseMsg("Failed to update trainer status. Please try again", false);
+      }
+    });
+  }
+
+  /**
+   * Get filtered staff based on active/inactive toggle
+   */
+  get displayedStaff() {
+    if (this.showInactive) {
+      return this.staff; // Show all trainers
+    }
+    return this.staff.filter(s => !s.isDeactivated); // Show only active trainers
+  }
+ // Show/hide inactive trainers
+ //Note:toggle handled by [(ngModel)], this just resets pagination
+
+  onShowInactiveChange() {    
+    this.p = 1; // Reset to first page when toggling filter
+  }
 
   mapUnit(staff: any) {
     const staffId = staff.userId;

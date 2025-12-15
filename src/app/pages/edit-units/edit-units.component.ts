@@ -275,40 +275,27 @@ export class EditUnitsComponent implements OnInit {
   }
   getUnitOrganization() {
     this.isLoading = true;
-    this.unitLocations$ = this.unitService.getOrganizationUnit().pipe(
-      finalize(() => {
+    this.unitService.getOrganizationUnit().subscribe({
+      next: (units: any[]) => {
+        this.unitLocations = units;
         this.isLoading = false;
-        //  this.successMsg = true;
-        //  this.successText = "f"
-      }),
-      catchError(err => {
+        console.log('Unit locations refreshed:', this.unitLocations);
+      },
+      error: (err) => {
         this.isLoading = false;
         this.errorMsg = true;
         if (err.status === 404) {
-          this.errorText = "No units found"
-          // alert("No units found (404)");
+          this.errorText = "No units found";
         } else if (err.status === 500) {
-          this.errorText = "Server error. Please try again later"
-          // alert("Server error. Please try again later (500)");
+          this.errorText = "Server error. Please try again later";
         } else if (err.error?.message) {
-          this.errorText = `Error ${err.error.message}`
-          // alert("Error: " + err.error.message);
+          this.errorText = `Error: ${err.error.message}`;
         } else {
-          this.errorText = "An unexpected error occurred."
-          // alert("An unexpected error occurred.");
+          this.errorText = "An unexpected error occurred.";
         }
-        return of([])
-      })
-    );
-    console.log(this.unitLocations$);
-    const location: any = [];
-    this.unitLocations$.subscribe(units => {
-      this.unitLocations = units;
-      console.log(this.unitLocations);
-
+        console.error('Error fetching unit organization:', err);
+      }
     });
-
-    console.log(this.unitLocations);
   }
   onOpenUnitEditModal(unit: any) {
     this.orgUnitLocId = unit.orgUnitLocationId
