@@ -57,6 +57,13 @@ export class Endpoints {
   static dynamicReportGenerate = Endpoints.getbaseURL() + '/api/admin/reports/dynamic/generate';
   static dynamicReportPreview = Endpoints.getbaseURL() + '/api/admin/reports/dynamic/preview';
 
+  // Azure Storage endpoints
+  static storageCreateContainers = Endpoints.getbaseURL() + '/api/Storage/create-containers';
+  static storageSasToken = Endpoints.getbaseURL() + '/api/Storage/sas-token';
+  static storageUpload = Endpoints.getbaseURL() + '/api/Storage/upload';
+  static storageDelete = Endpoints.getbaseURL() + '/api/Storage/delete';
+  static storageList = Endpoints.getbaseURL() + '/api/Storage/list';
+
 
     static getbaseURL() {
     return 'https://gkvk-qaenv.azurewebsites.net';

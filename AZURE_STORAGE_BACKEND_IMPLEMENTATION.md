@@ -1,0 +1,762 @@
+# Azure Storage Backend Implementation Guide
+
+This document provides comprehensive implementation guidelines for the backend API to support dynamic Azure Blob Storage container creation, SAS token management, and file organization by userId.
+
+## Overview
+
+When a superadmin creates an organization/institute, the system needs to:
+1. **Dynamically create Azure containers** (private and public) based on the provided names
+2. **Generate and manage SAS tokens** with automatic expiry handling
+3. **Organize file uploads** by userId within containers
+4. **Route uploads** from superadmin, trainers, and unit heads to the correct container
+
+---
+
+## 1. Backend Architecture
+
+### Required NuGet Packages
+
+```xml
+<PackageReference Include="Azure.Storage.Blobs" Version="12.23.0" />
+<PackageReference Include="Azure.Identity" Version="1.14.1" />
+```
+
+### Configuration (appsettings.json)
+
+```json
+{
+  "AzureStorage": {
+    "ConnectionString": "DefaultEndpointsProtocol=https;AccountName=YOUR_ACCOUNT;AccountKey=YOUR_KEY;EndpointSuffix=core.windows.net",
+    "AccountName": "YOUR_STORAGE_ACCOUNT_NAME",
+    "AccountKey": "YOUR_STORAGE_ACCOUNT_KEY",
+    "SasTokenExpiryHours": 24,
+    "SasTokenCacheHours": 23
+  }
+}
+```
+
+---
+
+## 2. Database Schema Updates
+
+### Organizations Table - Add Columns
+
+```sql
+ALTER TABLE Organizations
+ADD StorageContainerName NVARCHAR(63) NOT NULL DEFAULT 'default-private',
+    StorageContainerNamePublic NVARCHAR(63) NOT NULL DEFAULT 'default-public',
+    ContainerCreatedDate DATETIME2 NULL,
+    ContainerCreatedBy INT NULL;
+```
+
+### SAS Token Cache Table - Create New Table
+
+```sql
+CREATE TABLE SasTokenCache (
+    Id INT IDENTITY(1,1) PRIMARY KEY,
+    ContainerName NVARCHAR(63) NOT NULL,
+    SasToken NVARCHAR(MAX) NOT NULL,
+    Permissions NVARCHAR(10) NOT NULL,
+    ExpiresOn DATETIME2 NOT NULL,
+    CreatedOn DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+    IsPublicContainer BIT NOT NULL DEFAULT 0,
+
+    CONSTRAINT UQ_Container_Permissions UNIQUE (ContainerName, Permissions, IsPublicContainer)
+);
+
+CREATE INDEX IX_SasTokenCache_ExpiresOn ON SasTokenCache(ExpiresOn);
+CREATE INDEX IX_SasTokenCache_ContainerName ON SasTokenCache(ContainerName);
+```
+
+---
+
+## 3. Backend Services
+
+### 3.1 IAzureStorageService Interface
+
+```csharp
+public interface IAzureStorageService
+{
+    Task<(bool Success, string PrivateContainer, string PublicContainer)> CreateOrganizationContainersAsync(
+        int organizationId,
+        string privateContainerName,
+        string publicContainerName
+    );
+
+    Task<string> GetSasTokenAsync(string containerName, bool isPublic, string permissions);
+
+    Task<string> UploadFileAsync(Stream fileStream, string containerName, int userId, string fileName, string folder = null);
+
+    Task<bool> DeleteFileAsync(string containerName, string blobName);
+
+    Task<List<string>> ListFilesAsync(string containerName, string prefix);
+}
+```
+
+### 3.2 AzureStorageService Implementation
+
+```csharp
+using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Models;
+using Azure.Storage.Sas;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+
+public class AzureStorageService : IAzureStorageService
+{
+    private readonly string _connectionString;
+    private readonly string _accountName;
+    private readonly string _accountKey;
+    private readonly int _sasTokenExpiryHours;
+    private readonly ILogger<AzureStorageService> _logger;
+    private readonly ApplicationDbContext _context;
+
+    public AzureStorageService(
+        IConfiguration configuration,
+        ILogger<AzureStorageService> logger,
+        ApplicationDbContext context)
+    {
+        _connectionString = configuration["AzureStorage:ConnectionString"];
+        _accountName = configuration["AzureStorage:AccountName"];
+        _accountKey = configuration["AzureStorage:AccountKey"];
+        _sasTokenExpiryHours = int.Parse(configuration["AzureStorage:SasTokenExpiryHours"] ?? "24");
+        _logger = logger;
+        _context = context;
+    }
+
+    /// <summary>
+    /// Create both private and public containers for an organization
+    /// </summary>
+    public async Task<(bool Success, string PrivateContainer, string PublicContainer)>
+        CreateOrganizationContainersAsync(
+            int organizationId,
+            string privateContainerName,
+            string publicContainerName)
+    {
+        try
+        {
+            _logger.LogInformation(
+                "Creating containers for organization {OrgId}: Private={Private}, Public={Public}",
+                organizationId, privateContainerName, publicContainerName);
+
+            // Validate container names (Azure naming rules)
+            if (!IsValidContainerName(privateContainerName) || !IsValidContainerName(publicContainerName))
+            {
+                _logger.LogError("Invalid container names provided");
+                return (false, null, null);
+            }
+
+            var blobServiceClient = new BlobServiceClient(_connectionString);
+
+            // Create private container
+            var privateContainerClient = blobServiceClient.GetBlobContainerClient(privateContainerName);
+            await privateContainerClient.CreateIfNotExistsAsync(PublicAccessType.None);
+            _logger.LogInformation("Private container '{Container}' created successfully", privateContainerName);
+
+            // Create public container
+            var publicContainerClient = blobServiceClient.GetBlobContainerClient(publicContainerName);
+            await publicContainerClient.CreateIfNotExistsAsync(PublicAccessType.Blob);
+            _logger.LogInformation("Public container '{Container}' created successfully", publicContainerName);
+
+            return (true, privateContainerName, publicContainerName);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error creating containers for organization {OrgId}", organizationId);
+            return (false, null, null);
+        }
+    }
+
+    /// <summary>
+    /// Get a SAS token for a container (with caching)
+    /// </summary>
+    public async Task<string> GetSasTokenAsync(string containerName, bool isPublic, string permissions)
+    {
+        try
+        {
+            // Check cache first
+            var cachedToken = await _context.SasTokenCache
+                .Where(t => t.ContainerName == containerName
+                    && t.Permissions == permissions
+                    && t.IsPublicContainer == isPublic
+                    && t.ExpiresOn > DateTime.UtcNow.AddHours(1)) // At least 1 hour left
+                .OrderByDescending(t => t.ExpiresOn)
+                .FirstOrDefaultAsync();
+
+            if (cachedToken != null)
+            {
+                _logger.LogInformation("Using cached SAS token for container {Container}", containerName);
+                return cachedToken.SasToken;
+            }
+
+            // Generate new token
+            _logger.LogInformation("Generating new SAS token for container {Container}", containerName);
+
+            var blobServiceClient = new BlobServiceClient(_connectionString);
+            var containerClient = blobServiceClient.GetBlobContainerClient(containerName);
+
+            // Ensure container exists
+            await containerClient.CreateIfNotExistsAsync();
+
+            // Set permissions
+            var sasBuilder = new BlobSasBuilder
+            {
+                BlobContainerName = containerName,
+                Resource = "c", // Container
+                StartsOn = DateTimeOffset.UtcNow.AddMinutes(-5),
+                ExpiresOn = DateTimeOffset.UtcNow.AddHours(_sasTokenExpiryHours)
+            };
+
+            // Parse permissions string (e.g., "rwdl")
+            if (permissions.Contains('r')) sasBuilder.SetPermissions(BlobContainerSasPermissions.Read);
+            if (permissions.Contains('w')) sasBuilder.SetPermissions(BlobContainerSasPermissions.Write);
+            if (permissions.Contains('d')) sasBuilder.SetPermissions(BlobContainerSasPermissions.Delete);
+            if (permissions.Contains('l')) sasBuilder.SetPermissions(BlobContainerSasPermissions.List);
+
+            var sasToken = sasBuilder.ToSasQueryParameters(
+                new Azure.Storage.StorageSharedKeyCredential(_accountName, _accountKey)
+            ).ToString();
+
+            // Cache the token
+            var cacheEntry = new SasTokenCache
+            {
+                ContainerName = containerName,
+                SasToken = sasToken,
+                Permissions = permissions,
+                ExpiresOn = sasBuilder.ExpiresOn.UtcDateTime,
+                IsPublicContainer = isPublic,
+                CreatedOn = DateTime.UtcNow
+            };
+
+            _context.SasTokenCache.Add(cacheEntry);
+            await _context.SaveChangesAsync();
+
+            return sasToken;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error generating SAS token for container {Container}", containerName);
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Upload a file to blob storage organized by userId
+    /// </summary>
+    public async Task<string> UploadFileAsync(
+        Stream fileStream,
+        string containerName,
+        int userId,
+        string fileName,
+        string folder = null)
+    {
+        try
+        {
+            var blobServiceClient = new BlobServiceClient(_connectionString);
+            var containerClient = blobServiceClient.GetBlobContainerClient(containerName);
+
+            // Construct blob path: {userId}/{folder}/{fileName}
+            var blobPath = folder != null
+                ? $"{userId}/{folder}/{fileName}"
+                : $"{userId}/{fileName}";
+
+            var blobClient = containerClient.GetBlobClient(blobPath);
+
+            _logger.LogInformation(
+                "Uploading file {FileName} to container {Container} at path {Path}",
+                fileName, containerName, blobPath);
+
+            await blobClient.UploadAsync(fileStream, overwrite: true);
+
+            return blobClient.Uri.ToString();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error uploading file {FileName} to container {Container}",
+                fileName, containerName);
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Delete a file from blob storage
+    /// </summary>
+    public async Task<bool> DeleteFileAsync(string containerName, string blobName)
+    {
+        try
+        {
+            var blobServiceClient = new BlobServiceClient(_connectionString);
+            var containerClient = blobServiceClient.GetBlobContainerClient(containerName);
+            var blobClient = containerClient.GetBlobClient(blobName);
+
+            await blobClient.DeleteIfExistsAsync();
+            _logger.LogInformation("Deleted blob {BlobName} from container {Container}",
+                blobName, containerName);
+
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error deleting blob {BlobName} from container {Container}",
+                blobName, containerName);
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// List files in a container with a prefix (e.g., all files for a userId)
+    /// </summary>
+    public async Task<List<string>> ListFilesAsync(string containerName, string prefix)
+    {
+        try
+        {
+            var blobServiceClient = new BlobServiceClient(_connectionString);
+            var containerClient = blobServiceClient.GetBlobContainerClient(containerName);
+
+            var blobs = new List<string>();
+
+            await foreach (var blobItem in containerClient.GetBlobsAsync(prefix: prefix))
+            {
+                blobs.Add(blobItem.Name);
+            }
+
+            return blobs;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error listing files in container {Container} with prefix {Prefix}",
+                containerName, prefix);
+            return new List<string>();
+        }
+    }
+
+    /// <summary>
+    /// Validate Azure container naming rules
+    /// </summary>
+    private bool IsValidContainerName(string containerName)
+    {
+        if (string.IsNullOrWhiteSpace(containerName))
+            return false;
+
+        // Azure container naming rules:
+        // - Must be 3-63 characters
+        // - Only lowercase letters, numbers, and hyphens
+        // - Must start with letter or number
+        // - No consecutive hyphens
+        var isValid = containerName.Length >= 3
+            && containerName.Length <= 63
+            && containerName.All(c => char.IsLower(c) || char.IsDigit(c) || c == '-')
+            && !containerName.StartsWith("-")
+            && !containerName.EndsWith("-")
+            && !containerName.Contains("--");
+
+        return isValid;
+    }
+}
+```
+
+---
+
+## 4. API Controllers
+
+### 4.1 StorageController
+
+```csharp
+[ApiController]
+[Route("api/[controller]")]
+[Authorize]
+public class StorageController : ControllerBase
+{
+    private readonly IAzureStorageService _storageService;
+    private readonly ILogger<StorageController> _logger;
+
+    public StorageController(
+        IAzureStorageService storageService,
+        ILogger<StorageController> logger)
+    {
+        _storageService = storageService;
+        _logger = logger;
+    }
+
+    /// <summary>
+    /// Create containers for a new organization
+    /// </summary>
+    [HttpPost("create-containers")]
+    [Authorize(Roles = "SUPERADMIN")]
+    public async Task<IActionResult> CreateContainers([FromBody] CreateContainersRequest request)
+    {
+        try
+        {
+            var result = await _storageService.CreateOrganizationContainersAsync(
+                request.OrganizationId,
+                request.PrivateContainerName,
+                request.PublicContainerName
+            );
+
+            if (result.Success)
+            {
+                return Ok(new
+                {
+                    success = true,
+                    privateContainer = new { containerName = result.PrivateContainer, isPublic = false },
+                    publicContainer = new { containerName = result.PublicContainer, isPublic = true }
+                });
+            }
+
+            return BadRequest(new { success = false, message = "Failed to create containers" });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error in CreateContainers endpoint");
+            return StatusCode(500, new { success = false, message = "Internal server error" });
+        }
+    }
+
+    /// <summary>
+    /// Get a SAS token for accessing a container
+    /// </summary>
+    [HttpPost("sas-token")]
+    public async Task<IActionResult> GetSasToken([FromBody] SasTokenRequest request)
+    {
+        try
+        {
+            var sasToken = await _storageService.GetSasTokenAsync(
+                request.ContainerName,
+                request.IsPublic,
+                request.Permissions ?? "rwdl"
+            );
+
+            return Ok(new
+            {
+                sasToken,
+                containerName = request.ContainerName,
+                expiresOn = DateTime.UtcNow.AddHours(24).ToString("o"),
+                isPublic = request.IsPublic
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error generating SAS token");
+            return StatusCode(500, new { message = "Failed to generate SAS token" });
+        }
+    }
+
+    /// <summary>
+    /// Upload a file to blob storage
+    /// </summary>
+    [HttpPost("upload")]
+    public async Task<IActionResult> UploadFile([FromForm] FileUploadRequest request)
+    {
+        try
+        {
+            if (request.File == null || request.File.Length == 0)
+            {
+                return BadRequest(new { message = "No file provided" });
+            }
+
+            using var stream = request.File.OpenReadStream();
+
+            var blobUrl = await _storageService.UploadFileAsync(
+                stream,
+                request.ContainerName,
+                request.UserId,
+                request.File.FileName,
+                request.Folder
+            );
+
+            return Ok(new
+            {
+                success = true,
+                blobUrl,
+                fileName = request.File.FileName
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error uploading file");
+            return StatusCode(500, new { success = false, message = "File upload failed" });
+        }
+    }
+
+    /// <summary>
+    /// Delete a file from blob storage
+    /// </summary>
+    [HttpDelete("delete")]
+    public async Task<IActionResult> DeleteFile([FromQuery] string containerName, [FromQuery] string blobName)
+    {
+        try
+        {
+            var success = await _storageService.DeleteFileAsync(containerName, blobName);
+
+            return Ok(new { success });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error deleting file");
+            return StatusCode(500, new { success = false, message = "File deletion failed" });
+        }
+    }
+
+    /// <summary>
+    /// List files for a specific user
+    /// </summary>
+    [HttpGet("list")]
+    public async Task<IActionResult> ListFiles(
+        [FromQuery] string containerName,
+        [FromQuery] int userId,
+        [FromQuery] string folder = null)
+    {
+        try
+        {
+            var prefix = folder != null ? $"{userId}/{folder}" : $"{userId}";
+            var files = await _storageService.ListFilesAsync(containerName, prefix);
+
+            return Ok(new { files });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error listing files");
+            return StatusCode(500, new { message = "Failed to list files" });
+        }
+    }
+}
+
+// Request DTOs
+public class CreateContainersRequest
+{
+    public int OrganizationId { get; set; }
+    public string PrivateContainerName { get; set; }
+    public string PublicContainerName { get; set; }
+}
+
+public class SasTokenRequest
+{
+    public string ContainerName { get; set; }
+    public bool IsPublic { get; set; }
+    public string Permissions { get; set; } = "rwdl";
+}
+
+public class FileUploadRequest
+{
+    public IFormFile File { get; set; }
+    public string ContainerName { get; set; }
+    public int UserId { get; set; }
+    public string Folder { get; set; }
+}
+```
+
+---
+
+## 5. Update OrganizationsController
+
+### Modify the Create/Update Organization endpoint
+
+```csharp
+[HttpPost]
+[Authorize(Roles = "SUPERADMIN")]
+public async Task<IActionResult> CreateOrganization([FromBody] CreateOrganizationDto dto)
+{
+    try
+    {
+        // 1. Create the organization in the database
+        var organization = new Organization
+        {
+            Name = dto.Name,
+            DistrictId = dto.DistrictId,
+            Pincode = dto.Pincode,
+            StorageContainerName = dto.StorageContainerName,
+            StorageContainerNamePublic = dto.StorageContainerName + "-public",
+            CreatedDate = DateTime.UtcNow
+        };
+
+        _context.Organizations.Add(organization);
+        await _context.SaveChangesAsync();
+
+        // 2. Create Azure containers
+        var containerResult = await _storageService.CreateOrganizationContainersAsync(
+            organization.Id,
+            organization.StorageContainerName,
+            organization.StorageContainerNamePublic
+        );
+
+        if (!containerResult.Success)
+        {
+            _logger.LogError("Failed to create Azure containers for organization {OrgId}", organization.Id);
+            // Optionally: Roll back organization creation
+            return StatusCode(500, new { message = "Organization created but container creation failed" });
+        }
+
+        // 3. Update organization with container creation metadata
+        organization.ContainerCreatedDate = DateTime.UtcNow;
+        organization.ContainerCreatedBy = GetCurrentUserId(); // Helper method
+        await _context.SaveChangesAsync();
+
+        return Ok(new
+        {
+            id = organization.Id,
+            name = organization.Name,
+            storageContainerName = organization.StorageContainerName,
+            storageContainerNamePublic = organization.StorageContainerNamePublic,
+            containersCreated = true
+        });
+    }
+    catch (Exception ex)
+    {
+        _logger.LogError(ex, "Error creating organization");
+        return StatusCode(500, new { message = "Failed to create organization" });
+    }
+}
+```
+
+---
+
+## 6. Background Service for SAS Token Cleanup
+
+### SasTokenCleanupService
+
+```csharp
+public class SasTokenCleanupService : BackgroundService
+{
+    private readonly IServiceProvider _serviceProvider;
+    private readonly ILogger<SasTokenCleanupService> _logger;
+    private readonly TimeSpan _cleanupInterval = TimeSpan.FromHours(1);
+
+    public SasTokenCleanupService(
+        IServiceProvider serviceProvider,
+        ILogger<SasTokenCleanupService> logger)
+    {
+        _serviceProvider = serviceProvider;
+        _logger = logger;
+    }
+
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        _logger.LogInformation("SAS Token Cleanup Service started");
+
+        while (!stoppingToken.IsCancellationRequested)
+        {
+            try
+            {
+                await CleanupExpiredTokensAsync();
+                await Task.Delay(_cleanupInterval, stoppingToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in SAS Token Cleanup Service");
+            }
+        }
+    }
+
+    private async Task CleanupExpiredTokensAsync()
+    {
+        using var scope = _serviceProvider.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+        var expiredTokens = await context.SasTokenCache
+            .Where(t => t.ExpiresOn < DateTime.UtcNow)
+            .ToListAsync();
+
+        if (expiredTokens.Any())
+        {
+            _logger.LogInformation("Cleaning up {Count} expired SAS tokens", expiredTokens.Count);
+            context.SasTokenCache.RemoveRange(expiredTokens);
+            await context.SaveChangesAsync();
+        }
+    }
+}
+```
+
+### Register in Program.cs
+
+```csharp
+builder.Services.AddScoped<IAzureStorageService, AzureStorageService>();
+builder.Services.AddHostedService<SasTokenCleanupService>();
+```
+
+---
+
+## 7. Container Naming Convention
+
+### Recommended Format
+
+```
+Organization: "Karnataka GKVK"
+Private Container: "gkvk-private"
+Public Container: "gkvk-public"
+
+File Structure:
+  gkvk-private/
+    ├── 123/              (userId)
+    │   ├── documents/
+    │   │   └── report.pdf
+    │   └── profile/
+    │       └── avatar.jpg
+    ├── 456/              (another userId)
+    │   └── uploads/
+    │       └── file.docx
+```
+
+---
+
+## 8. Security Considerations
+
+1. **SAS Token Permissions**: Only grant minimum required permissions
+2. **Token Expiry**: Use 24-hour expiry with 1-hour refresh buffer
+3. **Private Containers**: Never allow anonymous access
+4. **Public Containers**: Only for assets that should be publicly accessible (logos, etc.)
+5. **User Isolation**: Always organize files by userId to prevent cross-user access
+6. **Authentication**: All endpoints require JWT authentication
+7. **Role-Based Access**: Container creation restricted to SUPERADMIN
+
+---
+
+## 9. Testing Checklist
+
+- [ ] Create organization with custom container names
+- [ ] Verify containers are created in Azure
+- [ ] Upload file to private container
+- [ ] Upload file to public container
+- [ ] Generate SAS token and verify it works
+- [ ] Verify files are organized by userId
+- [ ] Test SAS token caching
+- [ ] Test SAS token expiry and regeneration
+- [ ] Delete file from container
+- [ ] List files for specific user
+- [ ] Test cleanup service for expired tokens
+
+---
+
+## 10. Troubleshooting
+
+### Common Issues
+
+**Issue**: Container creation fails
+- **Solution**: Check Azure connection string and account key
+- **Solution**: Verify container naming rules are followed
+
+**Issue**: SAS token doesn't work
+- **Solution**: Check clock synchronization between server and Azure
+- **Solution**: Verify permissions in SAS token match operation
+
+**Issue**: File upload fails
+- **Solution**: Ensure container exists before upload
+- **Solution**: Check SAS token has write permissions
+
+---
+
+## Summary
+
+This implementation provides:
+✅ **Dynamic container creation** when organizations are created
+✅ **SAS token generation** with caching and automatic expiry management
+✅ **File organization** by userId within containers
+✅ **Secure file uploads** with proper authentication
+✅ **Background cleanup** of expired tokens
+✅ **Comprehensive error handling** and logging
+
+The frontend can now use the `AzureStorageService` to interact with these backend endpoints seamlessly.
