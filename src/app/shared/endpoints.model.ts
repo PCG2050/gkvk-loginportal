@@ -10,8 +10,6 @@ export class Endpoints {
     static addUnitHead = Endpoints.getbaseURL()+'/api/RegisterUser';
     static user = Endpoints.getbaseURL()+'/api/Users';
     static unitHead = Endpoints.getbaseURL()+'/api/UnitHeads';
-    static updateUnitHead = Endpoints.getbaseURL()+'/api/Users/{id}/UnitHead'
-    static getUnitHead = Endpoints.getbaseURL()+'/api/UnitHeads';
     static staff = Endpoints.getbaseURL()+'/api/Trainers';
     static logout = Endpoints.getbaseURL()+'/api/Auth/logout';
 
@@ -49,10 +47,22 @@ export class Endpoints {
   static kvkReports = Endpoints.getbaseURL() + '/api/KvkReport/MonthlyReports';
   static kvkThemeReports = Endpoints.getbaseURL() + '/api/KvkReport/MonthlyThemeReports';
   
-  // report
+  // report (Legacy endpoints)
 
   static filterOptions = Endpoints.getbaseURL() + '/api/admin/reports/filter-options';
   static generateReport = Endpoints.getbaseURL() + '/api/admin/reports/generate';
+
+  // Dynamic Report endpoints
+  static dynamicReportConfiguration = Endpoints.getbaseURL() + '/api/admin/reports/dynamic/configuration';
+  static dynamicReportGenerate = Endpoints.getbaseURL() + '/api/admin/reports/dynamic/generate';
+  static dynamicReportPreview = Endpoints.getbaseURL() + '/api/admin/reports/dynamic/preview';
+
+  // Azure Storage endpoints
+  static storageCreateContainers = Endpoints.getbaseURL() + '/api/Storage/create-containers';
+  static storageSasToken = Endpoints.getbaseURL() + '/api/Storage/sas-token';
+  static storageUpload = Endpoints.getbaseURL() + '/api/Storage/upload';
+  static storageDelete = Endpoints.getbaseURL() + '/api/Storage/delete';
+  static storageList = Endpoints.getbaseURL() + '/api/Storage/list';
 
 
     static getbaseURL() {

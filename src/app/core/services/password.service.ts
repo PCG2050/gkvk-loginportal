@@ -1,4 +1,4 @@
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Endpoints } from '../../shared/endpoints.model';
 
@@ -11,27 +11,36 @@ export class PasswordService {
 
   private httpClient = inject(HttpClient);
   private endpoint = Endpoints.user;
-  private token = localStorage.getItem('authtoken')
-  forgotPassword(userData:any){
-    const headers = new HttpHeaders({
-  'Content-Type': 'application/json'
-});
-    return this.httpClient.post(`${this.endpoint}/forgot-password`,userData,{headers})
-  }
-  resetPassword(password:any){
-const headers = new HttpHeaders({
-  'Content-Type': 'application/json'
-});
-return this.httpClient.post(`${this.endpoint}/reset-password`,password,{headers})
+
+  /**
+   * Initiate password reset (sends OTP to email)
+   * No auth required - user doesn't have token yet
+   */
+  forgotPassword(userData: any) {
+    return this.httpClient.post(`${this.endpoint}/forgot-password`, userData);
   }
 
-  verifyOtp(verifyOtpData:any){
-    const headers = new HttpHeaders({
-  'Content-Type': 'application/json'
-});
-return this.httpClient.post(`${this.endpoint}/verify-reset-otp`,verifyOtpData)
+  /**
+   * Reset password with new password
+   * No auth required - user can't authenticate without password
+   */
+  resetPassword(password: any) {
+    return this.httpClient.post(`${this.endpoint}/reset-password`, password);
   }
-  resendOtp(otp:any){
-    return this.httpClient.post(`${this.endpoint}/resend-reset-otp​`,otp)
+
+  /**
+   * Verify OTP sent to email
+   * No auth required - part of password reset flow
+   */
+  verifyOtp(verifyOtpData: any) {
+    return this.httpClient.post(`${this.endpoint}/verify-reset-otp`, verifyOtpData);
+  }
+
+  /**
+   * Resend OTP if user didn't receive it
+   * No auth required - part of password reset flow
+   */
+  resendOtp(otp: any) {
+    return this.httpClient.post(`${this.endpoint}/resend-reset-otp`, otp);
   }
 }
