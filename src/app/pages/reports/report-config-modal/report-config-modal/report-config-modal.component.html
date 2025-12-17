@@ -1,0 +1,191 @@
+<div class="modal-overlay" *ngIf="isOpen" (click)="onClose()">
+  <div class="modal-container" (click)="$event.stopPropagation()">
+
+    <!-- Modal Header -->
+    <div class="modal-header">
+      <h2>📊 Configure Report Sections & Columns</h2>
+      <button class="btn-close" (click)="onClose()" title="Close">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Modal Body -->
+    <div class="modal-body">
+
+      <!-- Left Panel: Section Selection -->
+      <div class="sections-panel">
+        <h3>Select Sections</h3>
+        <p class="panel-description">Choose which sections to include in your report</p>
+
+        <div class="section-list">
+          <div
+            *ngFor="let section of reportConfiguration?.availableSections"
+            class="section-item"
+            [class.selected]="isSectionSelected(section.sectionKey)"
+            [class.active]="activeTab === section.sectionKey"
+          >
+            <label class="section-label">
+              <input
+                type="checkbox"
+                [checked]="isSectionSelected(section.sectionKey)"
+                (change)="toggleSection(section)"
+              />
+              <span class="section-name">{{ section.displayName }}</span>
+              <span class="column-count" *ngIf="isSectionSelected(section.sectionKey)">
+                {{ getSelectedColumnCount(section.sectionKey) }}/{{ getTotalColumnCount(section.sectionKey) }} columns
+              </span>
+            </label>
+
+            <button
+              *ngIf="isSectionSelected(section.sectionKey)"
+              class="btn-configure"
+              (click)="setActiveTab(section.sectionKey)"
+              [class.active]="activeTab === section.sectionKey"
+              title="Configure columns"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="3"></circle>
+                <path d="M12 1v6m0 6v6m-8-4l2 2m3 3l2 2m5-5l2-2m3-3l2-2M1 12h6m6 0h6"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="selection-summary" *ngIf="selectedSections.size > 0">
+          <strong>{{ selectedSections.size }}</strong> section(s) selected
+        </div>
+      </div>
+
+      <!-- Right Panel: Column Selection -->
+      <div class="columns-panel">
+        <ng-container *ngIf="activeTab && getSectionDefinition(activeTab) as activeSection">
+          <div class="panel-header">
+            <h3>{{ activeSection.displayName }} - Columns</h3>
+            <p class="panel-description">Select columns to include</p>
+          </div>
+
+          <!-- Column Actions -->
+          <div class="column-actions">
+            <div class="search-box">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"></circle>
+                <path d="m21 21-4.35-4.35"></path>
+              </svg>
+              <input
+                type="text"
+                placeholder="Search columns..."
+                [(ngModel)]="searchTerm"
+              />
+            </div>
+
+            <div class="action-buttons">
+              <button class="btn-action" (click)="selectAllColumns(activeTab)" title="Select all">
+                Select All
+              </button>
+              <button class="btn-action" (click)="resetToDefaults(activeTab)" title="Reset to defaults">
+                Reset to Defaults
+              </button>
+            </div>
+          </div>
+
+          <!-- Column List -->
+          <div class="column-list">
+            <div
+              *ngFor="let column of getFilteredColumns(activeSection.availableColumns)"
+              class="column-item"
+              [class.selected]="isColumnSelected(activeTab, column.key)"
+            >
+              <label class="column-label">
+                <input
+                  type="checkbox"
+                  [checked]="isColumnSelected(activeTab, column.key)"
+                  (change)="toggleColumn(activeTab, column.key)"
+                  [disabled]="isColumnSelected(activeTab, column.key) && getSelectedColumnCount(activeTab) === 1"
+                />
+                <div class="column-info">
+                  <span class="column-name">{{ column.displayName }}</span>
+                  <span class="column-meta">
+                    <span class="column-type">{{ column.dataType }}</span>
+                    <span class="column-badge" *ngIf="column.defaultSelected">Default</span>
+                  </span>
+                </div>
+              </label>
+            </div>
+
+            <div *ngIf="getFilteredColumns(activeSection.availableColumns).length === 0" class="no-results">
+              No columns found matching "{{ searchTerm }}"
+            </div>
+          </div>
+
+          <!-- Column Summary -->
+          <div class="column-summary">
+            <strong>{{ getSelectedColumnCount(activeTab) }}</strong> of
+            <strong>{{ getTotalColumnCount(activeTab) }}</strong> columns selected
+            <span class="note">• At least 1 column required</span>
+          </div>
+        </ng-container>
+
+        <!-- Empty State -->
+        <div *ngIf="!activeTab" class="empty-state">
+          <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+            <polyline points="10 9 9 9 8 9"></polyline>
+          </svg>
+          <h4>Select a section to configure columns</h4>
+          <p>Choose sections from the left panel, then click the configure icon to customize columns</p>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Modal Footer -->
+    <div class="modal-footer">
+      <div class="footer-info">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="16" x2="12" y2="12"></line>
+          <line x1="12" y1="8" x2="12.01" y2="8"></line>
+        </svg>
+        <span>Configure sections and columns, then preview or generate your report</span>
+      </div>
+
+      <div class="footer-actions">
+        <button class="btn-cancel" (click)="onClose()">
+          Cancel
+        </button>
+        <button
+          class="btn-preview"
+          (click)="onPreview()"
+          [disabled]="selectedSections.size === 0"
+          title="Preview report with current configuration"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+            <circle cx="12" cy="12" r="3"></circle>
+          </svg>
+          Preview Report
+        </button>
+        <button
+          class="btn-generate"
+          (click)="onGenerate()"
+          [disabled]="selectedSections.size === 0"
+          title="Generate final report"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 6 2 18 2 18 9"></polyline>
+            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+            <rect x="6" y="14" width="12" height="8"></rect>
+          </svg>
+          Generate Report
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>

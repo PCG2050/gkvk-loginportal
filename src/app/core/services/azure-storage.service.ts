@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, from, throwError } from 'rxjs';
+import { Observable, from, throwError, forkJoin } from 'rxjs';
 import { map, catchError, switchMap } from 'rxjs/operators';
 import { BlobServiceClient, ContainerClient, BlockBlobClient } from '@azure/storage-blob';
 import { Endpoints } from '../../shared/endpoints.model';
@@ -37,7 +37,7 @@ export interface FileUploadResult {
   providedIn: 'root'
 })
 export class AzureStorageService {
-  private readonly STORAGE_ACCOUNT_URL = 'https://YOUR_STORAGE_ACCOUNT.blob.core.windows.net';
+  private readonly STORAGE_ACCOUNT_URL = 'https://tdms.blob.core.windows.net';
 
   constructor(private http: HttpClient) {}
 
@@ -176,7 +176,7 @@ export class AzureStorageService {
     );
 
     // Use forkJoin to wait for all uploads to complete
-    return from(uploadObservables).pipe(
+    return forkJoin(uploadObservables).pipe(
       catchError(error => {
         console.error('Error uploading multiple files:', error);
         return throwError(() => error);

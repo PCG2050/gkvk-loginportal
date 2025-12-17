@@ -3,11 +3,18 @@ import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Endpoints } from '../../shared/endpoints.model';
-import { HttpHeaders } from '@angular/common/http';
 import { Document, Packer, Paragraph, AlignmentType, HeadingLevel, TextRun } from 'docx';
 import { saveAs } from 'file-saver';
 import { DOCXTableBuilder } from '../../shared/docx-table-builder';
 import { UserService } from '../../core/services/user.service';
+import {
+  DynamicReportRequest,
+  DynamicReportData,
+  ReportConfiguration,
+  SectionRequest,
+  ReportSection
+} from '../../core/models/dynamic-report.models';
+import { ReportConfigModalComponent } from '../reports/report-config-modal/report-config-modal/report-config-modal.component';
 
 interface FilterOptions {
   units: Array<{
@@ -68,7 +75,7 @@ interface ReportData {
 @Component({
   selector: 'app-report',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule,ReportConfigModalComponent],
   templateUrl: './reports.component.html',
   styleUrls: ['./reports.component.css']
 })
@@ -81,7 +88,7 @@ export class ReportsComponent implements OnInit {
   selectedMonth: number = new Date().getMonth() + 1;
   selectedYear: number = new Date().getFullYear();
   
-  // Report data
+  // Report data (Legacy)
   reportData: ReportData | null = null;
   loading = false;
   error: string | null = null;
@@ -89,6 +96,16 @@ export class ReportsComponent implements OnInit {
   public isFIUUnit: boolean = false;
   public isASMUnit: boolean = false;
   public isUnitHead: boolean = false;
+
+  // Dynamic Report Properties
+  useDynamicReport: boolean = true; // Toggle between old and new system
+  reportConfiguration: ReportConfiguration | null = null;
+  dynamicReportData: DynamicReportData | null = null;
+  selectedSections: Map<string, SectionRequest> = new Map();
+
+  // Modal state
+  isConfigModalOpen = false;
+  isPreviewMode = false;
   
   unitHeadStats: any = {
     assignedUnitsCount: 0,
@@ -133,11 +150,7 @@ export class ReportsComponent implements OnInit {
     const unitHeadId = localStorage.getItem('userId');
     if (!unitHeadId) return;
 
-    const headers = new HttpHeaders({
-      'Authorization': `Bearer ${localStorage.getItem('authtoken')}`
-    });
-
-    this.http.get<any>(`${Endpoints.unitHead}/${unitHeadId}/statistics`, { headers })
+    this.http.get<any>(`${Endpoints.unitHead}/${unitHeadId}/statistics`)
       .subscribe({
         next: (data) => {
           this.unitHeadStats = data;
@@ -149,12 +162,7 @@ export class ReportsComponent implements OnInit {
   }
 
   loadFilterOptions() {
-    const token = localStorage.getItem('authtoken');
-    const headers = new HttpHeaders({
-      'Authorization': `Bearer ${token}`
-    });
-
-    this.http.get<FilterOptions>(Endpoints.filterOptions, { headers })
+    this.http.get<FilterOptions>(Endpoints.filterOptions)
       .subscribe({
         next: (data) => {
           // Ensure units exist and sort ascending by unitId
@@ -182,33 +190,45 @@ export class ReportsComponent implements OnInit {
   onUnitChange() {
     this.selectedLocation = null;
     this.reportData = null;
+    this.dynamicReportData = null;
     this.error = null; // Clear any previous errors
     // Check if selected unit is FIU or ASM
     this.isFIUUnit = this.selectedUnit === this.FIU_UNIT_ID;
     this.isASMUnit = this.selectedUnit === this.ASM_UNIT_ID;
+
+    // Load dynamic report configuration for the selected unit
+    if (this.useDynamicReport && this.selectedUnit) {
+      this.loadReportConfiguration(this.selectedUnit);
+    }
   }
 
   onLocationChange() {
     this.reportData = null;
+    this.dynamicReportData = null;
     this.error = null; // Clear any previous errors
   }
 
   onMonthChange() {
     this.reportData = null;
+    this.dynamicReportData = null;
     this.error = null; // Clear any previous errors
   }
 
   onYearChange() {
     this.reportData = null;
+    this.dynamicReportData = null;
     this.error = null; // Clear any previous errors
   }
 
   generateReport() {
-    const token = localStorage.getItem('authtoken');
-    const headers = new HttpHeaders({
-      'Authorization': `Bearer ${token}`
-    });
-    
+    if (this.useDynamicReport) {
+      this.generateDynamicReport();
+    } else {
+      this.generateLegacyReport();
+    }
+  }
+
+  generateLegacyReport() {
     if (!this.selectedLocation) {
       this.error = 'Please select a location';
       return;
@@ -223,7 +243,7 @@ export class ReportsComponent implements OnInit {
       year: this.selectedYear
     };
 
-    this.http.post<ReportData>(Endpoints.generateReport, filter, { headers })
+    this.http.post<ReportData>(Endpoints.generateReport, filter)
       .subscribe({
         next: (data) => {
           this.reportData = data;
@@ -247,6 +267,189 @@ export class ReportsComponent implements OnInit {
           console.error('Report generation error:', err);
         }
       });
+  }
+
+  // ========================================
+  // DYNAMIC REPORT METHODS
+  // ========================================
+
+  /**
+   * Load report configuration for the selected unit
+   */
+  loadReportConfiguration(unitId: number) {
+    this.http.get<ReportConfiguration>(`${Endpoints.dynamicReportConfiguration}?unitId=${unitId}`)
+      .subscribe({
+        next: (config) => {
+          this.reportConfiguration = config;
+          // Auto-select default sections
+          this.selectedSections.clear();
+          config.availableSections.forEach((section: any) => {
+            if (config.defaultSections.includes(section.sectionKey)) {
+              this.selectedSections.set(section.sectionKey, {
+                sectionKey: section.sectionKey,
+                selectedColumns: section.defaultColumns,
+                sortDirection: 'asc'
+              });
+            }
+          });
+          console.log('Report configuration loaded:', config);
+        },
+        error: (err) => {
+          console.error('Failed to load report configuration:', err);
+          this.error = 'Failed to load report configuration';
+        }
+      });
+  }
+
+  /**
+   * Generate dynamic report with selected sections
+   */
+  generateDynamicReport() {
+    if (!this.selectedLocation) {
+      this.error = 'Please select a location';
+      return;
+    }
+
+    if (this.selectedSections.size === 0) {
+      this.error = 'Please select at least one section';
+      return;
+    }
+
+    this.loading = true;
+    this.error = null;
+
+    const request: DynamicReportRequest = {
+      unitLocationId: this.selectedLocation,
+      month: this.selectedMonth,
+      year: this.selectedYear,
+      sections: Array.from(this.selectedSections.values())
+    };
+
+    this.http.post<DynamicReportData>(Endpoints.dynamicReportGenerate, request)
+      .subscribe({
+        next: (data) => {
+          this.dynamicReportData = data;
+          this.reportData = null; // Clear legacy data
+          this.loading = false;
+          console.log('Dynamic report generated:', data);
+        },
+        error: (err) => {
+          // Handle specific error cases
+          if (err.status === 403) {
+            this.error = 'Access Denied: You do not have permission to view this unit location.';
+          } else if (err.status === 401) {
+            this.error = 'Unauthorized: Please log in again.';
+          } else if (err.status === 404) {
+            this.error = 'No data found for the selected filters.';
+          } else {
+            this.error = err.error?.message || 'Failed to generate report. Please try again.';
+          }
+          this.loading = false;
+          console.error('Dynamic report generation error:', err);
+        }
+      });
+  }
+
+  /**
+   * Toggle section selection
+   */
+  toggleSection(sectionKey: string) {
+    if (this.selectedSections.has(sectionKey)) {
+      this.selectedSections.delete(sectionKey);
+    } else {
+      const section = this.reportConfiguration?.availableSections.find((s: any) => s.sectionKey === sectionKey);
+      if (section) {
+        this.selectedSections.set(sectionKey, {
+          sectionKey: section.sectionKey,
+          selectedColumns: section.defaultColumns,
+          sortDirection: 'asc'
+        });
+      }
+    }
+  }
+
+  /**
+   * Check if section is selected
+   */
+  isSectionSelected(sectionKey: string): boolean {
+    return this.selectedSections.has(sectionKey);
+  }
+
+  /**
+   * Format cell value based on data type
+   */
+  formatCellValue(value: any, dataType: string): string {
+    if (value === null || value === undefined) {
+      return '-';
+    }
+
+    switch (dataType.toLowerCase()) {
+      case 'date':
+      case 'datetime':
+        return new Date(value).toLocaleDateString();
+      case 'number':
+      case 'int':
+      case 'integer':
+        return value.toString();
+      case 'decimal':
+      case 'float':
+      case 'double':
+        return parseFloat(value).toFixed(2);
+      case 'currency':
+        return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(value);
+      case 'boolean':
+        return value ? 'Yes' : 'No';
+      default:
+        return value.toString();
+    }
+  }
+
+  // ========================================
+  // MODAL METHODS
+  // ========================================
+
+  /**
+   * Open report configuration modal
+   */
+  openConfigModal() {
+    if (!this.selectedUnit) {
+      this.error = 'Please select a unit first';
+      return;
+    }
+
+    if (!this.selectedLocation) {
+      this.error = 'Please select a location first';
+      return;
+    }
+
+    this.isConfigModalOpen = true;
+  }
+
+  /**
+   * Close report configuration modal
+   */
+  closeConfigModal() {
+    this.isConfigModalOpen = false;
+  }
+
+  /**
+   * Handle preview from modal
+   */
+  onPreviewReport(sections: Map<string, SectionRequest>) {
+    this.selectedSections = sections;
+    this.isPreviewMode = true;
+    this.generateDynamicReport();
+    // Don't close modal - let user see preview and make changes
+  }
+
+  /**
+   * Handle generate from modal
+   */
+  onGenerateReport(sections: Map<string, SectionRequest>) {
+    this.selectedSections = sections;
+    this.isPreviewMode = false;
+    this.generateDynamicReport();
+    this.closeConfigModal();
   }
 
   /**
