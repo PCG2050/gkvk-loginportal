@@ -96,7 +96,26 @@
       </select>
     </div>
 
-    <button class="btn-generate" (click)="generateReport()" [disabled]="!selectedLocation || loading">
+    <button
+      *ngIf="useDynamicReport"
+      class="btn-configure-report"
+      (click)="openConfigModal()"
+      [disabled]="!selectedLocation || loading"
+      title="Configure report sections and columns"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="3"></circle>
+        <path d="M12 1v6m0 6v6m-8-4l2 2m3 3l2 2m5-5l2-2m3-3l2-2M1 12h6m6 0h6"></path>
+      </svg>
+      Configure & Generate Report
+    </button>
+
+    <button
+      *ngIf="!useDynamicReport"
+      class="btn-generate"
+      (click)="generateReport()"
+      [disabled]="!selectedLocation || loading"
+    >
       {{ loading ? 'Generating...' : 'Generate Report' }}
     </button>
   </div>
@@ -106,8 +125,8 @@
     {{ error }}
   </div>
 
-  <!-- Section Selection (Dynamic Reports Only) -->
-  <div class="section-selection" *ngIf="useDynamicReport && reportConfiguration && selectedUnit">
+  <!-- OLD Section Selection - Now replaced by modal -->
+  <!-- <div class="section-selection" *ngIf="useDynamicReport && reportConfiguration && selectedUnit">
     <h3>Select Sections to Include:</h3>
     <div class="section-checkboxes">
       <label *ngFor="let section of reportConfiguration.availableSections" class="section-checkbox">
@@ -119,13 +138,20 @@
         <span>{{ section.displayName }}</span>
       </label>
     </div>
-  </div>
+  </div> -->
 
   <!-- Dynamic Report Display -->
   <div class="report-content" *ngIf="dynamicReportData">
 
     <!-- Header -->
     <div class="report-header">
+      <div class="preview-badge" *ngIf="isPreviewMode">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+          <circle cx="12" cy="12" r="3"></circle>
+        </svg>
+        PREVIEW MODE
+      </div>
       <h2>{{ dynamicReportData.unitName }}</h2>
       <p>{{ dynamicReportData.unitLocationName }}</p>
       <p>{{ dynamicReportData.monthName }} {{ dynamicReportData.year }}</p>
@@ -479,4 +505,15 @@
     </ng-container>
 
   </div>
+
+  <!-- Report Configuration Modal -->
+  <app-report-config-modal
+    [isOpen]="isConfigModalOpen"
+    [reportConfiguration]="reportConfiguration"
+    [selectedSections]="selectedSections"
+    (close)="closeConfigModal()"
+    (preview)="onPreviewReport($event)"
+    (generate)="onGenerateReport($event)"
+  ></app-report-config-modal>
+
 </div>

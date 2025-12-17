@@ -15,6 +15,7 @@ import {
   SectionRequest,
   ReportSection
 } from './dynamic-report.models';
+import { ReportConfigModalComponent } from './report-config-modal/report-config-modal.component';
 
 interface FilterOptions {
   units: Array<{
@@ -75,7 +76,7 @@ interface ReportData {
 @Component({
   selector: 'app-report',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ReportConfigModalComponent],
   templateUrl: './reports.component.html',
   styleUrls: ['./reports.component.css']
 })
@@ -102,6 +103,10 @@ export class ReportsComponent implements OnInit {
   reportConfiguration: ReportConfiguration | null = null;
   dynamicReportData: DynamicReportData | null = null;
   selectedSections: Map<string, SectionRequest> = new Map();
+
+  // Modal state
+  isConfigModalOpen = false;
+  isPreviewMode = false;
   
   unitHeadStats: any = {
     assignedUnitsCount: 0,
@@ -422,6 +427,54 @@ export class ReportsComponent implements OnInit {
       default:
         return value.toString();
     }
+  }
+
+  // ========================================
+  // MODAL METHODS
+  // ========================================
+
+  /**
+   * Open report configuration modal
+   */
+  openConfigModal() {
+    if (!this.selectedUnit) {
+      this.error = 'Please select a unit first';
+      return;
+    }
+
+    if (!this.selectedLocation) {
+      this.error = 'Please select a location first';
+      return;
+    }
+
+    this.isConfigModalOpen = true;
+  }
+
+  /**
+   * Close report configuration modal
+   */
+  closeConfigModal() {
+    this.isConfigModalOpen = false;
+  }
+
+  /**
+   * Handle preview from modal
+   */
+  onPreviewReport(sections: Map<string, SectionRequest>) {
+    this.selectedSections = sections;
+    this.isPreviewMode = true;
+    this.generateDynamicReport();
+    // Don't close modal - let user see preview and make changes
+  }
+
+  /**
+   * Handle generate from modal
+   */
+  onGenerateReport(sections: Map<string, SectionRequest>) {
+    this.selectedSections = sections;
+    this.isPreviewMode = false;
+    this.generateDynamicReport();
+    this.closeConfigModal();
   }
 
   /**
