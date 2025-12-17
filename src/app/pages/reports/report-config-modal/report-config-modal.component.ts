@@ -68,7 +68,7 @@ export class ReportConfigModalComponent {
    */
   getSectionDefinition(sectionKey: string): SectionDefinition | undefined {
     return this.reportConfiguration?.availableSections.find(
-      s => s.sectionKey === sectionKey
+      (s: SectionDefinition) => s.sectionKey === sectionKey
     );
   }
 
@@ -107,7 +107,7 @@ export class ReportConfigModalComponent {
     const sectionRequest = this.selectedSections.get(sectionKey);
     if (!section || !sectionRequest) return;
 
-    sectionRequest.selectedColumns = section.availableColumns.map(col => col.key);
+    sectionRequest.selectedColumns = section.availableColumns.map((col: ColumnDefinition) => col.key);
   }
 
   /**
