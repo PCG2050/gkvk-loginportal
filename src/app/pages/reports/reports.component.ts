@@ -303,7 +303,7 @@ export class ReportsComponent implements OnInit {
           this.reportConfiguration = config;
           // Auto-select default sections
           this.selectedSections.clear();
-          config.availableSections.forEach(section => {
+          config.availableSections.forEach((section: any) => {
             if (config.defaultSections.includes(section.sectionKey)) {
               this.selectedSections.set(section.sectionKey, {
                 sectionKey: section.sectionKey,
@@ -382,7 +382,7 @@ export class ReportsComponent implements OnInit {
     if (this.selectedSections.has(sectionKey)) {
       this.selectedSections.delete(sectionKey);
     } else {
-      const section = this.reportConfiguration?.availableSections.find(s => s.sectionKey === sectionKey);
+      const section = this.reportConfiguration?.availableSections.find((s: any) => s.sectionKey === sectionKey);
       if (section) {
         this.selectedSections.set(sectionKey, {
           sectionKey: section.sectionKey,
