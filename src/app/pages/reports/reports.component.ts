@@ -3,7 +3,6 @@ import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Endpoints } from '../../shared/endpoints.model';
-import { HttpHeaders } from '@angular/common/http';
 import { Document, Packer, Paragraph, AlignmentType, HeadingLevel, TextRun } from 'docx';
 import { saveAs } from 'file-saver';
 import { DOCXTableBuilder } from '../../shared/docx-table-builder';
@@ -151,11 +150,7 @@ export class ReportsComponent implements OnInit {
     const unitHeadId = localStorage.getItem('userId');
     if (!unitHeadId) return;
 
-    const headers = new HttpHeaders({
-      'Authorization': `Bearer ${localStorage.getItem('authtoken')}`
-    });
-
-    this.http.get<any>(`${Endpoints.unitHead}/${unitHeadId}/statistics`, { headers })
+    this.http.get<any>(`${Endpoints.unitHead}/${unitHeadId}/statistics`)
       .subscribe({
         next: (data) => {
           this.unitHeadStats = data;
@@ -167,12 +162,7 @@ export class ReportsComponent implements OnInit {
   }
 
   loadFilterOptions() {
-    const token = localStorage.getItem('authtoken');
-    const headers = new HttpHeaders({
-      'Authorization': `Bearer ${token}`
-    });
-
-    this.http.get<FilterOptions>(Endpoints.filterOptions, { headers })
+    this.http.get<FilterOptions>(Endpoints.filterOptions)
       .subscribe({
         next: (data) => {
           // Ensure units exist and sort ascending by unitId
@@ -239,11 +229,6 @@ export class ReportsComponent implements OnInit {
   }
 
   generateLegacyReport() {
-    const token = localStorage.getItem('authtoken');
-    const headers = new HttpHeaders({
-      'Authorization': `Bearer ${token}`
-    });
-
     if (!this.selectedLocation) {
       this.error = 'Please select a location';
       return;
@@ -258,7 +243,7 @@ export class ReportsComponent implements OnInit {
       year: this.selectedYear
     };
 
-    this.http.post<ReportData>(Endpoints.generateReport, filter, { headers })
+    this.http.post<ReportData>(Endpoints.generateReport, filter)
       .subscribe({
         next: (data) => {
           this.reportData = data;
@@ -292,12 +277,7 @@ export class ReportsComponent implements OnInit {
    * Load report configuration for the selected unit
    */
   loadReportConfiguration(unitId: number) {
-    const token = localStorage.getItem('authtoken');
-    const headers = new HttpHeaders({
-      'Authorization': `Bearer ${token}`
-    });
-
-    this.http.get<ReportConfiguration>(`${Endpoints.dynamicReportConfiguration}?unitId=${unitId}`, { headers })
+    this.http.get<ReportConfiguration>(`${Endpoints.dynamicReportConfiguration}?unitId=${unitId}`)
       .subscribe({
         next: (config) => {
           this.reportConfiguration = config;
@@ -325,11 +305,6 @@ export class ReportsComponent implements OnInit {
    * Generate dynamic report with selected sections
    */
   generateDynamicReport() {
-    const token = localStorage.getItem('authtoken');
-    const headers = new HttpHeaders({
-      'Authorization': `Bearer ${token}`
-    });
-
     if (!this.selectedLocation) {
       this.error = 'Please select a location';
       return;
@@ -350,7 +325,7 @@ export class ReportsComponent implements OnInit {
       sections: Array.from(this.selectedSections.values())
     };
 
-    this.http.post<DynamicReportData>(Endpoints.dynamicReportGenerate, request, { headers })
+    this.http.post<DynamicReportData>(Endpoints.dynamicReportGenerate, request)
       .subscribe({
         next: (data) => {
           this.dynamicReportData = data;
