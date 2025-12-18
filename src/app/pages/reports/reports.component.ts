@@ -7,6 +7,7 @@ import { Document, Packer, Paragraph, AlignmentType, HeadingLevel, TextRun } fro
 import { saveAs } from 'file-saver';
 import { DOCXTableBuilder } from '../../shared/docx-table-builder';
 import { UserService } from '../../core/services/user.service';
+import { LayoutService } from '../../core/services/layout.service';
 import {
   DynamicReportRequest,
   DynamicReportData,
@@ -132,7 +133,10 @@ export class ReportsComponent implements OnInit {
     { value: 12, name: 'December' }
   ];
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private layoutService: LayoutService
+  ) {}
 
   ngOnInit() {
     // Get user role from localStorage
@@ -422,6 +426,8 @@ export class ReportsComponent implements OnInit {
       return;
     }
 
+    // Collapse sidebar when modal opens
+    this.layoutService.collapseSidebarForModal();
     this.isConfigModalOpen = true;
   }
 
@@ -430,6 +436,8 @@ export class ReportsComponent implements OnInit {
    */
   closeConfigModal() {
     this.isConfigModalOpen = false;
+    // Restore sidebar to previous state when modal closes
+    this.layoutService.restoreSidebarAfterModal();
   }
 
   /**
