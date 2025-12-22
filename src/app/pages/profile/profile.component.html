@@ -1,8 +1,13 @@
 <div class="profile-container">
   <div class="personal-details">
     <div class="profile-img">
-      <!-- <img *ngIf="(user$ | async)?.profileImageUrl as profileImg" [src]="profileImg" /> -->
-      <img src="assets/images/profileIcon.png" alt="Profile" width="80" style="border-radius: 50%;" />
+      <img
+        [src]="user?.profileImageUrl || 'assets/images/profileIcon.png'"
+        alt="Profile"
+        width="80"
+        style="border-radius: 50%;"
+        (error)="onImageError($event)"
+      />
 
       <label for="photo-upload" class="edit-pen">
         <input type="file" id="photo-upload" hidden />

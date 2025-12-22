@@ -3,7 +3,7 @@
 
     <!-- Modal Header -->
     <div class="modal-header">
-      <h2>📊 Configure Report Sections & Columns</h2>
+      <h2>Configure Options</h2>
       <button class="btn-close" (click)="onClose()" title="Close">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -26,8 +26,9 @@
             class="section-item"
             [class.selected]="isSectionSelected(section.sectionKey)"
             [class.active]="activeTab === section.sectionKey"
+            (click)="toggleSection(section)"
           >
-            <label class="section-label">
+            <label class="section-label" (click)="$event.stopPropagation()">
               <input
                 type="checkbox"
                 [checked]="isSectionSelected(section.sectionKey)"
@@ -42,7 +43,7 @@
             <button
               *ngIf="isSectionSelected(section.sectionKey)"
               class="btn-configure"
-              (click)="setActiveTab(section.sectionKey)"
+              (click)="setActiveTab(section.sectionKey); $event.stopPropagation()"
               [class.active]="activeTab === section.sectionKey"
               title="Configure columns"
             >
@@ -107,10 +108,7 @@
                 />
                 <div class="column-info">
                   <span class="column-name">{{ column.displayName }}</span>
-                  <span class="column-meta">
-                    <span class="column-type">{{ column.dataType }}</span>
-                    <span class="column-badge" *ngIf="column.defaultSelected">Default</span>
-                  </span>
+                  <span class="column-badge" *ngIf="column.defaultSelected">Default</span>
                 </div>
               </label>
             </div>
@@ -152,7 +150,7 @@
           <line x1="12" y1="16" x2="12" y2="12"></line>
           <line x1="12" y1="8" x2="12.01" y2="8"></line>
         </svg>
-        <span>Configure sections and columns, then preview or generate your report</span>
+        <span>Configure sections and columns, then apply or generate your report</span>
       </div>
 
       <div class="footer-actions">
@@ -163,13 +161,12 @@
           class="btn-preview"
           (click)="onPreview()"
           [disabled]="selectedSections.size === 0"
-          title="Preview report with current configuration"
+          title="Apply configuration and preview report"
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-            <circle cx="12" cy="12" r="3"></circle>
+            <polyline points="20 6 9 17 4 12"></polyline>
           </svg>
-          Preview Report
+          Apply
         </button>
         <button
           class="btn-generate"

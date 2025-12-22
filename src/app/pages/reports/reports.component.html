@@ -120,6 +120,19 @@
     </button>
   </div>
 
+  <!-- Selected Sections Display -->
+  <div class="selected-sections-display" *ngIf="useDynamicReport && selectedSections.size > 0">
+    <div class="selected-header">
+      <span class="selected-label">Selected:</span>
+    </div>
+    <div class="selected-items">
+      <span *ngFor="let section of getSelectedSectionsForDisplay()" class="selected-tag">
+        {{ section.displayName }}
+        <span class="column-badge" *ngIf="section.columnCount">{{ section.columnCount }} cols</span>
+      </span>
+    </div>
+  </div>
+
   <!-- Error Message -->
   <div class="error-message" *ngIf="error">
     {{ error }}

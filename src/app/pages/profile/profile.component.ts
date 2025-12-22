@@ -67,7 +67,7 @@ export class ProfileComponent implements OnInit {
       role : 3
     }
     console.log();
-    
+
     this.service.updateUser(id, userData).subscribe({
       next:(res:any)=>{
         console.log(res);
@@ -76,5 +76,10 @@ export class ProfileComponent implements OnInit {
         console.log(err);
       }
     })
+  }
+
+  onImageError(event: Event) {
+    const img = event.target as HTMLImageElement;
+    img.src = 'assets/images/profileIcon.png';
   }
 }

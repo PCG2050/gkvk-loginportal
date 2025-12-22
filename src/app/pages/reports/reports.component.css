@@ -624,3 +624,74 @@ tbody tr:last-child td {
   font-weight: 600;
   color: #007bff;
 }
+
+/* ========================================= */
+/* SELECTED SECTIONS DISPLAY */
+/* ========================================= */
+.selected-sections-display {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 15px;
+  background: #f8f9fa;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+}
+
+.selected-header {
+  display: flex;
+  align-items: center;
+}
+
+.selected-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.selected-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.selected-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  background: #e3f2fd;
+  color: #1976d2;
+  border-radius: 15px;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.selected-tag .column-badge {
+  background: #1976d2;
+  color: white;
+  padding: 1px 5px;
+  border-radius: 8px;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+/* ========================================= */
+/* INFO MESSAGE */
+/* ========================================= */
+.info-message {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  background: #e3f2fd;
+  border: 1px solid #90caf9;
+  border-radius: 6px;
+  margin-bottom: 20px;
+  color: #1565c0;
+  font-size: 14px;
+}

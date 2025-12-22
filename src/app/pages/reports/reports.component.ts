@@ -380,6 +380,23 @@ export class ReportsComponent implements OnInit {
   }
 
   /**
+   * Get selected sections for display below filters
+   */
+  getSelectedSectionsForDisplay(): { displayName: string; columnCount: number }[] {
+    const result: { displayName: string; columnCount: number }[] = [];
+    this.selectedSections.forEach((request, key) => {
+      const section = this.reportConfiguration?.availableSections.find((s: any) => s.sectionKey === key);
+      if (section) {
+        result.push({
+          displayName: section.displayName,
+          columnCount: request.selectedColumns.length
+        });
+      }
+    });
+    return result;
+  }
+
+  /**
    * Format cell value based on data type
    */
   formatCellValue(value: any, dataType: string): string {
