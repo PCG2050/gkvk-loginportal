@@ -382,14 +382,19 @@ export class ReportsComponent implements OnInit {
   /**
    * Get selected sections for display below filters
    */
-  getSelectedSectionsForDisplay(): { displayName: string; columnCount: number }[] {
-    const result: { displayName: string; columnCount: number }[] = [];
+  getSelectedSectionsForDisplay(): { displayName: string; columnNames: string[] }[] {
+    const result: { displayName: string; columnNames: string[] }[] = [];
     this.selectedSections.forEach((request, key) => {
       const section = this.reportConfiguration?.availableSections.find((s: any) => s.sectionKey === key);
       if (section) {
+        // Get display names for selected columns
+        const columnNames = request.selectedColumns.map(colKey => {
+          const col = section.availableColumns.find((c: any) => c.key === colKey);
+          return col?.displayName || colKey;
+        });
         result.push({
           displayName: section.displayName,
-          columnCount: request.selectedColumns.length
+          columnNames: columnNames
         });
       }
     });

@@ -28,17 +28,18 @@
             [class.active]="activeTab === section.sectionKey"
             (click)="toggleSection(section)"
           >
-            <label class="section-label" (click)="$event.stopPropagation()">
+            <div class="section-label">
               <input
                 type="checkbox"
                 [checked]="isSectionSelected(section.sectionKey)"
+                (click)="$event.stopPropagation()"
                 (change)="toggleSection(section)"
               />
               <span class="section-name">{{ section.displayName }}</span>
               <span class="column-count" *ngIf="isSectionSelected(section.sectionKey)">
                 {{ getSelectedColumnCount(section.sectionKey) }}/{{ getTotalColumnCount(section.sectionKey) }} columns
               </span>
-            </label>
+            </div>
 
             <button
               *ngIf="isSectionSelected(section.sectionKey)"

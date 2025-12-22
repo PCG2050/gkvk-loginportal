@@ -126,10 +126,12 @@
       <span class="selected-label">Selected:</span>
     </div>
     <div class="selected-items">
-      <span *ngFor="let section of getSelectedSectionsForDisplay()" class="selected-tag">
-        {{ section.displayName }}
-        <span class="column-badge" *ngIf="section.columnCount">{{ section.columnCount }} cols</span>
-      </span>
+      <div *ngFor="let section of getSelectedSectionsForDisplay()" class="selected-section-card">
+        <div class="section-title">{{ section.displayName }}</div>
+        <div class="column-names">
+          <span *ngFor="let colName of section.columnNames" class="column-name-tag">{{ colName }}</span>
+        </div>
+      </div>
     </div>
   </div>
 
