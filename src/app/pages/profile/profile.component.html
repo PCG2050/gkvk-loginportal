@@ -1,4 +1,10 @@
 <div class="profile-container">
+  <!-- Success Message -->
+  <div class="success-message" *ngIf="successMessage">
+    <i class="bi bi-check-circle"></i>
+    {{ successMessage }}
+  </div>
+
   <div class="personal-details">
     <div class="profile-img">
       <img
@@ -15,9 +21,9 @@
       </label>
     </div>
     <div class="details">
-      <p><span style="font-weight: bold;">Name:</span> {{user.firstName}} {{user.lastName}}</p>
-      <p><span style="font-weight: bold;">Email:</span> {{user.email}}</p>
-      <p><span style="font-weight: bold;">Phone:</span>{{user.phone}}</p>
+      <p><span style="font-weight: bold;">Name:</span> {{user?.firstName}} {{user?.lastName}}</p>
+      <p><span style="font-weight: bold;">Email:</span> {{user?.email}}</p>
+      <p><span style="font-weight: bold;">Phone:</span> {{user?.phone}}</p>
     </div>
   </div>
 
@@ -25,7 +31,16 @@
   <!-- Button to Open Modal -->
   <button class="btn btn-primary" (click)="openUserDetailsEditModel()">Edit Profile</button>
   <div class="modal-backdrop" *ngIf="editProfileModal">
-    <div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Edit Profile</h3>
+        <button type="button" class="btn-close-modal" (click)="closeModal()">&times;</button>
+      </div>
+      <!-- Error Message in Modal -->
+      <div class="error-message" *ngIf="errorMessage">
+        <i class="bi bi-exclamation-circle"></i>
+        {{ errorMessage }}
+      </div>
       <form [formGroup]="profileForm" (ngSubmit)="saveProfile()">
         <label for="firstName">First Name<span class="asterisk">*</span></label>
         <input id="firstName" type="text" formControlName="firstName" class="form-control" required />
@@ -102,8 +117,10 @@
         }
 
         <div class="modal-actions">
-          <button type="submit" [disabled]="profileForm.invalid">Save</button>
-          <button type="button" (click)="closeModal()">Cancel</button>
+          <button type="submit" class="btn-save" [disabled]="profileForm.invalid || saving">
+            {{ saving ? 'Saving...' : 'Save' }}
+          </button>
+          <button type="button" class="btn-cancel" (click)="closeModal()" [disabled]="saving">Cancel</button>
         </div>
       </form>
     </div>

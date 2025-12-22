@@ -107,14 +107,19 @@
 .dropdown-item:hover {
   color: black;
 }
-.heading{
-  position: relative;
-  left: 40%;
-  font-size: 4vh;
+.heading {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 3.5vh;
   padding-top: 20px;
   font-weight: 700;
-  /* color: white; */
   color: rgb(3, 90, 3);
+  white-space: nowrap;
+}
+
+.heading p {
+  margin: 0;
 }
 
 /* .dropdown-item :active{

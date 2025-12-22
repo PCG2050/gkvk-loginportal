@@ -17,6 +17,9 @@ export class ProfileComponent implements OnInit {
   user:any;
   editProfileModal:boolean = false;
   profileForm!: FormGroup;
+  saving: boolean = false;
+  successMessage: string = '';
+  errorMessage: string = '';
 
    
   ngOnInit(): void {
@@ -66,13 +69,23 @@ export class ProfileComponent implements OnInit {
       phone : this.profileForm.value.phone,
       role : 3
     }
-    console.log();
+
+    this.saving = true;
+    this.errorMessage = '';
 
     this.service.updateUser(id, userData).subscribe({
       next:(res:any)=>{
-        console.log(res);
+        this.saving = false;
+        this.editProfileModal = false;
+        this.successMessage = 'Profile updated successfully!';
+        this.getUserDetails();
+        setTimeout(() => {
+          this.successMessage = '';
+        }, 3000);
       },
       error:(err:any)=>{
+        this.saving = false;
+        this.errorMessage = err.error?.message || 'Failed to update profile. Please try again.';
         console.log(err);
       }
     })
