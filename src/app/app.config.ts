@@ -12,6 +12,5 @@ export const appConfig: ApplicationConfig = {
       withHashLocation(),
       withEnabledBlockingInitialNavigation()
     )
-
   ]
 };

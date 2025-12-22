@@ -1,11 +1,27 @@
-/* app-header {
-    background: green;
-  height: 100px;
-  display: block;
-  position: relative;
+/* Layout styles moved from inline styles in layout.html */
+
+app-left-sidebar.fixed-left-sidebar,
+app-left-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 250px;
+  z-index: 1100;
 }
 
+app-header.fixed-header,
+app-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  z-index: 1000;
+}
+
+/* Ensure main content is offset by the header and sidebar */
 app-main {
-  background: green;
-  padding-top: 60px; 
-} */
+  margin-left: 250px; /* match sidebar width */
+  padding-top: 60px; /* adjust if header height changes */
+}

@@ -1,9 +1,9 @@
 <app-left-sidebar
-  style="position: fixed; top: 0; left: 0; height: 100vh; width: 250px;z-index: 1100;"
+  class="fixed-left-sidebar"
   [isLeftSidebarCollapsed]="isLeftSidebarCollapsed()"
   (changeIsLeftSidebarCollapsed)="changeIsLeftSidebarCollapsed($event)">
 </app-left-sidebar>
-<app-header style="position: fixed; top: 0px; left: 0; right: 0; width: 100%; z-index: 1000;"></app-header>
+<app-header class="fixed-header"></app-header>
 <app-main
 [isLeftSidebarCollapsed]="isLeftSidebarCollapsed()"
 [screenwidth]="screenWidth()"/>
